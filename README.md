@@ -1,6 +1,6 @@
 # Whisly — Offline Indian Language Speech-to-Speech Translator
 
-Whisly (`com.aistudio.whisly.kxmpzq`) is a privacy-first, offline-capable Android application for real-time speech-to-speech, two-person conversation, and text translation across **12 Indian languages**.
+Whisly is a privacy-first, offline-capable Android application for real-time speech-to-speech, two-person conversation, and text translation across **12 Indian languages**.
 
 ---
 
