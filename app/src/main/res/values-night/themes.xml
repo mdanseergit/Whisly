@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Night / Dark mode post-splash theme (#1A1412 background + #29211E deep cocoa top bar) -->
+    <style name="Theme.MyApplication" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/whisly_dark_bg</item>
+        <item name="android:colorBackground">@color/whisly_dark_bg</item>
+        <item name="android:statusBarColor">@color/whisly_deep_brown</item>
+        <item name="android:navigationBarColor">@color/whisly_dark_bg</item>
+        <item name="android:windowSplashScreenBackground" tools:targetApi="31">@color/whisly_dark_bg</item>
+        <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="31">@drawable/ic_splash_whisly_logo</item>
+        <item name="android:windowSplashScreenIconBackgroundColor" tools:targetApi="31">@color/whisly_warm_white</item>
+        <item name="android:windowSplashScreenAnimationDuration" tools:targetApi="31">250</item>
+    </style>
+
+    <style name="Theme.Whisly.Starting" parent="Theme.MyApplication">
+        <item name="android:windowBackground">@drawable/bg_splash_whisly</item>
+        <item name="android:windowSplashScreenBackground" tools:targetApi="31">@color/whisly_dark_bg</item>
+        <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="31">@drawable/ic_splash_whisly_logo</item>
+        <item name="android:windowSplashScreenIconBackgroundColor" tools:targetApi="31">@color/whisly_warm_white</item>
+        <item name="android:windowSplashScreenAnimationDuration" tools:targetApi="31">250</item>
+    </style>
+
+</resources>

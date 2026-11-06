@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: whisly
+      POSTGRES_PASSWORD: whisly_dev_password
+      POSTGRES_DB: whisly_control_plane
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./backend/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+
+  control-plane-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://whisly:whisly_dev_password@postgres:5432/whisly_control_plane
+      WHISLY_MANIFEST_SECRET: whisly-ed25519-hmac-dev-key
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres

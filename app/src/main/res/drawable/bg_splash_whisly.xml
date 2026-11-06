@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Cold-start window background drawable with #F8F2EC (whisly_cream_bg) and
+  centered Whisly logo so cold launches never flash white or black before Compose renders.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/whisly_cream_bg" />
+    <item
+        android:width="84dp"
+        android:height="84dp"
+        android:gravity="center">
+        <shape android:shape="oval">
+            <solid android:color="@color/whisly_warm_white" />
+        </shape>
+    </item>
+    <item
+        android:width="56dp"
+        android:height="56dp"
+        android:drawable="@drawable/whisly_launcher_fg"
+        android:gravity="center" />
+</layer-list>

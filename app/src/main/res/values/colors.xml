@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="whisly_primary_peach">#FFEBAF96</color>
+    <color name="whisly_secondary_peach">#FFDFA58D</color>
+    <color name="whisly_soft_peach">#FFFCE5DB</color>
+    <color name="whisly_light_peach">#FFFCE5DB</color>
+    <color name="whisly_warm_brown">#FF49352B</color>
+    <color name="whisly_deep_brown">#FF29211E</color>
+    <color name="whisly_light_bg">#FFFFF9F5</color>
+    <color name="whisly_cream_bg">#FFF8F2EC</color>
+    <color name="whisly_dark_bg">#FF1A1412</color>
+    <color name="whisly_warm_white">#FFFFF9F5</color>
+    <color name="whisly_primary_orange">#FFF45A18</color>
+    <color name="whisly_terracotta_accent">#FFF45A18</color>
+    <color name="black">#FF29211E</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

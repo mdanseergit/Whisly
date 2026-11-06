@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Whisly Data Extraction Rules (API 31+):
+   Excludes Keystore-encrypted Room database and downloaded model packs from
+   cloud backup and device-to-device transfer.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="database" path="whisly_offline_db" />
+        <exclude domain="database" path="whisly_offline_db-shm" />
+        <exclude domain="database" path="whisly_offline_db-wal" />
+        <exclude domain="file" path="whisly_models" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="database" path="whisly_offline_db" />
+        <exclude domain="database" path="whisly_offline_db-shm" />
+        <exclude domain="database" path="whisly_offline_db-wal" />
+        <exclude domain="file" path="whisly_models" />
+    </device-transfer>
+</data-extraction-rules>
