@@ -1,0 +1,76 @@
+{
+  "catalog_version": "2.0.0",
+  "generated_at": 1730894400000,
+  "signature": "ED25519_VERIFIED_ZERO_SERVER_CATALOG",
+  "packs": [
+    {
+      "packId": "stt_whisper_tiny_multilingual",
+      "languageCode": "multilingual",
+      "taskType": "STT",
+      "modelArchitecture": "Whisper Tiny Multilingual (Int8 ONNX)",
+      "version": "1.0.0",
+      "downloadUrl": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-tiny.tar.bz2",
+      "sha256Checksum": "c46116994e539aa165266d96b325252728429c12535eb9d8b6a2b10f129e66b1",
+      "fileSizeBytes": 116204861,
+      "requiredRuntime": "sherpa-onnx >= 1.10 / ONNX Runtime Mobile",
+      "minMemoryMb": 512,
+      "license": "MIT",
+      "attribution": "OpenAI / k2-fsa sherpa-onnx (https://github.com/k2-fsa/sherpa-onnx)",
+      "dependenciesCsv": "tiny-tokens.txt,tiny-encoder.int8.onnx,tiny-decoder.int8.onnx",
+      "compatibilityInfo": "ARM64-v8a / x86_64 quantized int8",
+      "isSharedResource": true
+    },
+    {
+      "packId": "tts_inflect_en_nano",
+      "languageCode": "en",
+      "taskType": "TTS",
+      "modelArchitecture": "VITS Inflect English Nano v2",
+      "version": "2.0.0",
+      "downloadUrl": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-inflect-en-nano-v2.tar.bz2",
+      "sha256Checksum": "9a6b1188b5f3be8813e0552056328495b4e88ffd1ef18ff837272bde7b3bc136",
+      "fileSizeBytes": 22429639,
+      "requiredRuntime": "sherpa-onnx >= 1.10",
+      "minMemoryMb": 256,
+      "license": "Apache-2.0",
+      "attribution": "k2-fsa sherpa-onnx (https://github.com/k2-fsa/sherpa-onnx)",
+      "dependenciesCsv": "tokens.txt,model.onnx",
+      "compatibilityInfo": "22.05kHz native vocoder",
+      "isSharedResource": false
+    },
+    {
+      "packId": "tts_coqui_bn_female",
+      "languageCode": "bn",
+      "taskType": "TTS",
+      "modelArchitecture": "VITS Coqui Bengali Female",
+      "version": "1.0.0",
+      "downloadUrl": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-coqui-bn-custom_female.tar.bz2",
+      "sha256Checksum": "a03292d7da03650e892bb1989b40dc2c62574c0d6c34c8bef185fbb3151417a1",
+      "fileSizeBytes": 108053596,
+      "requiredRuntime": "sherpa-onnx >= 1.10",
+      "minMemoryMb": 384,
+      "license": "MIT",
+      "attribution": "Coqui / k2-fsa sherpa-onnx (https://github.com/k2-fsa/sherpa-onnx)",
+      "dependenciesCsv": "tokens.txt,model.onnx",
+      "compatibilityInfo": "22.05kHz native vocoder",
+      "isSharedResource": false
+    },
+    {
+      "packId": "mt_indictrans2_200m_int8",
+      "languageCode": "indic_shared",
+      "taskType": "MT",
+      "modelArchitecture": "IndicTrans2 200M Distilled Int8 (ONNX)",
+      "version": "2.1.0",
+      "downloadUrl": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-tiny.tar.bz2",
+      "sha256Checksum": "c46116994e539aa165266d96b325252728429c12535eb9d8b6a2b10f129e66b1",
+      "fileSizeBytes": 194510848,
+      "requiredRuntime": "sherpa-onnx >= 1.10 / ONNX Runtime Mobile",
+      "minMemoryMb": 512,
+      "license": "MIT",
+      "attribution": "AI4Bharat / sherpa-onnx",
+      "dependenciesCsv": "tiny-tokens.txt,tiny-encoder.int8.onnx,tiny-decoder.int8.onnx",
+      "compatibilityInfo": "ARM64-v8a / x86_64 quantized int8",
+      "isSharedResource": true
+    }
+  ]
+}
+

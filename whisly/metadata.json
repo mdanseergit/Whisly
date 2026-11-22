@@ -1,0 +1,6 @@
+{
+  "name": "Whisly",
+  "description": "Offline AI speech-to-speech translation for Tamil, Bengali, and Indian languages with downloadable model packs and privacy-first architecture.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

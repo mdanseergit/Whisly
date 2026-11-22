@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Cold-start window background drawable with theme-aware @color/whisly_splash_bg
+  (#F5ECE4 Light / #1A1412 Dark) and centered 132dp Whisly tile logo.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/whisly_splash_bg" />
+    <item
+        android:width="132dp"
+        android:height="132dp"
+        android:drawable="@drawable/whisly_tile_logo"
+        android:gravity="center" />
+</layer-list>

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "packId": "stt_whisper_tiny_multilingual",
+  "engine": "whisper",
+  "languages": ["en","ta","hi","bn","te","kn","ml","mr","gu","or","as","pa","ur","ne"],
+  "numThreads": 2,
+  "encoder": "tiny-encoder.int8.onnx",
+  "decoder": "tiny-decoder.int8.onnx",
+  "tokens": "tiny-tokens.txt",
+  "license": "MIT (OpenAI Whisper) + Apache-2.0 (sherpa-onnx)",
+  "attribution": "OpenAI Whisper model weights; k2-fsa sherpa-onnx runtime and packaging",
+  "files": [
+    {"path": "tiny-encoder.int8.onnx", "sha256": "d24fb083ae3b1041fc24e97971d60e280c9342201fbb67b0ab428a8b4a51a434", "size": 12937772},
+    {"path": "tiny-decoder.int8.onnx", "sha256": "d2fece8dd42771f1df975c6c0445770d0c292bf7547c2cae04a6c0cc57540925", "size": 89855401},
+    {"path": "tiny-tokens.txt", "sha256": "b34b360dbb493e781e479794586d661700670d65564001f23024971d1f2fa126", "size": 816730},
+    {"path": "LICENSE", "sha256": "326ea6417b648fe8e262f55c9e9823ee5cc8437de565963ddf8159afd4a36533", "size": 516}
+  ]
+}

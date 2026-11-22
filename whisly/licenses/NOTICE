@@ -1,0 +1,49 @@
+# Whisly Third-Party Software, Model & Asset Notices (`licenses/NOTICE`)
+
+## 1. License Gate Policy (Enforced)
+Every library, model checkpoint, tokenizer, and voice asset evaluated for Whisly is audited under a strict commercial-distribution license gate:
+- **Permitted**: `MIT`, `Apache-2.0`, `BSD-3-Clause`, `CC0-1.0`, `SIL OFL 1.1`.
+- **Blocked from APK Distribution**: `GPL-2.0`, `GPL-3.0`, `LGPL` (statically linked), `CC-BY-NC-*` (Non-Commercial), `CC-BY-SA-*` (Share-Alike copyleft on model weights).
+
+---
+
+## 2. Flagged / Rejected Candidates (Excluded from Shipping)
+
+| Component | Upstream Source | License | Gate Decision & Reason | Approved Alternative Used |
+| :--- | :--- | :--- | :--- | :--- |
+| **Piper TTS Engine (`piper1-gpl` / `espeak-ng`)** | `https://github.com/OHF-Voice/piper1-gpl` / `https://github.com/espeak-ng/espeak-ng` | **GPL-3.0** | **BLOCKED (Copyleft)**: Linking GPL-3.0 `piper1-gpl` or `espeak-ng` C++ phonemizer inside the Android APK imposes GPL-3.0 copyleft obligations on the application binary. | **AI4Bharat Indic-TTS / VITS-Rasa** (`MIT`), **Kokoro-82M** (`Apache-2.0`), and **Android System Offline TTS** (`Apache-2.0`). |
+| **fastText `lid.176.ftz`** | `https://fasttext.cc/docs/en/language-identification.html` | **CC-BY-SA 3.0** | **BLOCKED (Share-Alike)**: Trained on Wikipedia/Tatoeba/SETimes with CC-BY-SA 3.0 share-alike terms. | **Unicode Script Block + Character N-Gram LID** (`Apache-2.0`) and **GlotLID** (`cisnlp/GlotLID`, `Apache-2.0`). |
+| **MADLAD-400 (3B / 7B / 10B)** | `https://huggingface.co/google/madlad400-3b-mt` | `Apache-2.0` | **EXCLUDED FROM MOBILE DEFAULT (Size Budget)**: Exceeds mobile RAM (< 1 GB) and pack download budgets (> 1.5 GB even at Int4). | **AI4Bharat IndicTrans2 Distilled (200M / 320M)** (`MIT`) and **M2M100 418M** (`MIT`). |
+
+---
+
+## 3. Approved Models & Runtimes (On-Demand Downloadable Packs)
+
+| Stage | Model / Asset | Official Source URL | License | Commercial Use |
+| :--- | :--- | :--- | :--- | :--- |
+| **VAD** | Silero VAD v5 (`silero_vad.onnx`) | `https://github.com/snakers4/silero-vad` | **MIT License** | Permitted |
+| **LID** | GlotLID v3 (`cisnlp/GlotLID`) | `https://huggingface.co/cis-lmu/glotlid` | **Apache-2.0** | Permitted |
+| **STT (Indic)** | AI4Bharat IndicConformer (CTC/RNNT) | `https://huggingface.co/ai4bharat/indic-conformer-600m-multilingual` | **MIT License** | Permitted (Note: HuggingFace repository is gated; requires accepting MIT terms on HF to download raw weights) |
+| **STT (Global / English)** | OpenAI Whisper Tiny / Base (`whisper-tiny`, `whisper-base`) | `https://huggingface.co/openai/whisper-base` | **MIT License** | Permitted |
+| **MT (English ↔ Indic)** | AI4Bharat IndicTrans2 Distilled 200M (`en-indic`, `indic-en`) | `https://huggingface.co/ai4bharat/indictrans2-en-indic-dist-200M` / `https://huggingface.co/ai4bharat/indictrans2-indic-en-dist-200M` | **MIT License** | Permitted |
+| **MT (Indic ↔ Indic)** | AI4Bharat IndicTrans2 Indic-Indic Distilled 320M | `https://huggingface.co/ai4bharat/indictrans2-indic-indic-dist-320M` | **MIT License** | Permitted |
+| **MT (Global Fallback)** | Meta M2M100 418M | `https://huggingface.co/facebook/m2m100_418M` | **MIT License** | Permitted |
+| **TTS (Indic)** | AI4Bharat Indic-TTS / VITS-Rasa | `https://github.com/AI4Bharat/Indic-TTS` | **MIT License** | Permitted |
+| **TTS (English)** | Kokoro-82M (`hexgrad/Kokoro-82M`) | `https://huggingface.co/hexgrad/Kokoro-82M` | **Apache-2.0** | Permitted |
+| **TTS (System Fallback)** | Android `android.speech.tts.TextToSpeech` | `https://developer.android.com/reference/android/speech/tts/TextToSpeech` | **Apache-2.0** | Permitted |
+
+---
+
+## 4. Bundled Android Libraries & Fonts
+
+1. **Android Jetpack (Compose, Room, DataStore, Lifecycle, Navigation, Core, Activity)**
+   - License: **Apache License 2.0** (`https://www.apache.org/licenses/LICENSE-2.0`)
+2. **Kotlin Standard Library & Kotlinx Coroutines**
+   - License: **Apache License 2.0**
+3. **Square OkHttp 4.12.0, Retrofit 2.12.0, Moshi 1.15.2**
+   - License: **Apache License 2.0**
+4. **Inter & Plus Jakarta Sans Typefaces (`app/src/main/res/font/`)**
+   - License: **SIL Open Font License 1.1 (OFL-1.1)**
+5. **Simple Icons — GitHub Vector Mark (`app/src/main/res/drawable/ic_github.xml`)**
+   - Source: `https://simpleicons.org/`
+   - License: **CC0 1.0 Universal (Public Domain Dedication)**

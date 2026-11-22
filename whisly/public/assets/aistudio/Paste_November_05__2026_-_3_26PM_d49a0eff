@@ -1,0 +1,1128 @@
+# WHISLY — EXISTING APPLICATION REPAIR, AI ACCURACY, COMPLETE UI REDESIGN & PERFORMANCE MASTER PROMPT
+
+## ROLE ASSIGNMENT
+
+Act as a combined senior engineering team:
+
+- Principal Android Engineer.
+- Senior Kotlin and Jetpack Compose Developer.
+- AI Speech Recognition Engineer.
+- Machine Translation Engineer.
+- Text-to-Speech Engineer.
+- Backend Architect.
+- Product UI/UX Designer.
+- Mobile Performance Engineer.
+- QA and Application Security Engineer.
+
+You are working on my EXISTING Android application, WHISLY.
+
+Your responsibility is to inspect the actual source code, fix its current problems, redesign the interface and improve the existing AI implementation.
+
+**This is a repair and improvement task, NOT a new application development task.**
+
+Do not generate an unrelated project.
+
+Do not replace working implementations just because you prefer another architecture.
+
+Inspect before changing. Implement before claiming completion. Test before declaring success.
+
+---
+
+# 1. EXISTING APPLICATION — PRESERVE THE ARCHITECTURE
+
+Application:
+
+- Name: Whisly.
+- Package: `com.aistudio.whisly.kxmpzq`.
+- Language: Kotlin 2.2.10.
+- UI: Jetpack Compose + Material 3.
+- Architecture: Clean MVVM.
+- State management: StateFlow and ViewModel.
+- Navigation: Navigation Compose.
+- Database: Room SQLite.
+- Preferences: DataStore.
+- Local encryption: Android Keystore AES-GCM.
+- Model integrity: SHA-256 and signed manifests.
+- Network: Retrofit + OkHttp + Moshi.
+- Backend: FastAPI + PostgreSQL.
+- Audio capture: Android AudioRecord.
+- Audio playback: Android AudioTrack.
+- Android TTS: TextToSpeech fallback.
+
+Existing architecture includes:
+
+- `WhislyViewModel`
+- `WhislyRepository`
+- `AiEngineInterfaces.kt`
+- `SpeechToSpeechPipeline.kt`
+- `WhislyModelManager.kt`
+- `WhislyTheme`
+- `StrandsGlassOrbCanvas`
+- `MicrophoneButton.kt`
+- `WhislyGooeyNavBar.kt`
+- `KeystoreCryptoManager`
+- `AiEvaluationSuite.kt`
+
+Preserve these components when they are implemented correctly.
+
+First inspect the actual project tree and compare the code against this architectural specification.
+
+If the implementation differs from the specification, report the difference and use the actual source code as the source of truth.
+
+Do not blindly create duplicate ViewModels, repositories, databases, AI engines or navigation graphs.
+
+Preserve database migrations and encrypted user data.
+
+Do not change application identifiers or signing configurations.
+
+Do not perform unnecessary Gradle, Kotlin or Android plugin upgrades.
+
+---
+
+# 2. EXECUTION ORDER — PRIORITIES
+
+Work in this order:
+
+1. Diagnose and fix the 0% voice detection problem.
+2. Verify actual STT inference.
+3. Verify real IndicTrans2 translation.
+4. Verify actual TTS playback.
+5. Remove fake sample data from production.
+6. Redesign the complete user interface.
+7. Replace excessive visual effects.
+8. Improve startup and navigation.
+9. Optimize memory, CPU and animation performance.
+10. Verify offline and online behavior.
+11. Run automated tests and generate a working build.
+
+Do not start with cosmetic changes while the voice engine is broken.
+
+---
+
+# 3. CRITICAL REPAIR — VOICE DETECTION SHOWING 0%
+
+The current application reports 0% voice detection accuracy.
+
+Diagnose the exact root cause.
+
+Do not randomly modify thresholds.
+
+Do not assume that VAD, STT confidence and recognition accuracy are the same measurement.
+
+## A. Audit the microphone implementation
+
+Inspect the existing AudioRecord implementation.
+
+Expected current configuration:
+
+- Audio source: `VOICE_RECOGNITION`.
+- Sample rate: 16,000 Hz.
+- Channels: mono.
+- Encoding: PCM 16-bit.
+- Output: actual captured PCM samples.
+
+Verify:
+
+1. RECORD_AUDIO permission in the manifest.
+2. Runtime permission.
+3. AudioRecord initialization.
+4. `AudioRecord.STATE_INITIALIZED`.
+5. Recording state.
+6. `getMinBufferSize()` result.
+7. Buffer allocation.
+8. Audio read return values.
+9. Audio source availability.
+10. Audio interruption and lifecycle handling.
+11. Microphone routing.
+12. Whether recorded data contains actual speech.
+
+Compare the current AudioRecord configuration with the actual STT model's required input format.
+
+Do not assume that 16 kHz is correct simply because the current implementation uses it.
+
+If the selected model expects another sample rate, implement proper resampling.
+
+## B. Inspect PCM normalization
+
+Inspect how PCM16 values are converted into model input.
+
+For signed 16-bit samples, verify appropriate conversion to normalized floating-point samples when required:
+
+`floatSample = pcm16Sample / 32768.0f`
+
+Check:
+
+- Peak amplitude.
+- RMS.
+- Silence percentage.
+- Clipping.
+- Sample count.
+- Audio duration.
+- NaN and infinite values.
+- Actual microphone signal.
+
+Avoid passing integer PCM values directly into a model that expects normalized floats.
+
+Do not normalize pure silence into apparent speech.
+
+## C. Repair the current VAD logic
+
+The existing specification describes:
+
+- Pre-emphasis filter.
+- Energy-based VAD.
+- Minimum speech duration of 350 ms.
+- Fixed RMS threshold of 0.015.
+
+Investigate these exact conditions.
+
+Potential problems:
+
+- Quiet speech is rejected.
+- Short utterances are rejected.
+- Microphone amplitude scaling is wrong.
+- Background noise causes incorrect segmentation.
+- Sentence beginnings or endings are cut off.
+- Pre-emphasis is unsuitable for the selected model.
+- Speech buffers are shorter than the VAD frame requirement.
+
+Do not preserve the fixed threshold without testing.
+
+Implement robust speech segmentation using:
+
+- Background noise estimation.
+- Adaptive thresholding.
+- Separate speech-start and speech-stop thresholds.
+- Hysteresis.
+- Pre-roll buffer.
+- Hangover duration.
+- Minimum valid speech duration.
+- Maximum recording duration.
+- Silence timeout.
+
+Evaluate the current energy-based implementation against a supported VAD model such as Silero VAD if necessary.
+
+Do not add a second VAD model without demonstrating a measurable improvement.
+
+VAD must identify speech, not calculate translation accuracy.
+
+## D. Fix the 0% metric itself
+
+Audit the code displaying 0%.
+
+The application already has WER, CER and chrF++ evaluation functions.
+
+Important:
+
+- WER is an error rate.
+- CER is an error rate.
+- A WER of 0% can represent perfect recognition against a reference.
+- VAD speech probability is not transcription accuracy.
+- Recognition confidence is not actual recognition accuracy.
+
+Never calculate a live recognition accuracy percentage without a ground-truth transcript.
+
+Separate these measurements:
+
+1. Microphone signal level.
+2. Speech detected: Yes/No.
+3. VAD speech probability, if supported.
+4. Actual recognized transcript.
+5. STT confidence, only if genuinely provided by the model.
+6. WER/CER, only during evaluation against a known reference.
+
+Remove misleading 0% indicators from the normal application interface.
+
+Keep correct evaluation calculations in the developer benchmark system.
+
+## E. Add temporary development diagnostics
+
+For development builds only, collect:
+
+- Sample rate.
+- Audio channels.
+- PCM format.
+- Audio duration.
+- Peak amplitude.
+- RMS.
+- Silence percentage.
+- Number of frames.
+- VAD result.
+- VAD segment duration.
+- STT inference duration.
+- Model loading status.
+- Transcript.
+- Actual error cause.
+
+Use these diagnostics to trace the failure stage.
+
+Do not expose them to normal app users.
+
+Do not upload user recordings for debugging without explicit consent.
+
+---
+
+# 4. REAL STT IMPLEMENTATION
+
+Primary model:
+
+AI4Bharat IndicConformer.
+
+Existing model-pack convention:
+
+`stt_indicconformer_<lang>_v2`
+
+Inspect:
+
+- Actual model files.
+- Model configuration.
+- Tokenizer.
+- Language mapping.
+- Checkpoint compatibility.
+- Model loader.
+- Native inference implementation.
+- Output decoding.
+- Memory usage.
+
+Verify that real neural inference is occurring.
+
+If the current IndicConformer conversion is broken, diagnose whether the problem is:
+
+- Model export.
+- Runtime operators.
+- Input tensor shape.
+- Input sample rate.
+- Tokenizer.
+- Language configuration.
+- Decoder.
+- Model path.
+- Checksum verification.
+
+Benchmark Whisper tiny through whisper.cpp only as an alternative, not as an automatic replacement.
+
+Use the model that demonstrates better real-world results on the target devices.
+
+Support Tamil, Bengali and the other currently verified language capabilities.
+
+Do not claim a language works merely because its language code exists.
+
+Remove all sample transcripts and fake recognition results from production.
+
+---
+
+# 5. REAL INDIC TRANS2 TRANSLATION
+
+Existing intended translation model:
+
+AI4Bharat IndicTrans2 Indic-Indic Distilled 200M INT8.
+
+Existing shared model pack:
+
+`mt_indictrans2_200m_int8`
+
+Expected package size in the specification:
+
+194,510,848 bytes, approximately 185.5 MiB.
+
+Preserve shared model deduplication.
+
+Inspect the actual IndicTrans2 implementation.
+
+Verify:
+
+- ONNX encoder inference.
+- ONNX decoder inference.
+- Tokenizer loading.
+- SentencePiece processing.
+- Special language tags.
+- Correct source language.
+- Correct target language.
+- Autoregressive decoding.
+- Padding and attention masks.
+- End-of-sequence handling.
+- Maximum token length.
+- Output detokenization.
+- Unicode NFC normalization.
+
+Use the actual language tags from the model's verified language registry, such as:
+
+- Tamil: `tam_Taml`
+- Bengali: `ben_Beng`
+- Hindi: `hin_Deva`
+
+Preserve the correct model language-token format.
+
+### Critical translation requirement
+
+The current specification mentions semantic concepts, word-level lexicon transfer and Brahmic Unicode transliteration.
+
+Audit this carefully.
+
+These mechanisms may help with normalization or terminology, but they must not be presented as genuine machine translation.
+
+The primary translation output must come from the actual IndicTrans2 neural model.
+
+Do not replace neural inference with:
+
+- Hardcoded dictionaries.
+- Word-by-word substitution.
+- Unicode block conversion.
+- Transliteration presented as translation.
+- Predefined sample responses.
+- Random generated sentences.
+
+A glossary may be applied as a controlled, documented terminology feature. It must not silently replace the translation model.
+
+Test both directions independently.
+
+If the model fails, return a real translation failure state.
+
+---
+
+# 6. REAL VITS-RASA TTS
+
+Primary intended model:
+
+AI4Bharat VITS-Rasa.
+
+Existing intended capabilities:
+
+- Tamil.
+- Bengali.
+- Telugu.
+- Kannada.
+- Malayalam.
+- Marathi.
+- Assamese.
+- Hindi where the verified implementation or offline voice supports it.
+- Other language capabilities according to the actual registry.
+
+Existing fallback:
+
+Android TextToSpeech with an on-device voice.
+
+Inspect:
+
+- Model configuration.
+- Voice identifiers.
+- Text normalization.
+- Script handling.
+- Speaker selection.
+- Sample rate.
+- PCM generation.
+- Audio duration.
+- AudioTrack playback.
+- Runtime compatibility.
+
+Do not generate fake formant speech and claim that it is VITS-Rasa output.
+
+If a genuine neural TTS model is unavailable, clearly select a verified offline Android voice only when installed and available without network access.
+
+For unsupported languages, show an honest unavailable state.
+
+Do not pretend that the same voice model supports all 12 application languages.
+
+Verify that AudioTrack uses the actual output sample rate and audio format returned by the selected voice engine.
+
+---
+
+# 7. COMPLETE SPEECH PIPELINE
+
+Preserve the existing `SpeechToSpeechPipeline.kt` and its coroutine Mutex concurrency protection.
+
+Implement the verified pipeline:
+
+AudioRecord
+    ↓
+PCM validation
+    ↓
+Model-compatible resampling
+    ↓
+Audio preprocessing
+    ↓
+VAD segmentation
+    ↓
+IndicConformer STT
+    ↓
+Recognized source transcript
+    ↓
+User review and confirmation
+    ↓
+Unicode NFC normalization
+    ↓
+IndicTrans2 neural translation
+    ↓
+Translated target text
+    ↓
+VITS-Rasa TTS
+    ↓
+AudioTrack playback
+
+Requirements:
+
+- One active recording session.
+- One inference operation per pipeline stage.
+- No overlapping audio recording.
+- No duplicate model loading.
+- No processing on the Android main thread.
+- Correct coroutine cancellation.
+- Proper lifecycle handling.
+- Clear stage transitions.
+- Preservation of text if TTS fails.
+- Retry support for a failed stage.
+- Manual audio replay.
+- Editable source transcript.
+- User-controlled translated audio playback.
+
+Do not automatically listen while the user is unaware.
+
+Use push-to-talk as the default interaction.
+
+---
+
+# 8. COMPLETE WHISLY VISUAL REDESIGN
+
+Use my original uploaded Whisly ribbon W logo as the primary branding asset.
+
+Preserve the orange, red, golden and dark-brown ribbon identity.
+
+Do not distort or replace the logo.
+
+Create a minimal professional interface.
+
+## Official colors
+
+| Token | Hex |
+|---|---|
+| Primary Orange | #F45A18 |
+| Bright Orange | #FF6B1A |
+| Golden Accent | #FFAB32 |
+| Primary Peach | #EBAF96 |
+| Secondary Peach | #DFA58D |
+| Warm Brown | #49352B |
+| Deep Brown | #29211E |
+| Cream Background | #F8F2EC |
+| White Surface | #FFFFFF |
+| Muted Text | #806D62 |
+| Light Border | #E8DDD5 |
+| Dark Background | #1A1412 |
+| Dark Surface | #29211E |
+
+Keep the existing Inter typeface.
+
+Preserve light and dark themes, but make both visually consistent.
+
+### Design philosophy
+
+Think of a premium communication tool, not an AI control panel.
+
+The application should feel:
+
+- Simple.
+- Premium.
+- Calm.
+- Warm.
+- Professional.
+- Clear.
+- Fast.
+- Friendly.
+
+Avoid generic AI-generated UI design.
+
+Remove unnecessary decorative effects.
+
+---
+
+# 9. REMOVE THE EXCESSIVE GLASSMORPHISM
+
+The existing specification includes a Strands Glass Orb shader and a GooeyNav liquid-glass bottom navigation.
+
+These are visually complex for a voice translator and should be redesigned.
+
+### Replace StrandsGlassOrbCanvas
+
+Do not retain a large shader-driven glass orb as the main microphone control unless a measured device test proves that a simplified variant is genuinely useful.
+
+Create a clean microphone button:
+
+- Orange circular or softly rounded shape.
+- White microphone icon.
+- Precise alignment.
+- Subtle shadow.
+- Soft pressed-state animation.
+- Clear recording indicator.
+- Real audio-responsive waveform.
+
+During silence, show the correct idle state.
+
+Never animate random waves that imply speech has been detected.
+
+### Replace GooeyNav
+
+Remove the excessive liquid-glass navigation effect.
+
+Use a clean, stable Material 3-inspired bottom navigation bar.
+
+Four clear destinations:
+
+1. Home.
+2. Translate.
+3. History.
+4. Profile.
+
+Use simple icons and readable selected states.
+
+Keep Conversation, Languages, Saved, TextMode and Settings as secondary destinations accessible through their existing application routes.
+
+Preserve navigation behavior and existing route contracts unless there is a proven bug.
+
+No decorative droplets, large morphing animations, glowing pills or continuous rendering.
+
+---
+
+# 10. REBUILD THE MAIN TRANSLATOR SCREEN
+
+This must be the cleanest screen in Whisly.
+
+### Header
+
+- Official small Whisly logo.
+- Brand wordmark.
+- Small connectivity indicator.
+- Settings icon.
+
+### Language row
+
+- Source language.
+- Swap button.
+- Target language.
+
+Keep selectors simple and aligned.
+
+### Main interaction
+
+One central microphone button.
+
+Use:
+
+- Short recording instruction.
+- Recording state.
+- Actual audio level.
+- Real waveform.
+- Recording duration where useful.
+
+### Translation result
+
+Show two clean text areas:
+
+**Original speech**
+
+Actual STT transcription.
+
+**Translation**
+
+Actual IndicTrans2 result.
+
+Actions:
+
+- Edit transcript.
+- Translate.
+- Copy.
+- Listen.
+- Replay.
+- Save.
+
+Do not display unnecessary technical information.
+
+Do not show sample conversations or test translations.
+
+### Conversation screen
+
+Keep Person A and Person B clearly distinguished.
+
+Use subtle conversation bubbles, not oversized dashboard cards.
+
+Each message should show:
+
+- Original sentence.
+- Translated sentence.
+- Play/pause.
+- Speaker identity.
+- Language direction.
+
+---
+
+# 11. CLEAN OFFLINE / ONLINE INDICATOR
+
+Remove the existing visual treatment if it looks artificial or excessive.
+
+Use one restrained status component.
+
+States:
+
+- `Offline`: device has no active internet connection.
+- `Online`: device has internet connectivity.
+- `Ready offline`: required model packs are installed.
+- `Download required`: required model resource is missing.
+
+Important:
+
+Internet connectivity is not the same thing as translation execution mode.
+
+When the application is online but using local models, do not imply that speech is being uploaded.
+
+Do not show AI model names, APIs, server labels or processing diagrams.
+
+Use a small label, subtle dot and simple icon only where helpful.
+
+---
+
+# 12. STARTUP AND ONBOARDING REDESIGN
+
+## Splash screen
+
+Use:
+
+- Official Whisly logo.
+- Warm-white background.
+- Small brand wordmark.
+- Short logo fade/scale animation.
+- Smooth transition into the application.
+
+Use the Android splash screen system appropriately.
+
+Do not wait for large models to load before showing the UI.
+
+Do not display a long artificial loading screen.
+
+## First launch
+
+Maximum three onboarding screens:
+
+1. Speak in your language.
+2. Whisly translates your words.
+3. Hear the translation offline.
+
+Use a simple progress indicator, short text and a clear Get Started action.
+
+Save onboarding completion in DataStore.
+
+Do not repeatedly show onboarding to existing users.
+
+Request microphone permission only when needed and explain its purpose.
+
+Avoid mandatory account creation.
+
+---
+
+# 13. COMPLETE SCREEN ALIGNMENT
+
+Audit all existing routes:
+
+- Home.
+- Translate.
+- Conversation.
+- Languages.
+- Saved.
+- TextMode.
+- History.
+- Profile.
+- Settings.
+
+Fix:
+
+- Inconsistent horizontal margins.
+- Incorrect padding.
+- Overlapping controls.
+- Inconsistent heights.
+- Uneven spacing.
+- Typography hierarchy.
+- Incorrect icon alignment.
+- Status bar overlap.
+- Navigation bar alignment.
+- Keyboard overlap.
+- Scroll behavior.
+- Text clipping.
+- Screen-size responsiveness.
+
+Use:
+
+- 8dp spacing system.
+- Consistent rounded corners.
+- At least 48dp touch targets.
+- Appropriate content width.
+- Readable font scaling.
+- Clear component hierarchy.
+
+Keep the app visually consistent across all screens.
+
+---
+
+# 14. SMOOTH ANIMATIONS
+
+Use efficient Compose-native animations.
+
+Recommended interaction timings:
+
+- Button feedback: 150–200 ms.
+- Ordinary transitions: 180–250 ms.
+- Screen transitions: 200–300 ms.
+- Startup: short and non-blocking.
+
+Implement:
+
+- Smooth button state changes.
+- Language swapping.
+- Translation result appearance.
+- Actual recording waveform.
+- Speech playback indicator.
+- Subtle screen transitions.
+- Download progress.
+- Haptic confirmation.
+
+Do not use:
+
+- Expensive shaders.
+- Excessive blur.
+- Unnecessary Lottie assets.
+- Continuous idle animations.
+- Heavy particle systems.
+- Recomposition on every audio sample.
+
+Use throttled audio-level updates for the waveform.
+
+Only animate when an interaction or actual audio event occurs.
+
+Respect reduced-motion settings.
+
+---
+
+# 15. PRESERVE AND CLEAN THE EXISTING BACKEND
+
+The backend should continue to work internally.
+
+Do not remove the backend simply to hide technical information from the UI.
+
+Existing backend stack:
+
+- Python 3.12.
+- FastAPI.
+- SQLAlchemy 2.0.
+- Pydantic v2.
+- PostgreSQL 16.
+- Docker Compose.
+
+Preserve the existing control-plane endpoints and their authentication and role checks.
+
+These include:
+
+- Health.
+- Languages.
+- Model catalogue.
+- Model manifests.
+- Model downloads.
+- Device registration.
+- License activation and renewal.
+- Consented feedback submission.
+- Organization management.
+- Administrative model release management.
+
+Preserve the control-plane-only design.
+
+**Do not make normal offline voice translation depend on the backend.**
+
+Offline functionality must continue when the API is unavailable.
+
+Online functionality may provide:
+
+- Model catalogue updates.
+- Language-pack downloads.
+- Device-license validation.
+- Consent-based correction synchronization.
+- Authorized administrative functions.
+
+Do not add raw audio or transcript uploading by default.
+
+Preserve HTTPS, authentication, rate limiting and role-based authorization.
+
+Do not expose backend internals, API URLs, model endpoints, error traces or server architecture anywhere in the normal application interface.
+
+---
+
+# 16. PRESERVE DATABASE AND SECURITY
+
+The existing specification documents eight Room tables:
+
+1. languages.
+2. model_packs.
+3. installed_models.
+4. translation_history.
+5. saved_phrases.
+6. voice_preferences.
+7. app_settings.
+8. pending_corrections.
+
+Preserve their schemas where practical.
+
+Do not delete user history or saved phrases during redesign.
+
+Preserve AES-GCM encryption using Android Keystore.
+
+Preserve secure model installation:
+
+- Staging directory.
+- SHA-256 verification.
+- Signed manifest validation.
+- Compatibility validation.
+- Safe atomic promotion.
+- Rollback if installation fails.
+
+Never load a model before verification.
+
+Preserve explicit consent for correction synchronization.
+
+Never upload user recordings or history automatically.
+
+---
+
+# 17. REMOVE SAMPLE DATA FROM PRODUCTION
+
+Audit the entire project for fake data.
+
+Remove from production:
+
+- Predefined recognition sentences.
+- Fake translations.
+- Hardcoded conversation messages.
+- Sample history displayed as real user history.
+- Random recognition confidence.
+- Simulated accuracy values.
+- Fake microphone input.
+- Fake waveform generation.
+- Artificial success messages.
+- Fake offline/online transitions.
+- Demo translations.
+- Mock TTS playback.
+
+Keep automated test fixtures and benchmark datasets in proper test-only locations.
+
+Do not destroy legitimate held-out evaluation data.
+
+Ensure:
+
+- Debug/mock repositories are not injected in release builds.
+- Sample content is never seeded into production user databases.
+- Empty states are displayed when there is no user data.
+- AI errors produce honest failure states.
+
+---
+
+# 18. PROFILE AND SETTINGS REDESIGN
+
+Create a clean settings experience.
+
+Preserve useful functionality:
+
+- Light/dark appearance.
+- Low-end device optimization.
+- Strict offline-only mode.
+- Speech speed.
+- Voice choice.
+- Language packs.
+- Saved phrases.
+- Privacy.
+- Storage management.
+
+Remove technical dashboards from the normal user experience.
+
+The existing live JVM heap, latency telemetry, WER/CER results and error simulators should be accessible only in a developer/debug build or internal diagnostics screen.
+
+Do not show these controls to normal users.
+
+Do not remove the underlying evaluation tools.
+
+---
+
+# 19. PERFORMANCE OPTIMIZATION
+
+Priority: Low-end and mid-range Android devices.
+
+Use the existing optimized architecture where possible.
+
+Requirements:
+
+- Keep model inference off the main thread.
+- Keep audio processing off the main thread.
+- Lazy-load AI models.
+- Do not load duplicate ONNX sessions.
+- Reuse model instances where safe.
+- Avoid unnecessary memory allocations.
+- Close AudioRecord and AudioTrack correctly.
+- Avoid repeated database queries.
+- Avoid unnecessary background processing.
+- Throttle waveform updates.
+- Stop all idle animations.
+- Avoid unnecessary network requests.
+- Avoid large image assets.
+- Avoid duplicate native runtimes.
+
+Keep low-end performance mode.
+
+Use fewer visual effects when enabled.
+
+Measure real results rather than assuming that removing animations automatically improves performance.
+
+---
+
+# 20. AUTOMATED TESTING
+
+Preserve and extend the existing test infrastructure.
+
+Run:
+
+`./gradlew :app:testDebugUnitTest`
+
+Also run Robolectric or instrumented tests as appropriate.
+
+### Voice tests
+
+- Runtime microphone permission.
+- AudioRecord initialization.
+- Valid PCM samples.
+- Correct sample-rate handling.
+- Silence rejection.
+- Quiet speech detection.
+- Short speech detection.
+- Speech segmentation.
+- VAD threshold behavior.
+- Transcript generation.
+- Error handling.
+- Recording interruption.
+
+### Translation tests
+
+- Tamil → Bengali.
+- Bengali → Tamil.
+- Tamil → Hindi.
+- Hindi → Tamil.
+- Language tags.
+- Tokenizer.
+- Unicode NFC.
+- True model inference.
+
+### TTS tests
+
+- Tamil output.
+- Bengali output.
+- Speaker selection.
+- Correct sample rate.
+- AudioTrack playback.
+- Unsupported language behavior.
+- Offline voice availability.
+
+### Model manager tests
+
+- SHA-256 verification.
+- Invalid signature rejection.
+- Shared model deduplication.
+- Download interruption.
+- Atomic installation.
+- Rollback.
+- Model compatibility.
+
+### UI tests
+
+- All four primary navigation destinations.
+- Language selection and swapping.
+- Recording states.
+- Translation result.
+- Playback.
+- Settings.
+- Theme switching.
+- Small screens.
+- Keyboard visibility.
+- Accessibility.
+
+### Offline test
+
+Enable airplane mode.
+
+With the required model packs already installed, prove that the complete STT → MT → TTS process succeeds without internet.
+
+---
+
+# 21. VISUAL AND FUNCTIONAL ACCEPTANCE CRITERIA
+
+Do not declare this task finished until these conditions are checked.
+
+| Area | Required result |
+|---|---|
+| App identity | Existing package and branding preserved |
+| Voice capture | Real non-silent PCM captured |
+| VAD | Real speech detected without arbitrary demo data |
+| STT | Actual IndicConformer or verified alternative inference |
+| Translation | Actual IndicTrans2 model inference |
+| TTS | Real VITS-Rasa or verified offline voice |
+| Offline | All three stages operate without internet |
+| UI | Consistent, clean and professionally aligned |
+| Microphone | Simple professional control with real waveform |
+| Navigation | Stable, minimal bottom navigation |
+| Startup | Fast splash and simple onboarding |
+| Animations | Smooth and event-driven |
+| Backend | Existing control plane preserved |
+| Database | Existing data preserved and encrypted |
+| Performance | Measured on real Android hardware |
+| Testing | Unit and integration tests pass |
+
+Do not fabricate accuracy or performance values.
+
+---
+
+# 22. FINAL IMPLEMENTATION REPORT
+
+After making changes, provide:
+
+1. Exact root cause of the original voice detection failure.
+2. Whether the failure was microphone capture, PCM conversion, VAD, STT, model loading or metric calculation.
+3. Existing files audited.
+4. Files modified and created.
+5. Components removed or simplified.
+6. Actual STT model and version.
+7. Actual MT model and version.
+8. Actual TTS model and version.
+9. Audio format used.
+10. VAD settings and calibration measurements.
+11. Verified language capabilities.
+12. Unit-test results.
+13. End-to-end offline test results.
+14. Actual application download size.
+15. Peak memory and pipeline latency.
+16. Build status.
+17. Remaining issues that need real-device testing.
+
+If a model cannot run, identify the actual blocker. Do not replace it with a mock and claim success.
+
+---
+
+# FINAL PRODUCT DESIGN
+
+WHISLY must feel like a premium, effortless voice communication application.
+
+The interface should not expose the complexity of the AI system.
+
+A normal user only needs to understand:
+
+- Which language they are speaking.
+- Which language they want to hear.
+- Whether their voice is being recorded.
+- What was recognized.
+- What the translation says.
+- How to play the translated voice.
+
+The entire application should feel coherent, fast, comfortable and trustworthy.
+
+**No fake recognition. No fake translation. No unnecessary glass effects. No technical clutter. No laggy animations.**
+
+**WHISLY — Your voice. Every language. Anywhere.**
+
+Implement the improvements in the existing repository, preserve working features, build the application and report verified results.

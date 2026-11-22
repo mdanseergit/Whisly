@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  PHASE 5 — Perfectly Centered Whisly Splash Screen Icon.
+  Android 12+ SplashScreen API renders an icon in a 288dp viewport.
+  Using whisly_splash_logo ensures the 132dp squircle tile and ribbon fit
+  strictly within the 192dp circular mask without any clipping.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:width="288dp"
+        android:height="288dp"
+        android:drawable="@drawable/whisly_splash_logo"
+        android:gravity="center" />
+</layer-list>

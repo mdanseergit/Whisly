@@ -1,0 +1,9 @@
+# Whisly Third-Party Notices (`/NOTICE`)
+
+See `/licenses/NOTICE` for the full license audit table covering all models, voice packs, fonts, and libraries.
+
+- **Android Jetpack, Kotlin Coroutines, OkHttp, Retrofit, Moshi**: Apache License 2.0
+- **Inter & Plus Jakarta Sans Fonts (`app/src/main/res/font/`)**: SIL Open Font License 1.1
+- **Simple Icons GitHub Mark (`app/src/main/res/drawable/ic_github.xml`)**: CC0 1.0 Universal
+- **Downloadable On-Device Models (Silero VAD, IndicConformer, Whisper, IndicTrans2 Distilled, Indic-TTS, Kokoro-82M, GlotLID)**: MIT License / Apache License 2.0
+- **License Gate Exclusions**: GPL-3.0 `piper1-gpl` / `espeak-ng` and CC-BY-SA 3.0 `fastText lid.176.ftz` are excluded from the APK.
