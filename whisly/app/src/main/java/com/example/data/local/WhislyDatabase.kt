@@ -100,16 +100,16 @@ abstract class WhislyDatabase : RoomDatabase() {
                         wave, isPopular, updatedAt
                     ) VALUES (
                         'en', 'eng_Latn', 'English', 'English', 'Latin',
-                        1, 1, 'VITS_RASA_VERIFIED', 'stt_whisper_tiny_multilingual', 'mt_indictrans2_200m_int8', 'tts_inflect_en_nano',
-                        0, 0.0, 'NOT_INSTALLED', '2.1.0', 138634500,
-                        1, 1, 1, 'en-IN', 'stt_whisper_tiny_multilingual,mt_indictrans2_200m_int8,tts_inflect_en_nano', 'ARM64-v8a / x86_64 Int8',
+                        1, 1, 'SYSTEM_FALLBACK_ONLY', '', 'mt_indictrans2_200m_int8', NULL,
+                        0, 0.0, 'NOT_INSTALLED', '17.0.3', 0,
+                        1, 1, 1, 'en-IN', 'mt_indictrans2_200m_int8', 'On-device ML Kit Translate',
                         'WAVE_1', 1, 0
                     )
                     """.trimIndent()
                 )
-                db.execSQL("UPDATE languages SET totalSizeBytes = 116204861, sttPackId = 'stt_whisper_tiny_multilingual' WHERE code NOT IN ('en', 'bn')")
-                db.execSQL("UPDATE languages SET totalSizeBytes = 224258457, sttPackId = 'stt_whisper_tiny_multilingual', ttsPackId = 'tts_coqui_bn_female' WHERE code = 'bn'")
-                db.execSQL("UPDATE languages SET totalSizeBytes = 138634500, sttPackId = 'stt_whisper_tiny_multilingual', ttsPackId = 'tts_inflect_en_nano' WHERE code = 'en'")
+                db.execSQL("UPDATE languages SET totalSizeBytes = 0, sttPackId = '', ttsPackId = NULL WHERE code NOT IN ('en', 'bn')")
+                db.execSQL("UPDATE languages SET totalSizeBytes = 0, sttPackId = '', ttsPackId = NULL WHERE code = 'bn'")
+                db.execSQL("UPDATE languages SET totalSizeBytes = 0, sttPackId = '', ttsPackId = NULL WHERE code = 'en'")
             }
         }
 

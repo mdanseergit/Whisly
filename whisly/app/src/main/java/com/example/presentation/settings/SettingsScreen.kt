@@ -55,7 +55,6 @@ import com.example.core.theme.WhislyDesign
 import com.example.core.theme.WhislyTheme
 import com.example.core.theme.WhislyTokens
 import com.example.data.local.AppSettingsEntity
-import com.example.presentation.ImportUiState
 import java.util.Locale
 
 /**
@@ -80,12 +79,6 @@ fun SettingsScreen(
     onOpenAboutWhisly: () -> Unit = {},
     onOpenExitReport: () -> Unit = {},
     onRunTranslationAudit: () -> Unit = {},
-    installedSpeechPacks: List<String> = emptyList(),
-    importState: ImportUiState = ImportUiState.Idle,
-    speechModelMissingFor: String? = null,
-    onImportSpeechModel: (android.net.Uri) -> Unit = {},
-    onDismissImportState: () -> Unit = {},
-    onRemoveSpeechModel: (String) -> Unit = {},
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -158,17 +151,7 @@ fun SettingsScreen(
                 )
             }
 
-            // 2. Speech models (imported locally, verified on-device)
-            SpeechModelsSection(
-                installedPacks = installedSpeechPacks,
-                importState = importState,
-                missingForSourceLabel = speechModelMissingFor,
-                onImportModel = onImportSpeechModel,
-                onDismissImport = onDismissImportState,
-                onRemoveModel = onRemoveSpeechModel
-            )
-
-            // 3. Voice Playback Group
+            // 2. Voice Playback Group
             SettingsSectionCard(title = "Voice Playback") {
                 SettingsToggleRow(
                     icon = Icons.AutoMirrored.Filled.VolumeUp,

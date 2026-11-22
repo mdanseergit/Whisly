@@ -82,7 +82,6 @@ fun TranslateScreen(
     onNavigateToLanguages: () -> Unit,
     onNavigateToTextMode: () -> Unit,
     onNavigateToHistory: () -> Unit,
-    onNavigateToSettings: () -> Unit,
     onToggleDarkTheme: () -> Unit = {},
     onExitToHome: (() -> Unit)? = null,
     modifier: Modifier = Modifier
@@ -98,7 +97,7 @@ fun TranslateScreen(
     } ?: ""
     val isPairVerifiedOffline = (isSourceAuto || sourceLang?.code == "en" || sourceLang?.isInstalled == true) &&
         (targetLang?.code == "en" || targetLang?.isInstalled == true)
-    val ttsSupportedForTarget = targetLang?.canSpeak == true || targetLang?.ttsCapability == "VITS_RASA_VERIFIED"
+    val ttsSupportedForTarget = targetLang?.canSpeak == true || targetLang?.ttsCapability == "SYSTEM_FALLBACK_ONLY"
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -234,15 +233,6 @@ fun TranslateScreen(
                             ) {
                                 Text("Download", color = WhislyTokens.PrimaryOrange, fontWeight = FontWeight.Bold)
                             }
-                        } else if (uiState.activeError == com.example.domain.models.PipelineErrorType.OFFLINE_SPEECH_PACK_MISSING ||
-                            uiState.activeError == com.example.domain.models.PipelineErrorType.STT_MODEL_MISSING
-                        ) {
-                            TextButton(
-                                onClick = onNavigateToSettings,
-                                modifier = Modifier.testTag("banner_import_speech_model_button")
-                            ) {
-                                Text("Import", color = WhislyTokens.PrimaryOrange, fontWeight = FontWeight.Bold)
-                            }
                         } else if (bannerErrorMessage != null) {
                             IconButton(onClick = onDismissError) {
                                 Icon(
@@ -321,8 +311,8 @@ private fun TranslateScreenLightPreview() {
     com.example.core.theme.WhislyTheme(darkTheme = false) {
         TranslateScreen(
             uiState = TranslateUiState(
-                recognizedTranscript = "வணக்கம், நீங்கள் எப்படி இருக்கிறீர்கள்?",
-                translatedSentence = "নমস্কার, আপনি কেমন আছেন?"
+                recognizedTranscript = "Sample text",
+                translatedSentence = "Sample text"
             ),
             languages = com.example.ai.translation.IndicLanguageCatalog.buildInitialLanguageEntities().take(4),
             settings = AppSettingsEntity(),
@@ -344,8 +334,7 @@ private fun TranslateScreenLightPreview() {
             onDismissError = {},
             onNavigateToLanguages = {},
             onNavigateToTextMode = {},
-            onNavigateToHistory = {},
-            onNavigateToSettings = {}
+            onNavigateToHistory = {}
         )
     }
 }
@@ -357,8 +346,8 @@ private fun TranslateScreenDarkPreview() {
         TranslateScreen(
             uiState = TranslateUiState(
                 isDarkTheme = true,
-                recognizedTranscript = "வணக்கம், நீங்கள் எப்படி இருக்கிறீர்கள்?",
-                translatedSentence = "নমস্কার, আপনি কেমন আছেন?"
+                recognizedTranscript = "Sample text",
+                translatedSentence = "Sample text"
             ),
             languages = com.example.ai.translation.IndicLanguageCatalog.buildInitialLanguageEntities().take(4),
             settings = AppSettingsEntity(),
@@ -380,8 +369,7 @@ private fun TranslateScreenDarkPreview() {
             onDismissError = {},
             onNavigateToLanguages = {},
             onNavigateToTextMode = {},
-            onNavigateToHistory = {},
-            onNavigateToSettings = {}
+            onNavigateToHistory = {}
         )
     }
 }

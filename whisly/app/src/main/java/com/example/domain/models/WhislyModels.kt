@@ -7,8 +7,7 @@ enum class ModelTaskType(val label: String) {
 }
 
 enum class TtsCapabilityStatus(val label: String) {
-    VITS_RASA_VERIFIED("Voice Available"),
-    SYSTEM_FALLBACK_ONLY("Offline Voice Available"),
+    SYSTEM_FALLBACK_ONLY("Device voice, temporary"),
     UNAVAILABLE("Voice not available for this language")
 }
 
@@ -81,12 +80,12 @@ enum class PipelineErrorType(
         "Voice not available for this language."
     ),
     MODEL_MISSING(
-        "Download pack to speak",
+        "Speech isn't ready for this language yet",
         ""
     ),
     STT_MODEL_MISSING(
-        "Download the speech model for this language",
-        "Speech recognition needs a model package for this language. Import one, or type to translate."
+        "Speech recognition isn't ready for this language yet",
+        "You can still translate by typing."
     ),
     MIC_INIT_FAILED(
         "Microphone unavailable. Check your device.",
@@ -97,8 +96,8 @@ enum class PipelineErrorType(
         "Recognition took too long. Try a shorter phrase."
     ),
     OFFLINE_SPEECH_PACK_MISSING(
-        "Download the speech model for this language",
-        "Speech recognition needs a model package for this language. Import one, or type to translate."
+        "Speech recognition isn't ready for this language yet",
+        "You can still translate by typing."
     ),
     MODEL_CORRUPTED(
         "Language Pack Needs Repair",

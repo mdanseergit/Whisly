@@ -122,8 +122,6 @@ fun WhislyAppRoot(
     val isPlayingAudio by viewModel.isPlayingAudio.collectAsStateWithLifecycle()
     val audioDiagnostics by viewModel.audioDiagnostics.collectAsStateWithLifecycle()
     val downloadStates by viewModel.downloadStates.collectAsStateWithLifecycle()
-    val installedSpeechPacks by viewModel.installedSttPacks.collectAsStateWithLifecycle()
-    val speechImportState by viewModel.importState.collectAsStateWithLifecycle()
 
     // Bottom nav hidden on Splash, Onboarding, About, and Download Manager
     val showBottomBar = currentRoute !in setOf(
@@ -255,7 +253,6 @@ fun WhislyAppRoot(
                     },
                     onNavigateToTextMode = { navController.navigate(WhislyRoutes.TEXT_MODE) },
                     onNavigateToHistory = { navController.navigate(WhislyRoutes.HISTORY) },
-                    onNavigateToSettings = { navController.navigate(WhislyRoutes.SETTINGS) },
                     onToggleDarkTheme = viewModel::toggleDarkTheme,
                     onExitToHome = exitToHome
                 )
@@ -394,14 +391,6 @@ fun WhislyAppRoot(
                     onClearHistory = viewModel::clearAllHistory,
                     onOpenAboutWhisly = { navController.navigate(WhislyRoutes.ABOUT) },
                     onOpenExitReport = { navController.navigate(WhislyRoutes.EXIT_REPORT) },
-                    installedSpeechPacks = installedSpeechPacks,
-                    importState = speechImportState,
-                    speechModelMissingFor = com.example.ai.registry.CapabilityRegistry
-                        .getLanguage(uiState.sourceLangCode)?.name
-                        ?.takeUnless { viewModel.isSpeechModelInstalled(uiState.sourceLangCode) },
-                    onImportSpeechModel = viewModel::importSpeechModel,
-                    onDismissImportState = viewModel::dismissImportState,
-                    onRemoveSpeechModel = viewModel::removeSpeechModel,
                     onBack = exitToHome
                 )
             }

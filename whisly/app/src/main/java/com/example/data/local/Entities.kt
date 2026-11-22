@@ -17,7 +17,7 @@ data class LanguageEntity(
     val scriptName: String,
     val sttSupported: Boolean,
     val mtSupported: Boolean,
-    val ttsCapability: String, // VITS_RASA_VERIFIED, SYSTEM_FALLBACK_ONLY, UNAVAILABLE
+    val ttsCapability: String, // SYSTEM_FALLBACK_ONLY, UNAVAILABLE
     val sttPackId: String,
     val mtPackId: String,
     val ttsPackId: String?,

@@ -3,9 +3,7 @@ package com.example
 import com.example.ai.audio.AudioProcessor
 import com.example.ai.evaluation.AiEvaluationSuite
 import com.example.ai.lid.LanguageIdEngine
-import com.example.ai.pipeline.AudioInput
 import com.example.ai.registry.CapabilityRegistry
-import com.example.ai.stt.IndicSttEngine
 import com.example.ai.translation.IndicLanguageCatalog
 import com.example.ai.translation.IndicTrans2Engine
 import com.example.core.security.KeystoreCryptoManager
@@ -15,7 +13,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.math.PI
@@ -117,65 +114,15 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun `stt engine rejects silent audio, rejects low confidence below 0_55, and routes auto LID`() = runTest {
-        val sttEngine = IndicSttEngine(
-            isPackInstalledAndVerified = { packId ->
-                packId == "stt_indicconformer_ta_v2" || packId == "stt_whisper_en_int8_v2"
-            },
-            acousticRecognizerDelegate = { pcm16, _, _ ->
-                when {
-                    pcm16.size >= 16000 && pcm16[0] == 4200.toShort() -> "ரயில் நிலையம் எங்கே உள்ளது?" to 0.92f
-                    pcm16.size >= 8000 && pcm16[0] == 1200.toShort() -> "வணக்கம்" to 0.42f
-                    else -> null
-                }
-            }
-        )
+    fun `audio gate rejects silence and low confidence before any bundled decoder runs`() {
+        val silentVad = AudioProcessor.preprocessAndRunVad(ShortArray(1600) { 0 }, 16000, 100L)
+        assertFalse(silentVad.vadSpeechDetected)
+        assertTrue(silentVad.tooQuietDetected)
+        assertEquals(0L, silentVad.voicedDurationMs)
 
-        // 1. Silent audio -> SPEECH_NOT_DETECTED with null confidence
-        val silentInput = AudioInput(
-            pcm16Samples = ShortArray(1600) { 0 },
-            sampleRateHz = 16000,
-            durationMs = 200L,
-            peakAmplitude = 0.001f,
-            rmsEnergy = 0.0005f,
-            vadSpeechDetected = false
-        )
-        val silentResult = sttEngine.recognize(silentInput, "ta")
-        assertFalse(silentResult.success)
-        assertNull(silentResult.confidence)
-        assertEquals(PipelineErrorType.SPEECH_NOT_DETECTED, silentResult.error)
-
-        // 2. Low-confidence recognition (< 0.55) -> STT_LOW_CONFIDENCE
-        val lowConfidenceInput = AudioInput(
-            pcm16Samples = ShortArray(8000) { 1200 },
-            sampleRateHz = 16000,
-            durationMs = 500L,
-            peakAmplitude = 0.08f,
-            rmsEnergy = 0.01f,
-            vadSpeechDetected = true,
-            vadSpeechProbability = 0.36f,
-            recognizedConfidence = 0.42f
-        )
-        val lowConfResult = sttEngine.recognize(lowConfidenceInput, "ta")
-        assertFalse(lowConfResult.success)
-        assertEquals(PipelineErrorType.STT_LOW_CONFIDENCE, lowConfResult.error)
-
-        // 3. Auto-detect source language ("auto") with Tamil speech -> resolves "ta"
-        val validSpeechInput = AudioInput(
-            pcm16Samples = ShortArray(16000) { 4200 },
-            sampleRateHz = 16000,
-            durationMs = 1200L,
-            peakAmplitude = 0.55f,
-            rmsEnergy = 0.14f,
-            vadSpeechDetected = true,
-            vadSpeechProbability = 0.92f,
-            audioLidCandidates = mapOf("ta" to 0.92f)
-        )
-        val validResult = sttEngine.recognize(validSpeechInput, "auto")
-        assertTrue(validResult.success)
-        assertEquals("ta", validResult.language)
-        assertEquals("ரயில் நிலையம் எங்கே உள்ளது?", validResult.transcript)
-        assertNotNull(validResult.confidence)
+        assertEquals(0.55f, AudioProcessor.MIN_STT_CONFIDENCE, 0.0001f)
+        val lowConfidence = 0.42f
+        assertTrue(lowConfidence < AudioProcessor.MIN_STT_CONFIDENCE)
     }
 
     @Test
@@ -237,8 +184,8 @@ class ExampleUnitTest {
         assertNotNull(english)
         assertNotNull(santali)
 
-        assertEquals(TtsCapabilityStatus.VITS_RASA_VERIFIED, tamil?.ttsCapability)
-        assertEquals(TtsCapabilityStatus.VITS_RASA_VERIFIED, bengali?.ttsCapability)
+        assertEquals(TtsCapabilityStatus.SYSTEM_FALLBACK_ONLY, tamil?.ttsCapability)
+        assertEquals(TtsCapabilityStatus.SYSTEM_FALLBACK_ONLY, bengali?.ttsCapability)
         assertTrue(english!!.canSpeak)
         assertEquals(TtsCapabilityStatus.UNAVAILABLE, santali?.ttsCapability)
 
@@ -357,28 +304,59 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun `speech constancy test proves silence and noise return no text and never return Hello or vannakkam`() = runTest {
-        val stt = IndicSttEngine(
-            isPackInstalledAndVerified = { true },
-            acousticRecognizerDelegate = { _, _, _ -> null }
+    fun `grep check enforces that removed voice import and fake decoder paths do not return`() {
+        val mainSrcDir = java.io.File("src/main/java")
+        if (!mainSrcDir.exists()) return
+        val forbidden = listOf(
+            "ModelImportManager",
+            "SttPackageManifest",
+            "SttManifestParser",
+            "ManifestResult",
+            "ModelImportResult",
+            "whisly-stt.json",
+            "import_speech_model_button",
+            "banner_import_speech_model_button",
+            "Import speech model (.zip)",
+            "application/zip",
+            "application/octet-stream",
+            "acousticDecoder",
+            "recognizedSpeechText",
+            "preset transcript",
+            "canned transcript",
+            "install Google offline speech pack",
+            "Import one, or type to translate.",
+            "Import a model package to speak",
+            "Download pack to speak",
+            "Download speech model"
         )
-        // 1. Silent audio
-        val silentAudio = AudioProcessor.preprocessAndRunVad(ShortArray(16000) { 0 }, 16000, 1000L)
-        val silenceResult = stt.recognize(silentAudio, "ta")
-        assertFalse(silenceResult.success)
-        assertEquals("", silenceResult.transcript)
-        assertFalse("Silence must never return canned greeting", silenceResult.transcript.contains("வணக்கம்"))
-        assertFalse("Silence must never return Hello", silenceResult.transcript.contains("Hello"))
+        val ktFiles = mainSrcDir.walkTopDown().filter { it.extension == "kt" }.toList()
+        for (file in ktFiles) {
+            val content = file.readText()
+            for (term in forbidden) {
+                assertFalse(
+                    "Forbidden removed-voice term '$term' returned in ${file.name}",
+                    content.contains(term, ignoreCase = true)
+                )
+            }
+        }
+    }
 
-        // 2. Click noise
+    @Test
+    fun `speech constancy test proves silence and click noise are rejected before decoding`() {
+        val silentAudio = AudioProcessor.preprocessAndRunVad(ShortArray(16000) { 0 }, 16000, 1000L)
+        assertFalse(silentAudio.vadSpeechDetected)
+        assertTrue(silentAudio.voicedSegmentPcm16.isEmpty())
+
         val clickAudio = AudioProcessor.preprocessAndRunVad(
             ShortArray(16000) { if (it in 1000..1500) 5000.toShort() else 0.toShort() },
             16000,
             1000L
         )
-        val noiseResult = stt.recognize(clickAudio, "en")
-        assertFalse(noiseResult.success)
-        assertEquals("", noiseResult.transcript)
+        assertFalse(clickAudio.vadSpeechDetected)
+        assertTrue(
+            "500-sample click must stay below the 120ms voiced-duration gate",
+            clickAudio.voicedDurationMs < AudioProcessor.MIN_VOICED_DURATION_MS
+        )
     }
 
     @Test

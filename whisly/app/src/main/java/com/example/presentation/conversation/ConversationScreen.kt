@@ -459,8 +459,8 @@ private fun ConversationScreenLightPreview() {
                         isPersonA = true,
                         sourceLangCode = "ta",
                         targetLangCode = "bn",
-                        originalText = "வணக்கம், நீங்கள் எப்படி இருக்கிறீர்கள்?",
-                        translatedText = "নমস্কার, আপনি কেমন আছেন?",
+                        originalText = "Sample text",
+                        translatedText = "Sample text",
                         timestamp = 1730000000000L,
                         confidence = 0.95f,
                         ttsAvailable = true

@@ -131,11 +131,11 @@ object CapabilityRegistry {
             canIdentify = true,
             canSpeak = true,
             voiceLocale = "en-IN",
-            sttPackId = "stt_whisper_tiny_multilingual",
+            sttPackId = null,
             mtPackId = PACK_MT_INDIC_INDIC,
-            ttsPackId = "tts_inflect_en_nano",
-            sttSizeBytes = 116_204_861L,
-            ttsSizeBytes = 22_429_639L,
+            ttsPackId = null,
+            sttSizeBytes = 0L,
+            ttsSizeBytes = 0L,
             version = "2.1.0"
         ),
         LanguageCapabilityEntry(
@@ -150,10 +150,10 @@ object CapabilityRegistry {
             canIdentify = true,
             canSpeak = true,
             voiceLocale = "ta-IN",
-            sttPackId = "stt_whisper_tiny_multilingual",
+            sttPackId = null,
             mtPackId = PACK_MT_INDIC_INDIC,
-            ttsPackId = "tts_vits_rasa_ta_v1",
-            sttSizeBytes = 116_204_861L,
+            ttsPackId = null,
+            sttSizeBytes = 0L,
             ttsSizeBytes = 0L,
             version = "2.1.0"
         ),
@@ -169,11 +169,11 @@ object CapabilityRegistry {
             canIdentify = true,
             canSpeak = true,
             voiceLocale = "bn-IN",
-            sttPackId = "stt_whisper_tiny_multilingual",
+            sttPackId = null,
             mtPackId = PACK_MT_INDIC_INDIC,
-            ttsPackId = "tts_coqui_bn_female",
-            sttSizeBytes = 116_204_861L,
-            ttsSizeBytes = 108_053_596L,
+            ttsPackId = null,
+            sttSizeBytes = 0L,
+            ttsSizeBytes = 0L,
             version = "2.1.0"
         ),
         LanguageCapabilityEntry(
@@ -188,10 +188,10 @@ object CapabilityRegistry {
             canIdentify = true,
             canSpeak = true,
             voiceLocale = "hi-IN",
-            sttPackId = "stt_whisper_tiny_multilingual",
+            sttPackId = null,
             mtPackId = PACK_MT_INDIC_INDIC,
-            ttsPackId = "tts_vits_rasa_hi_v1",
-            sttSizeBytes = 116_204_861L,
+            ttsPackId = null,
+            sttSizeBytes = 0L,
             ttsSizeBytes = 0L,
             version = "2.1.0"
         ),
@@ -207,10 +207,10 @@ object CapabilityRegistry {
             canIdentify = true,
             canSpeak = true,
             voiceLocale = "te-IN",
-            sttPackId = "stt_whisper_tiny_multilingual",
+            sttPackId = null,
             mtPackId = PACK_MT_INDIC_INDIC,
-            ttsPackId = "tts_vits_rasa_te_v1",
-            sttSizeBytes = 116_204_861L,
+            ttsPackId = null,
+            sttSizeBytes = 0L,
             ttsSizeBytes = 0L,
             version = "2.1.0"
         ),
@@ -226,10 +226,10 @@ object CapabilityRegistry {
             canIdentify = true,
             canSpeak = true,
             voiceLocale = "kn-IN",
-            sttPackId = "stt_whisper_tiny_multilingual",
+            sttPackId = null,
             mtPackId = PACK_MT_INDIC_INDIC,
-            ttsPackId = "tts_vits_rasa_kn_v1",
-            sttSizeBytes = 116_204_861L,
+            ttsPackId = null,
+            sttSizeBytes = 0L,
             ttsSizeBytes = 0L,
             version = "2.1.0"
         ),
@@ -245,10 +245,10 @@ object CapabilityRegistry {
             canIdentify = true,
             canSpeak = true,
             voiceLocale = "ml-IN",
-            sttPackId = "stt_whisper_tiny_multilingual",
+            sttPackId = null,
             mtPackId = PACK_MT_INDIC_INDIC,
-            ttsPackId = "tts_vits_rasa_ml_v1",
-            sttSizeBytes = 116_204_861L,
+            ttsPackId = null,
+            sttSizeBytes = 0L,
             ttsSizeBytes = 0L,
             version = "2.1.0"
         ),
@@ -264,10 +264,10 @@ object CapabilityRegistry {
             canIdentify = true,
             canSpeak = true,
             voiceLocale = "mr-IN",
-            sttPackId = "stt_whisper_tiny_multilingual",
+            sttPackId = null,
             mtPackId = PACK_MT_INDIC_INDIC,
-            ttsPackId = "tts_vits_rasa_mr_v1",
-            sttSizeBytes = 116_204_861L,
+            ttsPackId = null,
+            sttSizeBytes = 0L,
             ttsSizeBytes = 0L,
             version = "2.0.4"
         ),
@@ -283,10 +283,10 @@ object CapabilityRegistry {
             canIdentify = true,
             canSpeak = true,
             voiceLocale = "gu-IN",
-            sttPackId = "stt_whisper_tiny_multilingual",
+            sttPackId = null,
             mtPackId = PACK_MT_INDIC_INDIC,
-            ttsPackId = "tts_vits_rasa_gu_v1",
-            sttSizeBytes = 116_204_861L,
+            ttsPackId = null,
+            sttSizeBytes = 0L,
             ttsSizeBytes = 0L,
             version = "2.0.4"
         ),
@@ -302,10 +302,10 @@ object CapabilityRegistry {
             canIdentify = true,
             canSpeak = true,
             voiceLocale = "or-IN",
-            sttPackId = "stt_whisper_tiny_multilingual",
+            sttPackId = null,
             mtPackId = PACK_MT_INDIC_INDIC,
-            ttsPackId = "tts_vits_rasa_or_v1",
-            sttSizeBytes = 116_204_861L,
+            ttsPackId = null,
+            sttSizeBytes = 0L,
             ttsSizeBytes = 0L,
             version = "2.0.2"
         ),
@@ -321,10 +321,10 @@ object CapabilityRegistry {
             canIdentify = true,
             canSpeak = true,
             voiceLocale = "as-IN",
-            sttPackId = "stt_whisper_tiny_multilingual",
+            sttPackId = null,
             mtPackId = PACK_MT_INDIC_INDIC,
-            ttsPackId = "tts_vits_rasa_as_v1",
-            sttSizeBytes = 116_204_861L,
+            ttsPackId = null,
+            sttSizeBytes = 0L,
             ttsSizeBytes = 0L,
             version = "2.0.2"
         ),
@@ -340,10 +340,10 @@ object CapabilityRegistry {
             canIdentify = true,
             canSpeak = true,
             voiceLocale = "pa-IN",
-            sttPackId = "stt_whisper_tiny_multilingual",
+            sttPackId = null,
             mtPackId = PACK_MT_INDIC_INDIC,
-            ttsPackId = "tts_vits_rasa_pa_v1",
-            sttSizeBytes = 116_204_861L,
+            ttsPackId = null,
+            sttSizeBytes = 0L,
             ttsSizeBytes = 0L,
             version = "2.0.2"
         ),
@@ -360,10 +360,10 @@ object CapabilityRegistry {
             canIdentify = true,
             canSpeak = false,
             voiceLocale = "sat-IN",
-            sttPackId = "stt_whisper_tiny_multilingual",
+            sttPackId = null,
             mtPackId = PACK_MT_INDIC_INDIC,
             ttsPackId = null,
-            sttSizeBytes = 116_204_861L,
+            sttSizeBytes = 0L,
             ttsSizeBytes = 0L,
             version = "1.4.0"
         ),
@@ -749,8 +749,8 @@ object CapabilityRegistry {
             ttsModelId = entry.ttsPackId,
             sttAvailable = entry.canListen,
             mtAvailable = true,
-            ttsCapability = if (entry.canSpeak && entry.ttsPackId != null) {
-                TtsCapabilityStatus.VITS_RASA_VERIFIED
+            ttsCapability = if (entry.canSpeak) {
+                TtsCapabilityStatus.SYSTEM_FALLBACK_ONLY
             } else {
                 TtsCapabilityStatus.UNAVAILABLE
             }
@@ -775,8 +775,8 @@ object CapabilityRegistry {
                 scriptName = entry.script,
                 sttSupported = entry.canListen,
                 mtSupported = true,
-                ttsCapability = if (entry.canSpeak && entry.ttsPackId != null) {
-                    TtsCapabilityStatus.VITS_RASA_VERIFIED.name
+                ttsCapability = if (entry.canSpeak) {
+                    TtsCapabilityStatus.SYSTEM_FALLBACK_ONLY.name
                 } else {
                     TtsCapabilityStatus.UNAVAILABLE.name
                 },
@@ -814,96 +814,28 @@ object CapabilityRegistry {
     }
 
     fun buildInitialModelPacks(): List<ModelPackEntity> {
-        val packs = mutableListOf<ModelPackEntity>()
-
-        // 1. Multilingual STT Model Pack (OpenAI Whisper Tiny via sherpa-onnx)
-        packs.add(
-            ModelPackEntity(
-                packId = "stt_whisper_tiny_multilingual",
-                languageCode = "multilingual",
-                taskType = "STT",
-                modelArchitecture = "Whisper Tiny Multilingual Int8 (ONNX)",
-                version = "1.0.0",
-                downloadUrl = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-tiny.tar.bz2",
-                sha256Checksum = "c46116994e539aa165266d96b325252728429c12535eb9d8b6a2b10f129e66b1",
-                fileSizeBytes = 116204861L,
-                requiredRuntime = "sherpa-onnx >= 1.10 / ONNX Runtime Mobile",
-                minMemoryMb = 512,
-                license = "MIT",
-                attribution = "OpenAI / k2-fsa sherpa-onnx (https://github.com/k2-fsa/sherpa-onnx)",
-                dependenciesCsv = "tiny-tokens.txt,tiny-encoder.int8.onnx,tiny-decoder.int8.onnx",
-                compatibilityInfo = "ARM64-v8a / x86_64 quantized int8",
-                manifestSignature = "SIG_VERIFIED_WHISPER_TINY",
-                isSharedResource = true
-            )
-        )
-
-        // 2. English TTS Model Pack (Inflect Nano v2)
-        packs.add(
-            ModelPackEntity(
-                packId = "tts_inflect_en_nano",
-                languageCode = "en",
-                taskType = "TTS",
-                modelArchitecture = "VITS Inflect English Nano v2",
-                version = "2.0.0",
-                downloadUrl = "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-inflect-en-nano-v2.tar.bz2",
-                sha256Checksum = "9a6b1188b5f3be8813e0552056328495b4e88ffd1ef18ff837272bde7b3bc136",
-                fileSizeBytes = 22429639L,
-                requiredRuntime = "sherpa-onnx >= 1.10",
-                minMemoryMb = 256,
-                license = "Apache-2.0",
-                attribution = "k2-fsa sherpa-onnx (https://github.com/k2-fsa/sherpa-onnx)",
-                dependenciesCsv = "tokens.txt,model.onnx",
-                compatibilityInfo = "22.05kHz native vocoder",
-                manifestSignature = "SIG_VERIFIED_VITS_EN",
-                isSharedResource = false
-            )
-        )
-
-        // 3. Bengali TTS Model Pack (Coqui Bengali Female)
-        packs.add(
-            ModelPackEntity(
-                packId = "tts_coqui_bn_female",
-                languageCode = "bn",
-                taskType = "TTS",
-                modelArchitecture = "VITS Coqui Bengali Female",
-                version = "1.0.0",
-                downloadUrl = "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-coqui-bn-custom_female.tar.bz2",
-                sha256Checksum = "a03292d7da03650e892bb1989b40dc2c62574c0d6c34c8bef185fbb3151417a1",
-                fileSizeBytes = 108053596L,
-                requiredRuntime = "sherpa-onnx >= 1.10",
-                minMemoryMb = 384,
-                license = "MIT",
-                attribution = "Coqui / k2-fsa sherpa-onnx (https://github.com/k2-fsa/sherpa-onnx)",
-                dependenciesCsv = "tokens.txt,model.onnx",
-                compatibilityInfo = "22.05kHz native vocoder",
-                manifestSignature = "SIG_VERIFIED_VITS_BN",
-                isSharedResource = false
-            )
-        )
-
-        // 4. Shared MT Model Pack (IndicTrans2 200M Distilled Int8)
-        packs.add(
+        // Bundled Whisper Tiny STT and temporary system TTS are shipped in the app and have no
+        // download rows. This metadata row only describes the ML Kit typed-translation download
+        // path; it contains no custom model URL and cannot install speech weights.
+        return listOf(
             ModelPackEntity(
                 packId = PACK_MT_INDIC_INDIC,
                 languageCode = "indic_shared",
                 taskType = "MT",
-                modelArchitecture = "IndicTrans2 200M Distilled Int8 (ONNX)",
-                version = "2.1.0",
-                downloadUrl = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-tiny.tar.bz2",
-                sha256Checksum = "c46116994e539aa165266d96b325252728429c12535eb9d8b6a2b10f129e66b1",
+                modelArchitecture = "ML Kit Translate on-device model",
+                version = "17.0.3",
+                downloadUrl = "",
+                sha256Checksum = "",
                 fileSizeBytes = SIZE_MT_INDIC_INDIC_BYTES,
-                requiredRuntime = "sherpa-onnx >= 1.10 / ONNX Runtime Mobile",
-                minMemoryMb = 512,
-                license = "MIT",
-                attribution = "AI4Bharat / sherpa-onnx",
-                dependenciesCsv = "tiny-tokens.txt,tiny-encoder.int8.onnx,tiny-decoder.int8.onnx",
-                compatibilityInfo = "ARM64-v8a / x86_64 quantized int8",
-                manifestSignature = "SIG_VERIFIED_INDICTRANS2",
+                requiredRuntime = "Google ML Kit Translate 17.0.3",
+                minMemoryMb = 256,
+                license = "Google ML Kit Terms",
+                attribution = "Google ML Kit Translate (https://developers.google.com/ml-kit/terms)",
+                dependenciesCsv = "",
+                compatibilityInfo = "On-device ML Kit language download",
+                manifestSignature = "",
                 isSharedResource = true
             )
         )
-
-        return packs
     }
 }

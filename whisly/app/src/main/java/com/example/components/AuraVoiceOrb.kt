@@ -493,31 +493,6 @@ fun AuraVoiceOrb(
     }
 }
 
-// ==================== Backward Compatibility & Migration Wrappers ====================
-
-/**
- * Compatibility wrapper routing [PortalVoiceOrb] directly to the new [AuraVoiceOrb].
- * Preserves existing signatures in [MicrophoneButton.kt] and [HomeScreen.kt].
- */
-@Composable
-fun PortalVoiceOrb(
-    state: AuraOrbState,
-    micLevel: Float,
-    onTap: () -> Unit,
-    modifier: Modifier = Modifier,
-    size: Dp = 168.dp,
-    lowEndMode: Boolean = false
-) {
-    AuraVoiceOrb(
-        state = state,
-        micLevel = micLevel,
-        onTap = onTap,
-        modifier = modifier,
-        size = size,
-        lowEndMode = lowEndMode
-    )
-}
-
 // ==================== Compose Previews ====================
 
 @Preview(name = "Aura Voice Orb - Idle Light", showBackground = true, backgroundColor = 0xFFFFF9F5)

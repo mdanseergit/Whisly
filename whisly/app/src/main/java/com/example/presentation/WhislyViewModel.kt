@@ -12,10 +12,9 @@ import com.example.ai.modelmanager.WhislyModelManager
 import com.example.ai.pipeline.AudioDiagnostics
 import com.example.ai.pipeline.SpeechToSpeechPipeline
 import com.example.ai.registry.CapabilityRegistry
-import com.example.ai.stt.IndicSttEngine
 import com.example.ai.translation.IndicLanguageCatalog
 import com.example.ai.translation.IndicTrans2Engine
-import com.example.ai.tts.VitsRasaTtsEngine
+import com.example.ai.tts.SystemTextToSpeechEngine
 import com.example.components.observeNetworkConnectivityFlow
 import com.example.data.local.AppSettingsEntity
 import com.example.data.local.InstalledModelEntity
@@ -54,7 +53,7 @@ data class TranslateUiState(
     val lastMtLatencyMs: Long = 0L,
     val lastTtsLatencyMs: Long = 0L,
     val lastSynthesizedPcm: ShortArray = ShortArray(0),
-    val lastSynthesizedSampleRateHz: Int = VitsRasaTtsEngine.VITS_NATIVE_SAMPLE_RATE_HZ,
+    val lastSynthesizedSampleRateHz: Int = 0,
     val activeError: PipelineErrorType? = null,
     val statusBannerMessage: String? = null,
     val textModeInput: String = "",
@@ -70,14 +69,6 @@ data class TranslateUiState(
     val lowEndPerformanceMode: Boolean = false
 )
 
-/** Honest state for user-initiated, local model-package import. */
-sealed interface ImportUiState {
-    data object Idle : ImportUiState
-    data class Importing(val bytesHashed: Long, val bytesTotal: Long) : ImportUiState
-    data class Installed(val packId: String, val languages: List<String>) : ImportUiState
-    data class Failed(val reason: String) : ImportUiState
-}
-
 class WhislyViewModel(application: Application) : AndroidViewModel(application) {
 
     private val database = WhislyDatabase.getInstance(application)
@@ -87,17 +78,8 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
 
     val audioProcessor = AudioProcessor(application)
 
-    // Real independent STT runtime (sherpa-onnx). Usable only when a verified model package
-    // is installed for the requested language; otherwise decoding fails closed with a model error.
+    // Real independent STT runtime (sherpa-onnx). Decoding fails closed when the bundled model is unavailable.
     val sttEngine = com.example.ai.stt.SherpaOnnxSttEngine(application)
-    val modelImporter = com.example.ai.stt.ModelImportManager(application)
-
-    // Declared before init{} so the initial refresh can write to them.
-    private val _installedSttPacks = MutableStateFlow<List<String>>(emptyList())
-    val installedSttPacks: StateFlow<List<String>> = _installedSttPacks.asStateFlow()
-
-    private val _importState = MutableStateFlow<ImportUiState>(ImportUiState.Idle)
-    val importState: StateFlow<ImportUiState> = _importState.asStateFlow()
 
     /** Single audio-session owner for the whole app. */
     val speechRecognizer = com.example.ai.stt.WhislyOfflineSpeechRecognizer(
@@ -108,21 +90,8 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
         }
     )
 
-    // Lazy AI Engine initialization so cold start never waits for STT/MT/TTS
+    // Lazy AI Engine initialization so cold start never waits for MT/TTS
     private var pipelineInitialized = false
-    private val indicSttEngine by lazy {
-        IndicSttEngine(
-            isPackInstalledAndVerified = { packId ->
-                modelManager.isPackInstalledAndVerified(packId)
-            },
-            acousticRecognizerDelegate = { pcm16, sampleRate, lang ->
-                when (val decoded = sttEngine.decode(pcm16, sampleRate, lang)) {
-                    is com.example.ai.stt.SttDecode.Text -> decoded.text to (decoded.confidence ?: 1.0f)
-                    is com.example.ai.stt.SttDecode.Failure -> null
-                }
-            }
-        )
-    }
     private val mtEngine by lazy {
         IndicTrans2Engine(
             isPackInstalledAndVerified = { packId ->
@@ -161,17 +130,11 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
     private var ttsEngineInitialized = false
     private val ttsEngine by lazy {
         ttsEngineInitialized = true
-        VitsRasaTtsEngine(
-            context = application,
-            audioProcessor = audioProcessor,
-            isPackInstalledAndVerified = { packId ->
-                modelManager.isPackInstalledAndVerified(packId)
-            }
-        )
+        SystemTextToSpeechEngine(context = application)
     }
     val pipeline by lazy {
         pipelineInitialized = true
-        SpeechToSpeechPipeline(audioProcessor, indicSttEngine, mtEngine, ttsEngine)
+        SpeechToSpeechPipeline(mtEngine, ttsEngine)
     }
 
     val languagesState: StateFlow<List<LanguageEntity>> = repository.languagesFlow
@@ -238,7 +201,6 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), com.example.domain.models.UnifiedTranslationState.Ready)
 
     init {
-        refreshInstalledSttPacks()
         viewModelScope.launch {
             runCatching {
                 repository.ensureSeeded()
@@ -451,9 +413,6 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
         return when (error) {
             PipelineErrorType.UNSUPPORTED_SOURCE_LANGUAGE ->
                 "Speech isn't available for $name yet. Type to translate instead."
-            PipelineErrorType.STT_MODEL_MISSING,
-            PipelineErrorType.OFFLINE_SPEECH_PACK_MISSING ->
-                "Download $name speech model to speak, or type to translate."
             else -> null
         }
     }
@@ -652,7 +611,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                         lastMtLatencyMs = mtRes.latencyMs,
                         lastTtsLatencyMs = ttsRes?.latencyMs ?: 0L,
                         lastSynthesizedPcm = ttsRes?.pcm16Audio ?: ShortArray(0),
-                        lastSynthesizedSampleRateHz = ttsRes?.sampleRateHz ?: VitsRasaTtsEngine.VITS_NATIVE_SAMPLE_RATE_HZ,
+                        lastSynthesizedSampleRateHz = ttsRes?.sampleRateHz ?: 0,
                         activeError = outcome.error
                     )
                 }
@@ -983,48 +942,6 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
 
     fun clearTextModeInput() {
         _uiState.update { it.copy(textModeInput = "", textModeOutput = "", textModeLatencyMs = 0L) }
-    }
-
-    // ---------------- Local STT model packages (zero-cost, no network) ----------------
-
-    fun refreshInstalledSttPacks() {
-        _installedSttPacks.value = runCatching { sttEngine.installedModels().map { it.packId } }
-            .getOrDefault(emptyList())
-    }
-
-    fun isSpeechModelInstalled(languageCode: String): Boolean =
-        sttEngine.hasModelFor(languageCode)
-
-    fun importSpeechModel(uri: android.net.Uri) {
-        if (_importState.value is ImportUiState.Importing) return
-        viewModelScope.launch {
-            _importState.value = ImportUiState.Importing(0L, 0L)
-            val result = modelImporter.importZip(uri) { hashed, total ->
-                _importState.value = ImportUiState.Importing(hashed, total)
-            }
-            _importState.value = when (result) {
-                is com.example.ai.stt.ModelImportResult.Installed -> {
-                    sttEngine.unload()
-                    refreshInstalledSttPacks()
-                    ImportUiState.Installed(result.packId, result.languages)
-                }
-                is com.example.ai.stt.ModelImportResult.Rejected ->
-                    ImportUiState.Failed(result.reason)
-            }
-        }
-    }
-
-    fun dismissImportState() {
-        _importState.value = ImportUiState.Idle
-    }
-
-    fun removeSpeechModel(packId: String) {
-        viewModelScope.launch {
-            modelImporter.removePack(packId)
-            sttEngine.unload()
-            refreshInstalledSttPacks()
-            _uiState.update { it.copy(statusBannerMessage = "Removed speech model") }
-        }
     }
 
     fun installLanguagePack(langCode: String) {

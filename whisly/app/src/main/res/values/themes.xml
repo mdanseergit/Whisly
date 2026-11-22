@@ -13,21 +13,7 @@
         <item name="android:windowSplashScreenAnimationDuration" tools:targetApi="31">250</item>
     </style>
 
-    <!-- Official SplashScreen Base Theme compliant with AndroidX core-splashscreen specification -->
-    <style name="Theme.SplashScreen" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="postSplashScreenTheme">@style/Theme.MyApplication</item>
-        <item name="windowSplashScreenBackground">@color/whisly_splash_bg</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/whisly_splash_logo</item>
-        <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
-        <item name="windowSplashScreenAnimationDuration">250</item>
-        <item name="android:windowBackground">@drawable/bg_splash_whisly</item>
-        <item name="android:windowSplashScreenBackground" tools:targetApi="31">@color/whisly_splash_bg</item>
-        <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="31">@drawable/whisly_splash_logo</item>
-        <item name="android:windowSplashScreenIconBackgroundColor" tools:targetApi="31">@android:color/transparent</item>
-        <item name="android:windowSplashScreenAnimationDuration" tools:targetApi="31">250</item>
-    </style>
-
-    <!-- Dedicated Cold-Start Splash Theme (#F5ECE4 Light / #1A1412 Dark + Centered Whisly Logo) -->
+    <!-- Uses the official Theme.SplashScreen from androidx.core:core-splashscreen:1.2.0. -->
     <style name="Theme.Whisly.Starting" parent="Theme.SplashScreen">
         <item name="postSplashScreenTheme">@style/Theme.MyApplication</item>
         <item name="windowSplashScreenBackground">@color/whisly_splash_bg</item>

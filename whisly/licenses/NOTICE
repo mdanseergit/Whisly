@@ -1,49 +1,61 @@
-# Whisly Third-Party Software, Model & Asset Notices (`licenses/NOTICE`)
+﻿# Whisly Third-Party Software, Model and Asset Notices
 
-## 1. License Gate Policy (Enforced)
-Every library, model checkpoint, tokenizer, and voice asset evaluated for Whisly is audited under a strict commercial-distribution license gate:
-- **Permitted**: `MIT`, `Apache-2.0`, `BSD-3-Clause`, `CC0-1.0`, `SIL OFL 1.1`.
-- **Blocked from APK Distribution**: `GPL-2.0`, `GPL-3.0`, `LGPL` (statically linked), `CC-BY-NC-*` (Non-Commercial), `CC-BY-SA-*` (Share-Alike copyleft on model weights).
+> GENERATED FILE. Do not edit by hand. Source: `MODELS.md`. Regenerate with `powershell -ExecutionPolicy Bypass -File tools\generate_notice.ps1`.
 
----
+## 1. License gate
 
-## 2. Flagged / Rejected Candidates (Excluded from Shipping)
+Permitted without additional approval: MIT, Apache-2.0, BSD-3-Clause, CC0-1.0, SIL OFL-1.1, Public Domain, and the ML Kit Terms of Service as declared by Google for the pinned ML Kit artifact.
 
-| Component | Upstream Source | License | Gate Decision & Reason | Approved Alternative Used |
-| :--- | :--- | :--- | :--- | :--- |
-| **Piper TTS Engine (`piper1-gpl` / `espeak-ng`)** | `https://github.com/OHF-Voice/piper1-gpl` / `https://github.com/espeak-ng/espeak-ng` | **GPL-3.0** | **BLOCKED (Copyleft)**: Linking GPL-3.0 `piper1-gpl` or `espeak-ng` C++ phonemizer inside the Android APK imposes GPL-3.0 copyleft obligations on the application binary. | **AI4Bharat Indic-TTS / VITS-Rasa** (`MIT`), **Kokoro-82M** (`Apache-2.0`), and **Android System Offline TTS** (`Apache-2.0`). |
-| **fastText `lid.176.ftz`** | `https://fasttext.cc/docs/en/language-identification.html` | **CC-BY-SA 3.0** | **BLOCKED (Share-Alike)**: Trained on Wikipedia/Tatoeba/SETimes with CC-BY-SA 3.0 share-alike terms. | **Unicode Script Block + Character N-Gram LID** (`Apache-2.0`) and **GlotLID** (`cisnlp/GlotLID`, `Apache-2.0`). |
-| **MADLAD-400 (3B / 7B / 10B)** | `https://huggingface.co/google/madlad400-3b-mt` | `Apache-2.0` | **EXCLUDED FROM MOBILE DEFAULT (Size Budget)**: Exceeds mobile RAM (< 1 GB) and pack download budgets (> 1.5 GB even at Int4). | **AI4Bharat IndicTrans2 Distilled (200M / 320M)** (`MIT`) and **M2M100 418M** (`MIT`). |
+Blocked from APK distribution without explicit user approval: GPL-2.0, GPL-3.0, LGPL, CC-BY-NC variants, CC-BY-SA variants, gated or terms-acceptance weights, and any model whose license is `CONFLICTING_EVIDENCE` or `UNVERIFIED`.
 
----
+`EPL-1.0` appears only in test-only JUnit 4 and is not bundled into the shipped app artifact.
 
-## 3. Approved Models & Runtimes (On-Demand Downloadable Packs)
+Generated from `MODELS.md` on 2026-11-22 from 42 canonical inventory rows.
 
-| Stage | Model / Asset | Official Source URL | License | Commercial Use |
-| :--- | :--- | :--- | :--- | :--- |
-| **VAD** | Silero VAD v5 (`silero_vad.onnx`) | `https://github.com/snakers4/silero-vad` | **MIT License** | Permitted |
-| **LID** | GlotLID v3 (`cisnlp/GlotLID`) | `https://huggingface.co/cis-lmu/glotlid` | **Apache-2.0** | Permitted |
-| **STT (Indic)** | AI4Bharat IndicConformer (CTC/RNNT) | `https://huggingface.co/ai4bharat/indic-conformer-600m-multilingual` | **MIT License** | Permitted (Note: HuggingFace repository is gated; requires accepting MIT terms on HF to download raw weights) |
-| **STT (Global / English)** | OpenAI Whisper Tiny / Base (`whisper-tiny`, `whisper-base`) | `https://huggingface.co/openai/whisper-base` | **MIT License** | Permitted |
-| **MT (English ↔ Indic)** | AI4Bharat IndicTrans2 Distilled 200M (`en-indic`, `indic-en`) | `https://huggingface.co/ai4bharat/indictrans2-en-indic-dist-200M` / `https://huggingface.co/ai4bharat/indictrans2-indic-en-dist-200M` | **MIT License** | Permitted |
-| **MT (Indic ↔ Indic)** | AI4Bharat IndicTrans2 Indic-Indic Distilled 320M | `https://huggingface.co/ai4bharat/indictrans2-indic-indic-dist-320M` | **MIT License** | Permitted |
-| **MT (Global Fallback)** | Meta M2M100 418M | `https://huggingface.co/facebook/m2m100_418M` | **MIT License** | Permitted |
-| **TTS (Indic)** | AI4Bharat Indic-TTS / VITS-Rasa | `https://github.com/AI4Bharat/Indic-TTS` | **MIT License** | Permitted |
-| **TTS (English)** | Kokoro-82M (`hexgrad/Kokoro-82M`) | `https://huggingface.co/hexgrad/Kokoro-82M` | **Apache-2.0** | Permitted |
-| **TTS (System Fallback)** | Android `android.speech.tts.TextToSpeech` | `https://developer.android.com/reference/android/speech/tts/TextToSpeech` | **Apache-2.0** | Permitted |
+## 2. Generated inventory
 
----
+| ID | Kind | Name | Version / revision | Source URL | License / terms | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| stt-whisper-tiny-int8 | model | OpenAI Whisper Tiny multilingual INT8 ONNX encoder, decoder and tokens | pinned tarball SHA-256 C46116994E539AA165266D96B325252728429C12535EB9D8B6A2B10F129E66B1 | https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-tiny.tar.bz2 | MIT | PLANNED_BUNDLE_STEP2 | Public non-gated release. Not tiny.en. Combined pinned INT8 files measure 103,609,903 bytes. Not yet present in APK or AAB. |
+| runtime-sherpa-onnx | engine | sherpa-onnx Android AAR runtime | 1.13.5 | https://jitpack.io/com/github/k2-fsa/sherpa-onnx/sherpa-onnx/1.13.5/sherpa-onnx-1.13.5.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Fetched JitPack POM declares Apache-2.0. Source is https://github.com/k2-fsa/sherpa-onnx.git. JitPack is a supply-chain risk and is pinned exactly. |
+| runtime-onnxruntime | engine | ONNX Runtime native library packaged with the AAR | exact version UNVERIFIED in this pass | https://github.com/microsoft/onnxruntime/blob/main/LICENSE | MIT | TRANSITIVE_NATIVE | libonnxruntime.so appears in Android build output. License verified from official repository. Exact embedded version not claimed. |
+| mt-mlkit-translate | model | Google ML Kit on-device text translation | 17.0.3 | https://dl.google.com/dl/android/maven2/com/google/mlkit/translate/17.0.3/translate-17.0.3.pom | ML Kit Terms of Service | ACTIVE_TYPED_TRANSLATION | On-device inference per Google terms. May contact Google for bug fixes, model updates, accelerator compatibility and metrics. Not Apache-2.0. |
+| tts-android-system | engine | Android platform TextToSpeech voices via SystemTextToSpeechEngine.kt | device-provided | https://developer.android.com/reference/android/speech/tts/TextToSpeech | Device voice licenses UNVERIFIED. AOSP platform code Apache-2.0 | TEMPORARY_DEVICE_ONLY | Active temporary device voice. Not bundled; no Whisly weights. Per-device voice availability and voice licenses UNMEASURED. |
+| lid-unicode-ngram | engine | Whisly Unicode script and character n-gram fallback LID | project source | https://github.com/k2-fsa/sherpa-onnx | Whisly project code, no third-party model license | FALLBACK_ONLY | Labeled fallback only. No fastText dependency. |
+| androidx-core-ktx | library | AndroidX Core KTX | 1.18.0 | https://dl.google.com/dl/android/maven2/androidx/core/core-ktx/1.18.0/core-ktx-1.18.0.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Declared through version catalog. |
+| androidx-core-splashscreen | library | AndroidX Core SplashScreen compat | 1.2.0 | https://dl.google.com/dl/android/maven2/androidx/core/core-splashscreen/1.2.0/core-splashscreen-1.2.0.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Official dependency replaces deleted local shim. |
+| androidx-datastore-preferences | library | AndroidX DataStore Preferences | 1.1.7 | https://dl.google.com/dl/android/maven2/androidx/datastore/datastore-preferences/1.1.7/datastore-preferences-1.1.7.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Declared through version catalog. |
+| androidx-activity-compose | library | AndroidX Activity Compose | 1.10.1 | https://dl.google.com/dl/android/maven2/androidx/activity/activity-compose/1.10.1/activity-compose-1.10.1.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Declared through version catalog. |
+| androidx-compose | library | Jetpack Compose BOM, UI, UI graphics, Material3, icons, tooling and test artifacts | BOM 2024.09.00 | https://developer.android.com/jetpack/compose/bom/bom-mapping | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Includes ui, ui-graphics, ui-tooling-preview, material3, material-icons-core, material-icons-extended, plus test and debug tooling artifacts. |
+| androidx-lifecycle | library | AndroidX Lifecycle runtime KTX, runtime Compose and ViewModel Compose | 2.8.7 | https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-runtime-ktx/2.8.7/lifecycle-runtime-ktx-2.8.7.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Three artifacts declared through version catalog. |
+| androidx-navigation-compose | library | AndroidX Navigation Compose | 2.8.9 | https://dl.google.com/dl/android/maven2/androidx/navigation/navigation-compose/2.8.9/navigation-compose-2.8.9.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Declared through version catalog. |
+| androidx-room | library | AndroidX Room runtime, KTX and compiler | 2.7.0 | https://dl.google.com/dl/android/maven2/androidx/room/room-runtime/2.7.0/room-runtime-2.7.0.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Compiler is KSP-only. Migrations 1 to 2, 2 to 3 and 3 to 4 are retained. |
+| kotlin | library | Kotlin standard library and Compose compiler plugin | 2.2.10 | https://github.com/JetBrains/kotlin/blob/master/license/LICENSE.txt | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Kotlin JVM toolchain 17. |
+| kotlinx-coroutines | library | Kotlinx Coroutines Android, core and test | 1.10.2 | https://github.com/Kotlin/kotlinx.coroutines/blob/master/LICENSE | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Test artifact is test-only. |
+| okhttp | library | Square OkHttp | 4.12.0 | https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp/4.12.0/okhttp-4.12.0.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | License block verified from Maven Central POM. |
+| retrofit | library | Square Retrofit and Converter Moshi | 2.12.0 | https://repo1.maven.org/maven2/com/squareup/retrofit2/retrofit/2.12.0/retrofit-2.12.0.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Declaration-only backend API does not create a call site. |
+| moshi | library | Square Moshi Kotlin and codegen | 1.15.2 | https://repo1.maven.org/maven2/com/squareup/moshi/moshi-kotlin/1.15.2/moshi-kotlin-1.15.2.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | License block verified from Maven Central POM. |
+| junit4 | library | JUnit 4 | 4.13.2 | https://github.com/junit-team/junit4/blob/main/LICENSE-junit.txt | EPL-1.0 | TEST_ONLY | License verified from official repository. |
+| androidx-test | library | AndroidX Test core, JUnit ext, runner and Espresso core | core 1.6.1, JUnit 1.3.0, runner 1.6.2, Espresso 3.7.0 | https://developer.android.com/jetpack/androidx/releases/test | Apache-2.0 | TEST_ONLY | Unit and instrumentation test dependencies. |
+| robolectric | library | Robolectric | 4.16.1 | https://github.com/robolectric/robolectric/blob/master/LICENSE | MIT with some Apache-2.0 files | TEST_ONLY | License verified from official repository. |
+| org-json | library | JSON-java | 20240303 | https://github.com/stleary/JSON-java/blob/master/LICENSE | Public Domain | TEST_ONLY | License verified from official repository. |
+| compose-ui-test | library | Compose UI test JUnit4 and test manifest | BOM 2024.09.00 | https://developer.android.com/jetpack/compose/bom/bom-mapping | Apache-2.0 | TEST_ONLY | ui-test-manifest is debug-only. |
+| agp | plugin | Android Gradle Plugin | 9.1.1 | https://dl.google.com/dl/android/maven2/com/android/tools/build/gradle/9.1.1/gradle-9.1.1.pom | Apache-2.0 | BUILD_ONLY | License block verified from Google Maven POM. |
+| ksp-plugin | plugin | Google KSP Gradle Plugin | 2.3.5 | https://repo1.maven.org/maven2/com/google/devtools/ksp/com.google.devtools.ksp.gradle.plugin/2.3.5/com.google.devtools.ksp.gradle.plugin-2.3.5.pom | Apache-2.0 | BUILD_ONLY | License block verified from Maven Central POM. |
+| secrets-plugin | plugin | Google Maps Platform Secrets Gradle Plugin | 2.0.1 | https://dl.google.com/dl/android/maven2/com/google/android/libraries/mapsplatform/secrets-gradle-plugin/secrets-gradle-plugin/2.0.1/secrets-gradle-plugin-2.0.1.pom | Apache-2.0 | BUILD_ONLY | License block verified from Google Maven POM. Reads .env or .env.example; no secrets are stored in source. |
+| google-services-plugin | plugin | Google Services Gradle Plugin | 4.5.0 | https://dl.google.com/dl/android/maven2/com/google/gms/google-services/4.5.0/google-services-4.5.0.pom | Apache-2.0 | BUILD_ONLY | License block verified from Google Maven POM. Missing google-services.json is configured as WARN. |
+| font-inter | asset | Inter TTF files | bundled files in app/src/main/res/font | https://github.com/rsms/inter/blob/master/LICENSE.txt | SIL OFL-1.1 | ACTIVE_BUNDLED_ASSET | License verified from official repository. |
+| font-plus-jakarta-sans | asset | Plus Jakarta Sans TTF files | bundled files in app/src/main/res/font | https://github.com/tokotype/PlusJakartaSans/blob/master/OFL.txt | SIL OFL-1.1 | ACTIVE_BUNDLED_ASSET | License verified from official repository. |
+| simple-icons-github | asset | GitHub vector mark | app/src/main/res/drawable/ic_github.xml | https://github.com/simple-icons/simple-icons/blob/develop/LICENSE.md | CC0-1.0 | ACTIVE_BUNDLED_ASSET | License verified from official repository. |
+| excluded-indicconformer | model | AI4Bharat IndicConformer multilingual STT | not pinned | https://huggingface.co/ai4bharat/indic-conformer-600m-multilingual | MIT but gated | EXCLUDED_GATED | Do not use. Gated HuggingFace terms are out of scope without explicit approval. |
+| excluded-indictrans2 | model | AI4Bharat IndicTrans2 distilled MT | not pinned | https://github.com/AI4Bharat/IndicTrans2 | MIT | EXCLUDED_NOT_BUNDLED | Historical candidate only. Current translation is ML Kit. |
+| excluded-vits-rasa | model | AI4Bharat VITS-Rasa neural TTS | not pinned | https://github.com/AI4Bharat/Indic-TTS | CONFLICTING_EVIDENCE | EXCLUDED_NOT_BUNDLED | Old docs disagree between MIT and CC-BY-4.0. Not used until verified and explicitly approved. |
+| excluded-kokoro | model | Kokoro-82M TTS | not pinned | https://huggingface.co/hexgrad/Kokoro-82M | Apache-2.0 claim UNVERIFIED in this pass | EXCLUDED_NOT_BUNDLED | Historical candidate only. Not used. |
+| excluded-m2m100 | model | Meta M2M100 418M MT | not pinned | https://huggingface.co/facebook/m2m100_418M | MIT claim UNVERIFIED in this pass | EXCLUDED_NOT_BUNDLED | Historical fallback only. Not used. |
+| excluded-whisper-tiny-en | model | OpenAI Whisper Tiny English-only | not pinned | https://huggingface.co/openai/whisper-tiny.en | MIT | EXCLUDED_WRONG_MODEL | Explicitly rejected. Requirement is multilingual. |
+| excluded-fasttext-lid | model | fastText lid.176.ftz | not pinned | https://fasttext.cc/docs/en/language-identification.html | CC-BY-SA-3.0 | EXCLUDED_LICENSE_GATE | Share-alike terms rejected. Replaced by project Unicode and n-gram fallback. |
+| excluded-piper-espeak | engine | piper1-gpl and espeak-ng TTS | not pinned | https://github.com/OHF-Voice/piper1-gpl | GPL-3.0 | EXCLUDED_LICENSE_GATE | Copyleft engine rejected. No GPL engine may be bundled without explicit approval. |
+| excluded-glotlid | model | GlotLID v3 | not pinned | https://huggingface.co/cis-lmu/glotlid | Apache-2.0 claim UNVERIFIED in this pass | EXCLUDED_NOT_USED | Historical LID candidate only. Not used. |
+| excluded-silero-vad | model | Silero VAD v5 | not pinned | https://github.com/snakers4/silero-vad | MIT claim UNVERIFIED in this pass | EXCLUDED_NOT_USED | Historical VAD candidate only. Not used. |
+| excluded-madlad | model | MADLAD-400 3B/7B/10B MT | not pinned | https://huggingface.co/google/madlad400-3b-mt | Apache-2.0 claim UNVERIFIED in this pass | EXCLUDED_SIZE | Historical candidate only. Excluded from mobile default. |
 
-## 4. Bundled Android Libraries & Fonts
-
-1. **Android Jetpack (Compose, Room, DataStore, Lifecycle, Navigation, Core, Activity)**
-   - License: **Apache License 2.0** (`https://www.apache.org/licenses/LICENSE-2.0`)
-2. **Kotlin Standard Library & Kotlinx Coroutines**
-   - License: **Apache License 2.0**
-3. **Square OkHttp 4.12.0, Retrofit 2.12.0, Moshi 1.15.2**
-   - License: **Apache License 2.0**
-4. **Inter & Plus Jakarta Sans Typefaces (`app/src/main/res/font/`)**
-   - License: **SIL Open Font License 1.1 (OFL-1.1)**
-5. **Simple Icons — GitHub Vector Mark (`app/src/main/res/drawable/ic_github.xml`)**
-   - Source: `https://simpleicons.org/`
-   - License: **CC0 1.0 Universal (Public Domain Dedication)**

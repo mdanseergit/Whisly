@@ -1,84 +1,105 @@
-# Whisly Model Bake-Off, License Audit & Per-Language Decision Table (`MODELS.md` — Phase 2)
+# Whisly Models, Voices, Engines and Licenses (`MODELS.md`)
 
-## 1. Candidate Verification & License Gate Audit (Ground Rules 3 & 4)
+Single source of truth for third-party notices. `licenses/NOTICE` is generated from the table in section 2 by `tools/generate_notice.ps1`. Do not edit `licenses/NOTICE` by hand.
 
-Every candidate model, voice pack, and runtime named in the architecture specification was verified against its official upstream repository or HuggingFace model card prior to selection:
+Evidence date: 2026-11-22. Items marked `UNMEASURED` or `UNVERIFIED` have not been claimed as proven.
 
-| Stage | Candidate | Official Upstream URL | Verified License | File Size | SHA-256 Checksum | Gate Status & Decision |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **VAD** | **Silero VAD v5** | `https://github.com/snakers4/silero-vad` | **MIT License** | `1.8 MB` (`silero_vad.onnx`) | Embedded DSP | **APPROVED** |
-| **LID** | **GlotLID v3** + **Unicode Script/N-Gram LID** | `https://huggingface.co/cis-lmu/glotlid` | **Apache-2.0** | `1.2 MB` / `< 50 KB` rule+ngram | N/A | **APPROVED** |
-| **LID** | **fastText `lid.176.ftz`** | `https://fasttext.cc/docs/en/language-identification.html` | **CC-BY-SA 3.0** | `917 KB` | N/A | **REJECTED (License Gate)**: Share-Alike copyleft (`CC-BY-SA 3.0`) on training data. |
-| **STT (Multilingual)** | **OpenAI Whisper Tiny (sherpa-onnx)** | `https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-tiny.tar.bz2` | **MIT / Apache-2.0** | `116,204,861 bytes` (`110.8 MB`) | `c46116994e539aa165266d96b325252728429c12535eb9d8b6a2b10f129e66b1` | **APPROVED**: Free, unauthenticated public GitHub release; verified HTTP 200. |
-| **STT (Indic Gated)** | **AI4Bharat IndicConformer** | `https://huggingface.co/ai4bharat/indic-conformer-600m-multilingual` | **MIT License** | `~60 MB` | Gated on HF | **REJECTED FROM DIRECT APP DOWNLOAD (401 Gate)**: HF requires user auth tokens; violates Zero-Server rule. |
-| **MT (On-Device)** | **Google ML Kit On-Device Translation** | Google Play Services (`com.google.mlkit:translate`) | **Free ($0.00) / Closed Source** | `0 MB` in APK | Managed on-device | **APPROVED**: 100% free, runs entirely offline on-device, no API keys, no server costs. |
-| **MT (Indic ↔ Indic)** | **AI4Bharat IndicTrans2 Distilled 320M** | `https://huggingface.co/ai4bharat/indictrans2-indic-indic-dist-320M` | **MIT License** | `185.5 MB` | Gated on HF | **FALLBACK (Gated)**: Requires upstream mirror for unauthenticated mobile range requests. |
-| **TTS (English)** | **VITS Inflect English Nano v2** | `https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-inflect-en-nano-v2.tar.bz2` | **Apache-2.0** | `22,429,639 bytes` (`21.4 MB`) | `9a6b1188b5f3be8813e0552056328495b4e88ffd1ef18ff837272bde7b3bc136` | **APPROVED**: Verified HTTP 200, unauthenticated public GitHub release. |
-| **TTS (Bengali)** | **VITS Coqui Bengali Female** | `https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-coqui-bn-custom_female.tar.bz2` | **MIT License** | `108,053,596 bytes` (`103.0 MB`) | `a03292d7da03650e892bb1989b40dc2c62574c0d6c34c8bef185fbb3151417a1` | **APPROVED**: Verified HTTP 200, unauthenticated public GitHub release. |
-| **TTS (System)** | **Android `TextToSpeech` Offline Voices** | `https://developer.android.com/reference/android/speech/tts/TextToSpeech` | **Apache-2.0** | `0 MB` in APK | OS-managed | **APPROVED**: Zero-cost, 100% offline OS voice engine. |
-| **TTS (Candidate)** | **Piper TTS (`OHF-Voice/piper1-gpl`)** | `https://github.com/OHF-Voice/piper1-gpl` | **GPL-3.0** | `~20 MB` | N/A | **REJECTED (License Gate)**: GPL-3.0 copyleft obligation. |
+## 1. Current status and evidence boundaries
 
----
+- Step 1 source tree contains **no bundled speech model and no bundled neural voice**. The stale `app/src/main/assets/whisly_manifest.json`, `ModelImportManager.kt`, `SttPackageManifest.kt`, `SpeechModelsSection.kt` and their tests are deleted. Production STT uses `SherpaOnnxSttEngine` and fails closed with `STT_MODEL_MISSING` until the Step 2 bundled Whisper assets are installed. No ZIP-import or custom speech-pack download path remains.
+- Planned Step 2 STT baseline is the public, non-gated **sherpa-onnx Whisper Tiny multilingual INT8** ONNX release. It is not `tiny.en`. It will be bundled in the app; no user download or ZIP import is allowed.
+- Measured Whisper Tiny INT8 payload (from the pinned tarball extracted under `C:\Users\danse\AppData\Local\Temp\opencode\whisper`):
+  - `tiny-encoder.int8.onnx` = `12,937,772` bytes, SHA-256 `D24FB083AE3B1041FC24E97971D60E280C9342201FBB67B0AB428A8B4A51A434`
+  - `tiny-decoder.int8.onnx` = `89,855,401` bytes, SHA-256 `D2FECE8DD42771F1DF975C6C0445770D0C292BF7547C2CAE04A6C0CC57540925`
+  - `tiny-tokens.txt` = `816,730` bytes, SHA-256 `B34B360DBB493E781E479794586D661700670D65564001F23024971D1F2FA126`
+  - Combined INT8 files = `103,609,903` bytes. This is **not** the final APK/AAB download size.
+- Pinned source archive: `https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-tiny.tar.bz2`, `116,204,861` bytes, SHA-256 `C46116994E539AA165266D96B325252728429C12535EB9D8B6A2B10F129E66B1`.
+- Pinned runtime: `com.github.k2-fsa.sherpa-onnx:sherpa-onnx:1.13.5`. Its JitPack POM declares Apache-2.0 and SCM `https://github.com/k2-fsa/sherpa-onnx.git`. JitPack is retained only for this pinned artifact; this is a recorded supply-chain risk, not an endorsement.
+- Official current stable `androidx.core:core-splashscreen` is `1.2.0` per `https://developer.android.com/jetpack/androidx/releases/core` (checked 2026-11-22). The local `androidx/core/splashscreen/SplashScreen.kt` shim was deleted.
+- Official Google Play size limits per `https://support.google.com/googleplay/android-developer/answer/9859372?hl=en-GB` (checked 2026-11-22) are based on **compressed download size**: base module `500 MB`, each feature module `500 MB`, each asset pack `1.5 GB`, cumulative modules plus install-time asset packs `4 GB`, cumulative on-demand or fast-follow asset packs `30 GB`, total maximum `34 GB`. Publishing APKs instead of app bundles remains subject to a `100 MB` legacy APK limit. No language or model will be dropped until real bundled AAB/APK sizes are measured and the user is asked again with numbers.
+- Default bundling plan remains arm64-only release split plus install-time Asset Delivery for the model payload. Install-time asset packs are immediately available at app launch per `https://developer.android.com/guide/playcore/asset-delivery` (checked 2026-11-22). This is a plan, not a measured Play Console result.
+- Typed translation uses `com.google.mlkit:translate:17.0.3`. ML Kit states that input data and outputs are processed on-device and not sent to Google, but the APIs may contact Google servers for bug fixes, updated models, hardware accelerator compatibility information, and performance/utilization metrics (`https://developers.google.com/ml-kit/terms`, checked 2026-11-22). Therefore Whisly does **not** claim "all offline from install" until a clean-install airplane-mode proof is recorded.
+- Current typed ML Kit translation map supports `en,ta,hi,bn,mr,te,kn,gu,ur`. The wider target registry (`as,bn,brx,doi,gu,hi,kn,ks,kok,mai,ml,mni,mr,ne,or,pa,sa,sat,sd,ta,te,ur` plus `en-IN`) does not imply translation availability; unsupported languages fail closed while typing still works.
+- Android system `TextToSpeech` is active only through `SystemTextToSpeechEngine.kt` as a temporary, clearly labeled device voice for the first English proof and typed-output playback. It is device-provided, contains no Whisly model weights, and is not bundled. Individual system voices, their offline availability, and their licenses are `UNMEASURED` / `UNVERIFIED`.
+- `com.example.ai.lid.LanguageIdEngine` remains only as a labeled fallback. Step 6 will consider ML Kit Language Identification and Whisper language detection.
+- `com.example.data.remote.WhislyBackendApi` is declaration-only and unused. No client, call site, account, billing, backend, upload path, secret, gated term, or online mode is added without explicit approval.
+- No GPL engine, LGPL engine, non-commercial weight, or share-alike weight is approved for APK distribution. If any is ever proposed, stop and ask the user first.
 
-## 2. Proposed Per-Language Minimum Thresholds (Awaiting User Confirmation for Wave 2/3 Promotion)
+## 2. Canonical inventory — generator input
 
-| Stage | Metric | Evaluation Dataset | Proposed Minimum Threshold | Action When Below Threshold |
-| :--- | :--- | :--- | :--- | :--- |
-| **Speech-to-Text (STT)** | Word Error Rate (**WER**) & Character Error Rate (**CER**) | FLEURS / IndicVoices / Kathbath held-out test split | **WER $\le 25.0\%$** (High-resource: `en`, `hi`, `ta`, `bn`, `te`, `kn`, `ml`, `mr`, `gu`, `pa`)<br>**WER $\le 30.0\%$** (Low-resource: `or`, `as`, `sat`) | Mark `canListen = false`; disable microphone for that language. |
-| **Language ID (LID)** | Top-1 Identification Accuracy | Held-out utterances ($\ge 3\text{s}$ speech / $\ge 20$ chars text) | **Accuracy $\ge 90.0\%$** (or show disambiguation prompt when top-2 margin $< 0.15$) | Prompt user to confirm between top-2 candidates (`hi`/`mr`, `bn`/`as`). |
-| **Machine Translation (MT)** | **chrF++** ($\beta = 2$, char $1..6$ + word $1..2$) | FLORES-200 `devtest` per directed pair $(s \to t)$ | **chrF++ $\ge 45.0$** | Mark directed pair `BELOW_THRESHOLD` or `UNSUPPORTED`; do not advertise speech-to-speech. |
-| **Text-to-Speech (TTS)** | Round-Trip Intelligibility **WER** ($\text{Text} \to \text{TTS} \to \text{STT} \to \text{WER}$) | 100 held-out sentences per language | **Round-Trip WER $\le 15.0\%$** | Mark `canSpeak = false` (e.g., Santali `sat`); display `"Voice not available for this language"`. |
+<!-- NOTICE-GENERATOR:START -->
+| ID | Kind | Name | Version / revision | Source URL | License / terms | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| `stt-whisper-tiny-int8` | model | OpenAI Whisper Tiny multilingual INT8 ONNX encoder, decoder and tokens | pinned tarball SHA-256 `C46116994E539AA165266D96B325252728429C12535EB9D8B6A2B10F129E66B1` | https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-tiny.tar.bz2 | MIT | PLANNED_BUNDLE_STEP2 | Public non-gated release. Not `tiny.en`. Combined pinned INT8 files measure `103,609,903` bytes. Not yet present in APK or AAB. |
+| `runtime-sherpa-onnx` | engine | sherpa-onnx Android AAR runtime | `1.13.5` | https://jitpack.io/com/github/k2-fsa/sherpa-onnx/sherpa-onnx/1.13.5/sherpa-onnx-1.13.5.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Fetched JitPack POM declares Apache-2.0. Source is https://github.com/k2-fsa/sherpa-onnx.git. JitPack is a supply-chain risk and is pinned exactly. |
+| `runtime-onnxruntime` | engine | ONNX Runtime native library packaged with the AAR | exact version UNVERIFIED in this pass | https://github.com/microsoft/onnxruntime/blob/main/LICENSE | MIT | TRANSITIVE_NATIVE | `libonnxruntime.so` appears in Android build output. License verified from official repository. Exact embedded version not claimed. |
+| `mt-mlkit-translate` | model | Google ML Kit on-device text translation | `17.0.3` | https://dl.google.com/dl/android/maven2/com/google/mlkit/translate/17.0.3/translate-17.0.3.pom | ML Kit Terms of Service | ACTIVE_TYPED_TRANSLATION | On-device inference per Google terms. May contact Google for bug fixes, model updates, accelerator compatibility and metrics. Not Apache-2.0. |
+| `tts-android-system` | engine | Android platform TextToSpeech voices via `SystemTextToSpeechEngine.kt` | device-provided | https://developer.android.com/reference/android/speech/tts/TextToSpeech | Device voice licenses UNVERIFIED. AOSP platform code Apache-2.0 | TEMPORARY_DEVICE_ONLY | Active temporary device voice. Not bundled; no Whisly weights. Per-device voice availability and voice licenses UNMEASURED. |
+| `lid-unicode-ngram` | engine | Whisly Unicode script and character n-gram fallback LID | project source | https://github.com/k2-fsa/sherpa-onnx | Whisly project code, no third-party model license | FALLBACK_ONLY | Labeled fallback only. No `fastText` dependency. |
+| `androidx-core-ktx` | library | AndroidX Core KTX | `1.18.0` | https://dl.google.com/dl/android/maven2/androidx/core/core-ktx/1.18.0/core-ktx-1.18.0.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Declared through version catalog. |
+| `androidx-core-splashscreen` | library | AndroidX Core SplashScreen compat | `1.2.0` | https://dl.google.com/dl/android/maven2/androidx/core/core-splashscreen/1.2.0/core-splashscreen-1.2.0.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Official dependency replaces deleted local shim. |
+| `androidx-datastore-preferences` | library | AndroidX DataStore Preferences | `1.1.7` | https://dl.google.com/dl/android/maven2/androidx/datastore/datastore-preferences/1.1.7/datastore-preferences-1.1.7.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Declared through version catalog. |
+| `androidx-activity-compose` | library | AndroidX Activity Compose | `1.10.1` | https://dl.google.com/dl/android/maven2/androidx/activity/activity-compose/1.10.1/activity-compose-1.10.1.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Declared through version catalog. |
+| `androidx-compose` | library | Jetpack Compose BOM, UI, UI graphics, Material3, icons, tooling and test artifacts | BOM `2024.09.00` | https://developer.android.com/jetpack/compose/bom/bom-mapping | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Includes `ui`, `ui-graphics`, `ui-tooling-preview`, `material3`, `material-icons-core`, `material-icons-extended`, plus test and debug tooling artifacts. |
+| `androidx-lifecycle` | library | AndroidX Lifecycle runtime KTX, runtime Compose and ViewModel Compose | `2.8.7` | https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-runtime-ktx/2.8.7/lifecycle-runtime-ktx-2.8.7.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Three artifacts declared through version catalog. |
+| `androidx-navigation-compose` | library | AndroidX Navigation Compose | `2.8.9` | https://dl.google.com/dl/android/maven2/androidx/navigation/navigation-compose/2.8.9/navigation-compose-2.8.9.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Declared through version catalog. |
+| `androidx-room` | library | AndroidX Room runtime, KTX and compiler | `2.7.0` | https://dl.google.com/dl/android/maven2/androidx/room/room-runtime/2.7.0/room-runtime-2.7.0.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Compiler is KSP-only. Migrations 1 to 2, 2 to 3 and 3 to 4 are retained. |
+| `kotlin` | library | Kotlin standard library and Compose compiler plugin | `2.2.10` | https://github.com/JetBrains/kotlin/blob/master/license/LICENSE.txt | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Kotlin JVM toolchain 17. |
+| `kotlinx-coroutines` | library | Kotlinx Coroutines Android, core and test | `1.10.2` | https://github.com/Kotlin/kotlinx.coroutines/blob/master/LICENSE | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Test artifact is test-only. |
+| `okhttp` | library | Square OkHttp | `4.12.0` | https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp/4.12.0/okhttp-4.12.0.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | License block verified from Maven Central POM. |
+| `retrofit` | library | Square Retrofit and Converter Moshi | `2.12.0` | https://repo1.maven.org/maven2/com/squareup/retrofit2/retrofit/2.12.0/retrofit-2.12.0.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | Declaration-only backend API does not create a call site. |
+| `moshi` | library | Square Moshi Kotlin and codegen | `1.15.2` | https://repo1.maven.org/maven2/com/squareup/moshi/moshi-kotlin/1.15.2/moshi-kotlin-1.15.2.pom | Apache-2.0 | ACTIVE_BUNDLED_DEPENDENCY | License block verified from Maven Central POM. |
+| `junit4` | library | JUnit 4 | `4.13.2` | https://github.com/junit-team/junit4/blob/main/LICENSE-junit.txt | EPL-1.0 | TEST_ONLY | License verified from official repository. |
+| `androidx-test` | library | AndroidX Test core, JUnit ext, runner and Espresso core | core `1.6.1`, JUnit `1.3.0`, runner `1.6.2`, Espresso `3.7.0` | https://developer.android.com/jetpack/androidx/releases/test | Apache-2.0 | TEST_ONLY | Unit and instrumentation test dependencies. |
+| `robolectric` | library | Robolectric | `4.16.1` | https://github.com/robolectric/robolectric/blob/master/LICENSE | MIT with some Apache-2.0 files | TEST_ONLY | License verified from official repository. |
+| `org-json` | library | JSON-java | `20240303` | https://github.com/stleary/JSON-java/blob/master/LICENSE | Public Domain | TEST_ONLY | License verified from official repository. |
+| `compose-ui-test` | library | Compose UI test JUnit4 and test manifest | BOM `2024.09.00` | https://developer.android.com/jetpack/compose/bom/bom-mapping | Apache-2.0 | TEST_ONLY | `ui-test-manifest` is debug-only. |
+| `agp` | plugin | Android Gradle Plugin | `9.1.1` | https://dl.google.com/dl/android/maven2/com/android/tools/build/gradle/9.1.1/gradle-9.1.1.pom | Apache-2.0 | BUILD_ONLY | License block verified from Google Maven POM. |
+| `ksp-plugin` | plugin | Google KSP Gradle Plugin | `2.3.5` | https://repo1.maven.org/maven2/com/google/devtools/ksp/com.google.devtools.ksp.gradle.plugin/2.3.5/com.google.devtools.ksp.gradle.plugin-2.3.5.pom | Apache-2.0 | BUILD_ONLY | License block verified from Maven Central POM. |
+| `secrets-plugin` | plugin | Google Maps Platform Secrets Gradle Plugin | `2.0.1` | https://dl.google.com/dl/android/maven2/com/google/android/libraries/mapsplatform/secrets-gradle-plugin/secrets-gradle-plugin/2.0.1/secrets-gradle-plugin-2.0.1.pom | Apache-2.0 | BUILD_ONLY | License block verified from Google Maven POM. Reads `.env` or `.env.example`; no secrets are stored in source. |
+| `google-services-plugin` | plugin | Google Services Gradle Plugin | `4.5.0` | https://dl.google.com/dl/android/maven2/com/google/gms/google-services/4.5.0/google-services-4.5.0.pom | Apache-2.0 | BUILD_ONLY | License block verified from Google Maven POM. Missing `google-services.json` is configured as WARN. |
+| `font-inter` | asset | Inter TTF files | bundled files in `app/src/main/res/font` | https://github.com/rsms/inter/blob/master/LICENSE.txt | SIL OFL-1.1 | ACTIVE_BUNDLED_ASSET | License verified from official repository. |
+| `font-plus-jakarta-sans` | asset | Plus Jakarta Sans TTF files | bundled files in `app/src/main/res/font` | https://github.com/tokotype/PlusJakartaSans/blob/master/OFL.txt | SIL OFL-1.1 | ACTIVE_BUNDLED_ASSET | License verified from official repository. |
+| `simple-icons-github` | asset | GitHub vector mark | `app/src/main/res/drawable/ic_github.xml` | https://github.com/simple-icons/simple-icons/blob/develop/LICENSE.md | CC0-1.0 | ACTIVE_BUNDLED_ASSET | License verified from official repository. |
+| `excluded-indicconformer` | model | AI4Bharat IndicConformer multilingual STT | not pinned | https://huggingface.co/ai4bharat/indic-conformer-600m-multilingual | MIT but gated | EXCLUDED_GATED | Do not use. Gated HuggingFace terms are out of scope without explicit approval. |
+| `excluded-indictrans2` | model | AI4Bharat IndicTrans2 distilled MT | not pinned | https://github.com/AI4Bharat/IndicTrans2 | MIT | EXCLUDED_NOT_BUNDLED | Historical candidate only. Current translation is ML Kit. |
+| `excluded-vits-rasa` | model | AI4Bharat VITS-Rasa neural TTS | not pinned | https://github.com/AI4Bharat/Indic-TTS | CONFLICTING_EVIDENCE | EXCLUDED_NOT_BUNDLED | Old docs disagree between MIT and CC-BY-4.0. Not used until verified and explicitly approved. |
+| `excluded-kokoro` | model | Kokoro-82M TTS | not pinned | https://huggingface.co/hexgrad/Kokoro-82M | Apache-2.0 claim UNVERIFIED in this pass | EXCLUDED_NOT_BUNDLED | Historical candidate only. Not used. |
+| `excluded-m2m100` | model | Meta M2M100 418M MT | not pinned | https://huggingface.co/facebook/m2m100_418M | MIT claim UNVERIFIED in this pass | EXCLUDED_NOT_BUNDLED | Historical fallback only. Not used. |
+| `excluded-whisper-tiny-en` | model | OpenAI Whisper Tiny English-only | not pinned | https://huggingface.co/openai/whisper-tiny.en | MIT | EXCLUDED_WRONG_MODEL | Explicitly rejected. Requirement is multilingual. |
+| `excluded-fasttext-lid` | model | fastText `lid.176.ftz` | not pinned | https://fasttext.cc/docs/en/language-identification.html | CC-BY-SA-3.0 | EXCLUDED_LICENSE_GATE | Share-alike terms rejected. Replaced by project Unicode and n-gram fallback. |
+| `excluded-piper-espeak` | engine | piper1-gpl and espeak-ng TTS | not pinned | https://github.com/OHF-Voice/piper1-gpl | GPL-3.0 | EXCLUDED_LICENSE_GATE | Copyleft engine rejected. No GPL engine may be bundled without explicit approval. |
+| `excluded-glotlid` | model | GlotLID v3 | not pinned | https://huggingface.co/cis-lmu/glotlid | Apache-2.0 claim UNVERIFIED in this pass | EXCLUDED_NOT_USED | Historical LID candidate only. Not used. |
+| `excluded-silero-vad` | model | Silero VAD v5 | not pinned | https://github.com/snakers4/silero-vad | MIT claim UNVERIFIED in this pass | EXCLUDED_NOT_USED | Historical VAD candidate only. Not used. |
+| `excluded-madlad` | model | MADLAD-400 3B/7B/10B MT | not pinned | https://huggingface.co/google/madlad400-3b-mt | Apache-2.0 claim UNVERIFIED in this pass | EXCLUDED_SIZE | Historical candidate only. Excluded from mobile default. |
+<!-- NOTICE-GENERATOR:END -->
 
----
+## 3. License gate
 
-## 3. Wave 1 Per-Language Decision Table (13 Languages: English + 12 Indian Languages)
+Permitted without additional approval: MIT, Apache-2.0, BSD-3-Clause, CC0-1.0, SIL OFL-1.1, Public Domain, and the ML Kit Terms of Service as declared by Google for the pinned ML Kit artifact.
 
-| ISO Code | Language | Script (`IndicTrans2` Tag) | Chosen STT Pack (License, Size) | Chosen MT Pack (License, Size) | Chosen TTS Pack / Fallback (License, Size) | Listen (`canListen`) | Speak (`canSpeak`) | Harness LID Accuracy | On-Device Neural WER / chrF++ / RT-WER |
-| :--- | :--- | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :--- |
-| `en` | **English** | Latin (`eng_Latn`) | `stt_whisper_tiny_multilingual` (MIT, `110.8 MB`) | `mt_indictrans2_200m_int8` (MIT, `185.5 MB` shared) | `tts_inflect_en_nano` (Apache-2.0, `21.4 MB`) + Android Offline TTS | Yes | Yes | `100.0%` | *Unmeasured in CI* (see §5) |
-| `ta` | **Tamil** | Tamil (`tam_Taml`) | `stt_whisper_tiny_multilingual` (MIT, `110.8 MB`) | `mt_indictrans2_200m_int8` (MIT, shared) | `tts_vits_rasa_ta_v1` (MIT, `0.0 MB` incremental) + Android Offline TTS | Yes | Yes | `100.0%` | *Unmeasured in CI* (see §5) |
-| `bn` | **Bengali** | Bengali (`ben_Beng`) | `stt_whisper_tiny_multilingual` (MIT, `110.8 MB`) | `mt_indictrans2_200m_int8` (MIT, shared) | `tts_coqui_bn_female` (MIT, `103.0 MB`) + Android Offline TTS | Yes | Yes | `100.0%` | *Unmeasured in CI* (see §5) |
-| `hi` | **Hindi** | Devanagari (`hin_Deva`) | `stt_whisper_tiny_multilingual` (MIT, `110.8 MB`) | `mt_indictrans2_200m_int8` (MIT, shared) | `tts_vits_rasa_hi_v1` (MIT, `0.0 MB` incremental) + Android Offline TTS | Yes | Yes | `100.0%` | *Unmeasured in CI* (see §5) |
-| `te` | **Telugu** | Telugu (`tel_Telu`) | `stt_whisper_tiny_multilingual` (MIT, `110.8 MB`) | `mt_indictrans2_200m_int8` (MIT, shared) | `tts_vits_rasa_te_v1` (MIT, `0.0 MB` incremental) + Android Offline TTS | Yes | Yes | `100.0%` | *Unmeasured in CI* (see §5) |
-| `kn` | **Kannada** | Kannada (`kan_Knda`) | `stt_whisper_tiny_multilingual` (MIT, `110.8 MB`) | `mt_indictrans2_200m_int8` (MIT, shared) | `tts_vits_rasa_kn_v1` (MIT, `0.0 MB` incremental) + Android Offline TTS | Yes | Yes | `100.0%` | *Unmeasured in CI* (see §5) |
-| `ml` | **Malayalam** | Malayalam (`mal_Mlym`) | `stt_whisper_tiny_multilingual` (MIT, `110.8 MB`) | `mt_indictrans2_200m_int8` (MIT, shared) | `tts_vits_rasa_ml_v1` (MIT, `0.0 MB` incremental) + Android Offline TTS | Yes | Yes | `100.0%` | *Unmeasured in CI* (see §5) |
-| `mr` | **Marathi** | Devanagari (`mar_Deva`) | `stt_whisper_tiny_multilingual` (MIT, `110.8 MB`) | `mt_indictrans2_200m_int8` (MIT, shared) | `tts_vits_rasa_mr_v1` (MIT, `0.0 MB` incremental) + Android Offline TTS | Yes | Yes | `100.0%` | *Unmeasured in CI* (see §5) |
-| `gu` | **Gujarati** | Gujarati (`guj_Gujr`) | `stt_whisper_tiny_multilingual` (MIT, `110.8 MB`) | `mt_indictrans2_200m_int8` (MIT, shared) | `tts_vits_rasa_gu_v1` (MIT, `0.0 MB` incremental) + Android Offline TTS | Yes | Yes | `100.0%` | *Unmeasured in CI* (see §5) |
-| `or` | **Odia** | Odia (`ory_Orya`) | `stt_whisper_tiny_multilingual` (MIT, `110.8 MB`) | `mt_indictrans2_200m_int8` (MIT, shared) | `tts_vits_rasa_or_v1` (MIT, `0.0 MB` incremental) + Android Offline TTS | Yes | Yes | `100.0%` | *Unmeasured in CI* (see §5) |
-| `as` | **Assamese** | Bengali-Assamese (`asm_Beng`) | `stt_whisper_tiny_multilingual` (MIT, `110.8 MB`) | `mt_indictrans2_200m_int8` (MIT, shared) | `tts_vits_rasa_as_v1` (MIT, `0.0 MB` incremental) + Android Offline TTS | Yes | Yes | `100.0%` | *Unmeasured in CI* (see §5) |
-| `pa` | **Punjabi** | Gurmukhi (`pan_Guru`) | `stt_whisper_tiny_multilingual` (MIT, `110.8 MB`) | `mt_indictrans2_200m_int8` (MIT, shared) | `tts_vits_rasa_pa_v1` (MIT, `0.0 MB` incremental) + Android Offline TTS | Yes | Yes | `100.0%` | *Unmeasured in CI* (see §5) |
-| `sat` | **Santali** | Ol Chiki (`sat_Olck`) | `stt_whisper_tiny_multilingual` (MIT, `110.8 MB`) | `mt_indictrans2_200m_int8` (MIT, Pivot via `en`) | **None (`UNAVAILABLE`)** — Honest text-only target | Yes | **No** | `100.0%` | *Unmeasured in CI* (see §5) |
+Blocked from APK distribution without explicit user approval: GPL-2.0, GPL-3.0, LGPL, CC-BY-NC variants, CC-BY-SA variants, gated or terms-acceptance weights, and any model whose license is `CONFLICTING_EVIDENCE` or `UNVERIFIED`.
 
----
+`EPL-1.0` appears only in test-only JUnit 4 and is not bundled into the shipped app artifact.
 
-## 4. Directed Translation Routing Policy (`CapabilityRegistry.directedPairs`)
+## 4. Network and offline claims
 
-1. **Direct Routing (`TranslationRouteMethod.DIRECT`)**:
-   - Used for `en -> Indic` (all 12 Indian languages), `Indic -> en` (all 12 Indian languages), and `Indic -> Indic` among the 11 high-resource Indian languages (`ta`, `bn`, `hi`, `te`, `kn`, `ml`, `mr`, `gu`, `or`, `as`, `pa`).
-2. **Single-Pivot Routing via English (`TranslationRouteMethod.PIVOT_EN`, max 1 pivot)**:
-   - Used for `sat -> Indic` (`sat -> en -> target`) and `Indic -> sat` (`source -> en -> sat`) where direct Santali-to-Indic training pairs in FLORES/BPCC are sparse.
-3. **Wave 3 Long-Tail Languages (`ur`, `ne`, `sa`)**:
-   - Marked `canListen = false`, `canSpeak = false`, `qualityStatus = BELOW_THRESHOLD` (text-only; never advertised as speech-to-speech ready).
+- No cloud STT, cloud TTS, backend upload, account, billing, online mode, secret, or external hosting is present.
+- Bundled STT model files will be read from app assets or install-time asset packs. No model download, ZIP import, or "install Google offline speech pack" path is allowed.
+- ML Kit translation processes text on-device but may contact Google as described in section 1. Any "all offline from install" claim requires clean-install airplane-mode evidence.
+- Device TTS voice availability is UNMEASURED. A missing Tamil voice is a recorded result, not a failure of the STT proof.
 
----
+## 5. Measurement register
 
-## 5. Mathematical Evaluation Formulas (`AiEvaluationSuite.kt` & `scripts/run_eval_harness.py`)
-
-- **WER**: $\text{WER} = \frac{S + D + I}{N_{\text{words}}} \times 100$
-- **CER**: $\text{CER} = \frac{S_c + D_c + I_c}{N_{\text{chars}}} \times 100$ (over Unicode NFC-normalized codepoints)
-- **chrF++** (Popović 2017, $\beta = 2.0$, character $1..6$-grams + word $1..2$-grams):
-  $$\text{chrF++} = 100 \times \frac{(1 + \beta^2) \cdot \bar{P} \cdot \bar{R}}{\beta^2 \cdot \bar{P} + \bar{R}}$$
-
----
-
-## 6. Exact Steps to Run the Evaluation Harness & Measure Real Device Checkpoints
-
-1. **Run the Automated Harness & Metric Verification Locally**:
-   ```bash
-   python3 scripts/run_eval_harness.py
-   gradle :app:testDebugUnitTest
-   ```
-2. **Run Real Checkpoint Bake-Off on Physical Android Hardware (Unmeasured in Cloud Build Container)**:
-   - Export quantized Int8 ONNX checkpoints from AI4Bharat (`IndicConformer`, `IndicTrans2-Distilled`, `Indic-TTS`) using `optimum-cli export onnx --quantize int8`.
-   - Push the `.onnx.pack` files to `/sdcard/Android/data/com.aistudio.whisly.kxmpzq/files/whisly_models/` on a physical ARM64 device in Airplane Mode.
-   - Run `adb shell am instrument -w com.aistudio.whisly.kxmpzq.test/androidx.test.runner.AndroidJUnitRunner` and record per-language WER, CER, chrF++, round-trip TTS WER, and `dumpsys meminfo com.aistudio.whisly.kxmpzq` peak PSS RAM.
+| Item | Status | Evidence needed |
+|---|---|---|
+| Whisper Tiny INT8 tarball and per-file sizes/hashes | MEASURED | Values in section 1, recomputed from local pinned archive on 2026-11-22. |
+| Final bundled APK/AAB compressed download size | UNMEASURED | Build bundle, run `bundletool get-size total`, report exact output. |
+| Play Console reported download size | UNMEASURED | Upload to Play Console only with explicit approval; paste App size page output. |
+| English STT WER on public data | UNMEASURED | Run FLEURS or Common Voice English subset with real transcripts; paste command and metrics. |
+| Tamil STT WER/CER on public data | UNMEASURED | Run FLEURS or Common Voice Tamil subset with real transcripts; paste command and metrics. |
+| Translation chrF++ | UNMEASURED | Native-speaker `references.csv` required; never invent references. |
+| Clean-install airplane-mode behavior | UNMEASURED | Factory-reset or clean install, airplane mode, run speak/transcribe/translate/speak path; paste logcat and Exit Report. |
+| Device model, Android version, ABI, RAM | UNMEASURED | User-run `adb shell getprop` output. |
+| RAM, latency, cold start | UNMEASURED | On-device measurement with Dates and times / logcat timestamps. |
+| System TTS voice licenses and offline availability | UNMEASURED | Per-device voice list and vendor license evidence. |

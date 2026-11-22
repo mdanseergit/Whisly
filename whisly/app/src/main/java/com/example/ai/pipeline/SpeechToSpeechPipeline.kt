@@ -1,9 +1,7 @@
 package com.example.ai.pipeline
 
-import com.example.ai.audio.AudioProcessor
-import com.example.ai.stt.IndicSttEngine
 import com.example.ai.translation.IndicTrans2Engine
-import com.example.ai.tts.VitsRasaTtsEngine
+import com.example.ai.tts.SystemTextToSpeechEngine
 import com.example.domain.models.PipelineErrorType
 import com.example.domain.models.PipelineStage
 import kotlinx.coroutines.CoroutineDispatcher
@@ -26,21 +24,15 @@ data class EndToEndTurnOutcome(
 )
 
 /**
- * PHASE 7 — Speech-to-Speech Pipeline Coordinator (`SpeechToSpeechPipeline.kt`).
+ * Clean post-reset translation/output coordinator.
  *
- * Full pipeline:
- * `AudioRecord -> preprocessing -> VAD -> LID -> STT router -> transcript -> (confirmation) -> MT router -> TTS router -> AudioTrack`
- *
- * - Runs inference on a dedicated single-concurrency dispatcher (`inferenceDispatcher`) guarded by `inferenceMutex`.
- * - Respects structured coroutine cancellation (`coroutineContext.ensureActive()`) between stages.
- * - Preserves the recognized transcript if MT fails, and preserves both transcript and translated text if TTS fails.
- * - Unloads resident STT/MT models and clears the TTS LRU cache on `onTrimMemory()` / background events.
+ * Speech capture and bundled Whisper STT are owned by [com.example.ai.stt.WhislyOfflineSpeechRecognizer]
+ * before this pipeline is called. This coordinator only performs typed ML Kit translation and
+ * temporary platform TTS playback.
  */
 class SpeechToSpeechPipeline(
-    val audioProcessor: AudioProcessor,
-    val sttEngine: IndicSttEngine,
     val mtEngine: IndicTrans2Engine,
-    val ttsEngine: VitsRasaTtsEngine,
+    val ttsEngine: SystemTextToSpeechEngine,
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     private val inferenceDispatcher: CoroutineDispatcher = Dispatchers.Default.limitedParallelism(1)
 ) {
@@ -53,70 +45,16 @@ class SpeechToSpeechPipeline(
         _currentStage.value = stage
     }
 
-    /**
-     * Unloads resident STT and MT models and trims the TTS audio cache when the app is backgrounded
-     * or receives an `onTrimMemory` signal from Android OS.
-     */
     fun unloadModelsOnMemoryPressure() {
-        sttEngine.unloadResidentModel()
         mtEngine.unloadResidentModel()
         ttsEngine.clearAudioCache()
     }
 
-    /**
-     * Stage 1: Processes recorded audio through Preprocessing, VAD, LID, and Routed STT,
-     * pausing at `AWAITING_CONFIRMATION` in Single Translate mode so the user can review or edit
-     * the recognized transcript before translation.
-     */
-    suspend fun processRecordedAudioToTranscript(
-        audioInput: AudioInput,
-        sourceLang: String
-    ): SpeechResult = withContext(inferenceDispatcher) {
-        inferenceMutex.withLock {
-            coroutineContext.ensureActive()
-            _currentStage.value = PipelineStage.PREPROCESSING
-
-            if (!audioInput.vadSpeechDetected) {
-                val vadError = when {
-                    audioInput.clippingDetected -> PipelineErrorType.AUDIO_CLIPPING
-                    audioInput.tooQuietDetected -> PipelineErrorType.AUDIO_TOO_QUIET
-                    else -> PipelineErrorType.SPEECH_NOT_DETECTED
-                }
-                _currentStage.value = PipelineStage.ERROR
-                return@withLock SpeechResult(
-                    success = false,
-                    transcript = "",
-                    language = sourceLang,
-                    confidence = null,
-                    latencyMs = 0L,
-                    engineUsed = "VAD",
-                    vadProbability = audioInput.vadSpeechProbability,
-                    error = vadError
-                )
-            }
-
-            coroutineContext.ensureActive()
-            _currentStage.value = PipelineStage.STT_INFERENCE
-            val sttResult = sttEngine.recognize(audioInput, sourceLang)
-            _currentStage.value = if (sttResult.success) {
-                PipelineStage.AWAITING_CONFIRMATION
-            } else {
-                PipelineStage.ERROR
-            }
-            sttResult
-        }
-    }
-
-    /**
-     * Stage 2: Runs after the user confirms (or edits) the transcript, or directly in Text / Conversation mode.
-     * Executes Normalization -> Routed MT -> Routed TTS -> optional AudioTrack playback.
-     * Preserves `confirmedText` if MT fails, and preserves `mtResult.translatedText` if TTS fails.
-     */
     suspend fun translateAndSynthesize(
         confirmedText: String,
         sourceLang: String,
         targetLang: String,
-        voiceId: String = "vits_rasa_default",
+        voiceId: String = "system_tts",
         autoPlay: Boolean = true,
         speechSpeed: Float = 1.0f
     ): EndToEndTurnOutcome = withContext(inferenceDispatcher) {
@@ -141,16 +79,24 @@ class SpeechToSpeechPipeline(
             _currentStage.value = PipelineStage.TTS_INFERENCE
             val ttsResult = ttsEngine.synthesize(mtResult.translatedText, targetLang, voiceId)
 
-            if (ttsResult.success && autoPlay && ttsResult.pcm16Audio.isNotEmpty()) {
+            if (ttsResult.success && autoPlay) {
                 coroutineContext.ensureActive()
                 _currentStage.value = PipelineStage.PLAYING_AUDIO
-                ttsEngine.speakOutLoud(
+                val played = ttsEngine.speakOutLoud(
                     text = mtResult.translatedText,
                     languageCode = targetLang,
-                    pcmAudio = ttsResult.pcm16Audio,
-                    sampleRateHz = ttsResult.sampleRateHz,
                     speechSpeed = speechSpeed
                 )
+                if (!played) {
+                    _currentStage.value = PipelineStage.ERROR
+                    return@withLock EndToEndTurnOutcome(
+                        stage = PipelineStage.ERROR,
+                        speechResult = null,
+                        translationResult = mtResult,
+                        audioResult = ttsResult,
+                        error = PipelineErrorType.TTS_FAILURE
+                    )
+                }
             }
 
             _currentStage.value = PipelineStage.COMPLETED
@@ -159,7 +105,7 @@ class SpeechToSpeechPipeline(
                 speechResult = null,
                 translationResult = mtResult,
                 audioResult = ttsResult,
-                error = ttsResult.error // Non-fatal if UNSUPPORTED_TARGET_VOICE; translated text is preserved
+                error = if (ttsResult.success) null else (ttsResult.error ?: PipelineErrorType.TTS_FAILURE)
             )
         }
     }

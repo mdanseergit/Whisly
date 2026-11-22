@@ -19,6 +19,9 @@ dependencyResolutionManagement {
   repositories {
     google()
     mavenCentral()
+    // Supply-chain risk: required only by the pinned
+    // com.github.k2-fsa.sherpa-onnx:sherpa-onnx:1.13.5 AAR. Its JitPack POM declares
+    // Apache-2.0 and SCM https://github.com/k2-fsa/sherpa-onnx.git (verified 2026-11-22).
     maven { url = uri("https://jitpack.io") }
   }
 }

@@ -124,6 +124,9 @@ dependencies {
   implementation(libs.androidx.compose.ui.graphics)
   implementation(libs.androidx.compose.ui.tooling.preview)
   implementation(libs.androidx.core.ktx)
+  // Official AndroidX splash screen compat library, stable 1.2.0 verified 2026-11-22
+  // from https://developer.android.com/jetpack/androidx/releases/core
+  implementation("androidx.core:core-splashscreen:1.2.0")
   implementation(libs.androidx.datastore.preferences)
   implementation(libs.androidx.lifecycle.runtime.compose)
   implementation(libs.androidx.lifecycle.runtime.ktx)

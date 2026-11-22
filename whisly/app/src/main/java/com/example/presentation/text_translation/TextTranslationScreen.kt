@@ -71,7 +71,7 @@ fun TextTranslationScreen(
     val colors = WhislyDesign.colors
     val sourceLang = languages.find { it.code == uiState.sourceLangCode }
     val targetLang = languages.find { it.code == uiState.targetLangCode }
-    val ttsSupported = targetLang?.ttsCapability == "VITS_RASA_VERIFIED"
+    val ttsSupported = targetLang?.ttsCapability == "SYSTEM_FALLBACK_ONLY"
 
     Column(
         modifier = modifier
@@ -300,8 +300,8 @@ private fun TextTranslationScreenLightPreview() {
     WhislyTheme(darkTheme = false) {
         TextTranslationScreen(
             uiState = TranslateUiState(
-                textModeInput = "வணக்கம், நீங்கள் எப்படி இருக்கிறீர்கள்?",
-                textModeOutput = "নমস্কার, আপনি কেমন আছেন?"
+                textModeInput = "Sample text",
+                textModeOutput = "Sample text"
             ),
             languages = IndicLanguageCatalog.buildInitialLanguageEntities().take(4),
             onSelectSource = {},
@@ -324,8 +324,8 @@ private fun TextTranslationScreenDarkPreview() {
         TextTranslationScreen(
             uiState = TranslateUiState(
                 isDarkTheme = true,
-                textModeInput = "வணக்கம், நீங்கள் எப்படி இருக்கிறீர்கள்?",
-                textModeOutput = "নমস্কার, আপনি কেমন আছেন?"
+                textModeInput = "Sample text",
+                textModeOutput = "Sample text"
             ),
             languages = IndicLanguageCatalog.buildInitialLanguageEntities().take(4),
             onSelectSource = {},
