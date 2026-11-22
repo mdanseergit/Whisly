@@ -372,4 +372,36 @@ class ExampleUnitTest {
         }
         assertTrue("Sentence must be in Tamil script", tamilOnly)
     }
+
+    @Test
+    fun `bundled Whisper Tiny assets match pinned sizes and sha256`() {
+        val assetDir = java.io.File("src/main/assets/whisper/tiny")
+        val expected = mapOf(
+            "tiny-encoder.int8.onnx" to
+                (12_937_772L to "D24FB083AE3B1041FC24E97971D60E280C9342201FBB67B0AB428A8B4A51A434"),
+            "tiny-decoder.int8.onnx" to
+                (89_855_401L to "D2FECE8DD42771F1DF975C6C0445770D0C292BF7547C2CAE04A6C0CC57540925"),
+            "tiny-tokens.txt" to
+                (816_730L to "B34B360DBB493E781E479794586D661700670D65564001F23024971D1F2FA126")
+        )
+        for ((name, sizeAndHash) in expected) {
+            val file = java.io.File(assetDir, name)
+            assertTrue("Bundled asset missing: $name", file.exists())
+            assertEquals(sizeAndHash.first, file.length())
+            val digest = java.security.MessageDigest.getInstance("SHA-256").digest(file.readBytes())
+            val actualHash = digest.joinToString("") { "%02X".format(it) }
+            assertEquals("SHA-256 mismatch for $name", sizeAndHash.second, actualHash)
+        }
+    }
+
+    @Test
+    fun `Whisper language gate accepts published token codes and rejects registry gaps`() {
+        val supported = listOf(
+            "as", "bn", "en", "en-IN", "gu", "hi", "kn", "ml", "mr", "ne", "pa", "sa", "sd",
+            "ta", "te", "ur"
+        )
+        val unsupported = listOf("brx", "doi", "ks", "kok", "mai", "mni", "or", "sat")
+        supported.forEach { assertTrue("$it should be supported", com.example.ai.stt.SherpaOnnxSttEngine.isLanguageSupported(it)) }
+        unsupported.forEach { assertFalse("$it must remain unavailable for bundled STT", com.example.ai.stt.SherpaOnnxSttEngine.isLanguageSupported(it)) }
+    }
 }

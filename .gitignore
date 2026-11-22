@@ -52,6 +52,8 @@ desktop.ini
 **/*.gz
 *.onnx
 **/*.onnx
+# Step 2: these two INT8 ONNX files are bundled app assets, not downloaded models.
+!whisly/app/src/main/assets/whisper/tiny/*.onnx
 *.tflite
 **/*.tflite
 *.bin
