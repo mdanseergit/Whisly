@@ -9,8 +9,8 @@ below). Nothing outside this scope was deleted or modified.
 
 | Measurement | Before | After |
 |---|---:|---:|
-| C: free | 69.96 GB | 71.34 GB |
-| C: used | ~405.65 GB (85.3%) | ~404.27 GB (85.0%) |
+| C: free | 69.96 GB | 71.34 GB after deletions/builds; **70.19 GB** after the final 573 MB backup |
+| C: used | ~405.65 GB (85.3%) | ~405.42 GB after the final backup |
 | Whisly folder | 1,127,976,627 B / 2,354 files | 996,064,606 B / 438 files |
 | `C:\dev\Whisly-eval` | 4,970.0 MB | 2.8 MB |
 | `.git` | 240.1 MB | 232.3 MB |
