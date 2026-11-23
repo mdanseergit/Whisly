@@ -1,0 +1,253 @@
+﻿WHISLY FINAL BUILD LOG - 2026-11-23
+All commands were local builds/static checks. No adb, emulator, or device command was used.
+
+===== 1. CLEAN DEBUG BUILD + TESTS + LINT =====
+Command: JAVA_HOME=<Adoptium 17>; .\gradlew.bat --no-daemon clean assembleDebug testDebugUnitTest lint
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+Calculating task graph as no cached configuration is available for tasks: clean assembleDebug testDebugUnitTest lint
+> Task :app:preBuild UP-TO-DATE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:clean
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:processDebugGoogleServices FROM-CACHE
+> Task :app:generateDebugBuildConfig FROM-CACHE
+> Task :app:generateDebugResources FROM-CACHE
+> Task :app:javaPreCompileDebug FROM-CACHE
+> Task :app:packageDebugResources FROM-CACHE
+> Task :app:desugarDebugFileDependencies FROM-CACHE
+> Task :app:processDebugNavigationResources FROM-CACHE
+> Task :app:parseDebugLocalResources FROM-CACHE
+> Task :app:generateDebugRFile FROM-CACHE
+> Task :app:mapDebugSourceSetPaths
+> Task :app:compileDebugNavigationResources FROM-CACHE
+> Task :app:checkDebugAarMetadata
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug FROM-CACHE
+> Task :app:mergeDebugAssets
+> Task :app:mergeDebugResources FROM-CACHE
+> Task :app:compressDebugAssets FROM-CACHE
+> Task :app:mergeDebugJniLibFolders
+> Task :app:processDebugMainManifest FROM-CACHE
+> Task :app:processDebugManifest FROM-CACHE
+> Task :app:processDebugManifestForPackage FROM-CACHE
+> Task :app:checkDebugDuplicateClasses
+> Task :app:mergeDebugNativeLibs
+> Task :app:mergeLibDexDebug FROM-CACHE
+
+> Task :app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libdatastore_shared_counter.so, libonnxruntime.so, libsherpa-onnx-c-api.so, libsherpa-onnx-cxx-api.so, libsherpa-onnx-jni.so, libtranslate_jni.so. Run with --info option to learn more.
+
+> Task :app:processDebugResources FROM-CACHE
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :app:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :app:mergeExtDexDebug FROM-CACHE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:extractProguardFiles
+> Task :app:processDebugUnitTestManifest
+> Task :app:packageDebugUnitTestForUnitTest
+> Task :app:generateDebugUnitTestConfig
+> Task :app:kspDebugKotlin
+> Task :app:compileDebugKotlin
+w: file:///C:/Users/danse/OneDrive/document/Whisly/whisly/app/src/main/java/com/example/MainActivity.kt:101:46 'static field TRIM_MEMORY_RUNNING_LOW: Int' is deprecated. Deprecated in Java.
+w: file:///C:/Users/danse/OneDrive/document/Whisly/whisly/app/src/main/java/com/example/core/crash/CrashProtectionManager.kt:67:92 'val id: Long' is deprecated. Deprecated in Java.
+
+> Task :app:processDebugJavaRes
+> Task :app:compileDebugJavaWithJavac
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:mergeDebugJavaResource
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugGlobalSynthetics FROM-CACHE
+> Task :app:generateDebugAndroidTestLintModel
+> Task :app:generateDebugLintReportModel
+> Task :app:mergeProjectDexDebug
+> Task :app:generateDebugUnitTestLintModel
+> Task :app:kspDebugUnitTestKotlin
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect
+> Task :app:assembleDebug
+> Task :app:lintAnalyzeDebugAndroidTest
+> Task :app:compileDebugUnitTestKotlin
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes
+> Task :app:lintAnalyzeDebug
+> Task :app:lintAnalyzeDebugUnitTest
+> Task :app:testDebugUnitTest
+
+> Task :app:lintReportDebug
+Wrote HTML report to file:///C:/Users/danse/AppData/Local/Temp/whisly_build/app/reports/lint-results-debug.html
+
+> Task :app:lintDebug
+> Task :app:lint
+
+BUILD SUCCESSFUL in 6m 26s
+60 actionable tasks: 39 executed, 21 from cache
+Configuration cache entry stored.
+
+
+===== 2. TEST + LINT SUMMARY =====
+JUnit XML totals: TESTS=47 FAILURES=0 ERRORS=0 SKIPPED=0
+0 errors, 105 warnings
+
+===== 3. RELEASE + BUNDLE BUILD (R8 ENABLED) =====
+Command: .\gradlew.bat --no-daemon assembleRelease bundleRelease
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+Calculating task graph as no cached configuration is available for tasks: assembleRelease bundleRelease
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:extractProguardFiles UP-TO-DATE
+> Task :app:generateReleaseBuildConfig FROM-CACHE
+> Task :app:processReleaseGoogleServices FROM-CACHE
+> Task :app:generateReleaseResources FROM-CACHE
+> Task :app:packageReleaseResources FROM-CACHE
+> Task :app:mergeReleaseJniLibFolders
+> Task :app:checkReleaseDuplicateClasses
+> Task :app:processReleaseNavigationResources FROM-CACHE
+> Task :app:javaPreCompileRelease FROM-CACHE
+> Task :app:parseReleaseLocalResources FROM-CACHE
+> Task :app:generateReleaseRFile FROM-CACHE
+> Task :app:checkReleaseAarMetadata
+> Task :app:mapReleaseSourceSetPaths
+> Task :app:compileReleaseNavigationResources FROM-CACHE
+> Task :app:mergeReleaseArtProfile
+> Task :app:createReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksRelease FROM-CACHE
+> Task :app:mergeReleaseNativeLibs
+> Task :app:processReleaseMainManifest FROM-CACHE
+> Task :app:processReleaseManifest FROM-CACHE
+> Task :app:processReleaseManifestForPackage FROM-CACHE
+> Task :app:mergeReleaseStartupProfile
+> Task :app:mergeReleaseResources FROM-CACHE
+
+> Task :app:stripReleaseDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libdatastore_shared_counter.so, libonnxruntime.so, libsherpa-onnx-c-api.so, libsherpa-onnx-cxx-api.so, libsherpa-onnx-jni.so, libtranslate_jni.so. Run with --info option to learn more.
+
+> Task :app:extractReleaseNativeSymbolTables FROM-CACHE
+> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:extractReleaseVersionControlInfo
+> Task :app:validateSigningRelease
+> Task :app:writeReleaseAppMetadata
+> Task :app:writeReleaseSigningConfigVersions
+> Task :app:processReleaseResources FROM-CACHE
+> Task :app:parseReleaseIntegrityConfig FROM-CACHE
+> Task :app:mergeReleaseAssets
+> Task :app:collectReleaseDependencies
+> Task :app:configureReleaseDependencies
+> Task :app:compressReleaseAssets FROM-CACHE
+> Task :app:kspReleaseKotlin
+> Task :app:compileReleaseKotlin
+w: file:///C:/Users/danse/OneDrive/document/Whisly/whisly/app/src/main/java/com/example/MainActivity.kt:101:46 'static field TRIM_MEMORY_RUNNING_LOW: Int' is deprecated. Deprecated in Java.
+w: file:///C:/Users/danse/OneDrive/document/Whisly/whisly/app/src/main/java/com/example/core/crash/CrashProtectionManager.kt:67:92 'val id: Long' is deprecated. Deprecated in Java.
+
+> Task :app:processReleaseJavaRes
+> Task :app:compileReleaseJavaWithJavac
+> Task :app:mergeReleaseGeneratedProguardFiles
+> Task :app:mergeReleaseJavaResource
+> Task :app:generateReleaseLintVitalReportModel
+> Task :app:expandReleaseArtProfileWildcards
+> Task :app:lintVitalAnalyzeRelease
+> Task :app:minifyReleaseWithR8
+> Task :app:convertShrunkResourcesToBinaryRelease FROM-CACHE
+> Task :app:optimizeReleaseResources FROM-CACHE
+> Task :app:compileReleaseArtProfile
+> Task :app:buildReleasePreBundle
+> Task :app:lintVitalReportRelease
+> Task :app:lintVitalRelease
+> Task :app:packageRelease
+> Task :app:assembleRelease
+> Task :app:createReleaseApkListingFileRedirect
+> Task :app:packageReleaseBundle
+> Task :app:signReleaseBundle
+> Task :app:bundleRelease
+> Task :app:produceReleaseBundleIdeListingFile
+> Task :app:createReleaseBundleListingFileRedirect
+
+BUILD SUCCESSFUL in 5m 27s
+57 actionable tasks: 36 executed, 20 from cache, 1 up-to-date
+Configuration cache entry stored.
+
+
+===== 4. STATIC VERIFICATION (NO DEVICE) =====
+=== apksigner release ===
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): false
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: CN=Android Debug, O=Android, C=US
+Signer #1 certificate SHA-256 digest: debb01439b4cdd03fee1688efa1f9e6d3699d44636b15fd96221fbbb35a693d7
+Signer #1 certificate SHA-1 digest: 820ea66e48f208ac34c3320eef5b542c3674ec09
+Signer #1 certificate MD5 digest: db5ab24a12e258084f4e5a6b2f2a578d
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 2048
+Signer #1 public key SHA-256 digest: 28f29601b5a9f1b774d96cd45713784b9e4ff7039a85f5cfda86262b076387e6
+Signer #1 public key SHA-1 digest: 23946cac354936b343dfaea98ebc145325c72283
+Signer #1 public key MD5 digest: 22ef91dd5fa6a20af69f4a764273d5bd
+APKSIGNER_RELEASE_EXIT=0
+=== apksigner debug ===
+Signer #1 certificate DN: CN=Android Debug, O=Android, C=US
+Signer #1 certificate SHA-256 digest: debb01439b4cdd03fee1688efa1f9e6d3699d44636b15fd96221fbbb35a693d7
+Signer #1 certificate SHA-1 digest: 820ea66e48f208ac34c3320eef5b542c3674ec09
+Signer #1 certificate MD5 digest: db5ab24a12e258084f4e5a6b2f2a578d
+APKSIGNER_DEBUG_EXIT=0
+=== aapt2 badging key fields ===
+
+package: name='com.aistudio.whisly.kxmpzq' versionCode='7' versionName='1.0.7' platformBuildVersionName='16' 
+platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'
+minSdkVersion:'24'
+targetSdkVersion:'36'
+uses-permission: name='android.permission.RECORD_AUDIO'
+uses-permission: name='android.permission.VIBRATE'
+uses-permission: name='android.permission.INTERNET'
+uses-permission: name='android.permission.ACCESS_NETWORK_STATE'
+uses-permission: name='android.permission.FOREGROUND_SERVICE'
+uses-permission: name='android.permission.FOREGROUND_SERVICE_DATA_SYNC'
+uses-permission: name='android.permission.POST_NOTIFICATIONS'
+uses-permission: name='com.aistudio.whisly.kxmpzq.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'
+application-label:'Whisly'
+launchable-activity: name='com.example.MainActivity'  label='Whisly' icon=''
+native-code: 'arm64-v8a'
+=== apkanalyzer file-size ===
+113232981
+=== apkanalyzer summary ===
+com.aistudio.whisly.kxmpzq	7	1.0.7
+
+
+
+
+===== 5. APK FILE LIST (first 25 lines) =====
+293576	/resources.arsc
+15460	/res/za.ttf
+2900	/res/zR.png
+15811	/res/yz.ttf
+4226	/res/yn.png
+19157	/res/xM.png
+7461	/res/wb.png
+256448	/res/tF.png
+260	/res/ry.xml
+279205	/res/rl.png
+256448	/res/qX.png
+18273	/res/o-.png
+65439	/res/kw.png
+15338	/res/jj.ttf
+182	/res/jB.xml
+489	/res/iQ1.png
+158635	/res/iQ.png
+333	/res/hq.xml
+411	/res/hQ.xml
+147136	/res/gm.png
+38367	/res/gX.png
+13518	/res/fO.png
+41294	/res/dM.png
+71068	/res/Zw.png
+681	/res/ZI.png

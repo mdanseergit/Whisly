@@ -86,3 +86,7 @@ desktop.ini
 # Captures and local reports with potentially device-specific data
 captures/
 **/captures/
+
+# Final deliverable mapping is large and reproducible from the release build;
+# its hash is recorded in SHA256SUMS.txt.
+whisly/deliverables/FINAL_APK/mapping.txt
