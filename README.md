@@ -69,20 +69,20 @@ Current measured scope (see [`whisly/docs/MODELS.md`](./whisly/docs/MODELS.md) a
 
 ```mermaid
 flowchart TD
-    A[Microphone 16 kHz mono PCM16] --> B[AudioProcessor: NS / AGC + VAD]
-    B --> C{English STT available?}
-    C -- yes --> D[Bundled Whisper Tiny INT8 via sherpa-onnx]
-    C -- no --> E[Fail closed: speech unavailable]
-    D --> F[TranscriptFirewall: PASS / LOW_CONFIDENCE / FAIL]
-    F -- FAIL --> G[Couldn't understand. Try again.]
-    F -- LOW_CONFIDENCE --> H[User confirms and edits transcript]
-    F -- PASS --> H
-    H --> I[ML Kit typed translation, on-device]
-    I -- language unsupported --> J[Translation unavailable offline]
-    I --> K[System TTS voice gate]
-    K -- voice missing --> L[Voice not available for language]
-    K --> M[Spoken translation]
-    H --> N[Room + Keystore encrypted history]
+  A[Microphone 16 kHz mono PCM16] --> B[AudioProcessor with VAD]
+  B --> C{English STT available}
+  C -->|yes| D[Whisper Tiny INT8 via sherpa-onnx]
+  C -->|no| E[Fail closed speech unavailable]
+  D --> F[TranscriptFirewall]
+  F -->|FAIL| G[Couldn't understand Try again]
+  F -->|LOW_CONFIDENCE| H[User confirms and edits transcript]
+  F -->|PASS| H
+  H --> I[ML Kit typed translation on device]
+  I -->|language unsupported| J[Translation unavailable offline]
+  I --> K[System TTS voice gate]
+  K -->|voice missing| L[Voice not available for language]
+  K --> M[Spoken translation]
+  H --> N[Encrypted local history]
 ```
 
 The same state machine drives both single-speaker translation and the two-person conversation screen.
