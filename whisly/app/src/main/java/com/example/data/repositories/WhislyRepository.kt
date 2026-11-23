@@ -28,7 +28,7 @@ data class DecryptedHistoryItem(
     val originalText: String,
     val translatedText: String,
     val mode: String,
-    val sttConfidence: Float,
+    val sttConfidence: Float?,
     val inferenceLatencyMs: Long,
     val createdAt: Long
 )
@@ -108,7 +108,7 @@ class WhislyRepository(
         originalText: String,
         translatedText: String,
         mode: String,
-        confidence: Float,
+        confidence: Float?,
         latencyMs: Long
     ) = withContext(Dispatchers.IO) {
         val entry = TranslationHistoryEntity(

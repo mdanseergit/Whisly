@@ -516,7 +516,7 @@ private fun HistoryScreenLightPreview() {
                     originalText = "Sample text",
                     translatedText = "Sample text",
                     mode = "VOICE",
-                    sttConfidence = 0.94f,
+                    sttConfidence = null,
                     inferenceLatencyMs = 42L,
                     createdAt = 1730000000000L
                 )
@@ -542,7 +542,7 @@ private fun HistoryScreenDarkPreview() {
                     originalText = "Sample text",
                     translatedText = "Sample text",
                     mode = "VOICE",
-                    sttConfidence = 0.94f,
+                    sttConfidence = null,
                     inferenceLatencyMs = 42L,
                     createdAt = 1730000000000L
                 )

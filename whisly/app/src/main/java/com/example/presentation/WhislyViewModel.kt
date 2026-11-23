@@ -12,6 +12,7 @@ import com.example.ai.modelmanager.WhislyModelManager
 import com.example.ai.pipeline.AudioDiagnostics
 import com.example.ai.pipeline.SpeechToSpeechPipeline
 import com.example.ai.registry.CapabilityRegistry
+import com.example.ai.stt.TranscriptFirewall
 import com.example.ai.translation.IndicLanguageCatalog
 import com.example.ai.translation.IndicTrans2Engine
 import com.example.ai.tts.SystemTextToSpeechEngine
@@ -46,6 +47,8 @@ data class TranslateUiState(
     val recordingElapsedMs: Long = 0L,
     val recognizedTranscript: String = "",
     val initialSttTranscript: String = "",
+    val transcriptReviewNotice: String? = null,
+    val pendingConversationSpeakerIsA: Boolean? = null,
     val translatedSentence: String = "",
     val tokenizedPreview: String = "",
     val sttConfidence: Float? = null,
@@ -475,6 +478,8 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                 recordingElapsedMs = 0L,
                 recognizedTranscript = "",
                 initialSttTranscript = "",
+                transcriptReviewNotice = null,
+                pendingConversationSpeakerIsA = null,
                 translatedSentence = "",
                 sttConfidence = null,
                 activeError = null,
@@ -530,27 +535,49 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
             when (outcome) {
                 is com.example.ai.stt.SttOutcome.Transcript -> {
                     val transcript = sanitizeTranscript(outcome.text)
-                    if (transcript.isEmpty()) {
-                        _pipelineStage.value = PipelineStage.ERROR
-                        _uiState.update { it.copy(activeError = PipelineErrorType.STT_FAILURE) }
-                        return@launch
-                    }
                     // Speech auto-detect is UNAVAILABLE. The decoder was forced with the
                     // user-selected source language; never override it with a text LID guess.
                     val selectedSource = _uiState.value.sourceLangCode
-                    _uiState.update {
-                        it.copy(
-                            recognizedTranscript = transcript,
-                            initialSttTranscript = transcript,
-                            sttConfidence = outcome.confidence,
-                            detectedSourceLangCode = selectedSource,
-                            ambiguousLanguageCandidates = emptyList(),
-                            activeError = null,
-                            statusBannerMessage = null
-                        )
+                    val firewall = TranscriptFirewall.evaluate(transcript, outcome.confidence)
+                    when (firewall) {
+                        TranscriptFirewall.Outcome.FAIL -> {
+                            _pipelineStage.value = PipelineStage.ERROR
+                            _uiState.update {
+                                it.copy(
+                                    recognizedTranscript = "",
+                                    initialSttTranscript = "",
+                                    transcriptReviewNotice = null,
+                                    translatedSentence = "",
+                                    activeError = PipelineErrorType.STT_FAILURE,
+                                    statusBannerMessage = TranscriptFirewall.FAILURE_MESSAGE
+                                )
+                            }
+                            return@launch
+                        }
+                        TranscriptFirewall.Outcome.LOW_CONFIDENCE,
+                        TranscriptFirewall.Outcome.PASS -> {
+                            val reviewNotice = if (firewall == TranscriptFirewall.Outcome.LOW_CONFIDENCE) {
+                                TranscriptFirewall.LOW_CONFIDENCE_LABEL
+                            } else {
+                                null
+                            }
+                            _uiState.update {
+                                it.copy(
+                                    recognizedTranscript = transcript,
+                                    initialSttTranscript = transcript,
+                                    sttConfidence = outcome.confidence,
+                                    transcriptReviewNotice = reviewNotice,
+                                    detectedSourceLangCode = selectedSource,
+                                    ambiguousLanguageCandidates = emptyList(),
+                                    activeError = null,
+                                    statusBannerMessage = null
+                                )
+                            }
+                            // No automatic translation. The user must edit if needed and tap
+                            // Translate, including for PASS results.
+                            _pipelineStage.value = PipelineStage.AWAITING_CONFIRMATION
+                        }
                     }
-                    _pipelineStage.value = PipelineStage.AWAITING_CONFIRMATION
-                    confirmTranscriptAndTranslate()
                 }
                 is com.example.ai.stt.SttOutcome.Failure -> {
                     _pipelineStage.value = PipelineStage.ERROR
@@ -576,6 +603,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
         val state = _uiState.value
         val transcript = state.recognizedTranscript.trim()
         if (transcript.isEmpty()) return
+        _uiState.update { it.copy(transcriptReviewNotice = null) }
 
         val effectiveSource = state.sourceLangCode
 
@@ -640,7 +668,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                     originalText = transcript,
                     translatedText = mtRes.translatedText,
                     mode = "VOICE",
-                    confidence = state.sttConfidence ?: 0f,
+                    confidence = state.sttConfidence,
                     latencyMs = totalLatency
                 )
 
@@ -719,14 +747,40 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
             viewModelScope.launch {
                 when (val outcome = speechRecognizer.stopAndRecognize()) {
                     is com.example.ai.stt.SttOutcome.Transcript -> {
+                        val transcript = sanitizeTranscript(outcome.text)
+                        val firewall = TranscriptFirewall.evaluate(transcript, outcome.confidence)
+                        if (firewall == TranscriptFirewall.Outcome.FAIL) {
+                            _pipelineStage.value = PipelineStage.ERROR
+                            _uiState.update {
+                                it.copy(
+                                    recognizedTranscript = "",
+                                    initialSttTranscript = "",
+                                    transcriptReviewNotice = null,
+                                    activeError = PipelineErrorType.STT_FAILURE,
+                                    statusBannerMessage = TranscriptFirewall.FAILURE_MESSAGE
+                                )
+                            }
+                            return@launch
+                        }
+                        val reviewNotice = if (firewall == TranscriptFirewall.Outcome.LOW_CONFIDENCE) {
+                            TranscriptFirewall.LOW_CONFIDENCE_LABEL
+                        } else {
+                            null
+                        }
+                        _uiState.update {
+                            it.copy(
+                                recognizedTranscript = transcript,
+                                initialSttTranscript = transcript,
+                                sttConfidence = outcome.confidence,
+                                transcriptReviewNotice = reviewNotice,
+                                detectedSourceLangCode = speakerSource,
+                                pendingConversationSpeakerIsA = state.activeConversationSpeakerIsA,
+                                activeError = null,
+                                statusBannerMessage = null
+                            )
+                        }
+                        // No conversation turn is emitted until the user confirms the transcript.
                         _pipelineStage.value = PipelineStage.AWAITING_CONFIRMATION
-                        executeConversationTranslationTurn(
-                            isPersonA = state.activeConversationSpeakerIsA,
-                            sourceLang = speakerSource,
-                            targetLang = speakerTarget,
-                            transcript = outcome.text,
-                            confidence = outcome.confidence ?: 1.0f
-                        )
                     }
                     is com.example.ai.stt.SttOutcome.Failure -> {
                         _pipelineStage.value = PipelineStage.ERROR
@@ -773,6 +827,11 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                     activeConversationSpeakerIsA = isPersonA,
                     recordingElapsedMs = 0L,
                     recognizedTranscript = "",
+                    initialSttTranscript = "",
+                    transcriptReviewNotice = null,
+                    pendingConversationSpeakerIsA = null,
+                    translatedSentence = "",
+                    sttConfidence = null,
                     activeError = null
                 )
             }
@@ -791,6 +850,33 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    /** Emits a conversation turn only after explicit confirmation of the editable transcript. */
+    fun confirmConversationTranscript() {
+        val state = _uiState.value
+        val transcript = state.recognizedTranscript.trim()
+        if (transcript.isEmpty()) return
+        val isPersonA = state.pendingConversationSpeakerIsA ?: state.activeConversationSpeakerIsA
+        val effectiveSrc = state.sourceLangCode
+        val speakerSource = if (isPersonA) effectiveSrc else state.targetLangCode
+        val speakerTarget = if (isPersonA) state.targetLangCode else effectiveSrc
+        _uiState.update {
+            it.copy(
+                transcriptReviewNotice = null,
+                pendingConversationSpeakerIsA = null,
+                activeError = null
+            )
+        }
+        viewModelScope.launch {
+            executeConversationTranslationTurn(
+                isPersonA = isPersonA,
+                sourceLang = speakerSource,
+                targetLang = speakerTarget,
+                transcript = transcript,
+                confidence = state.sttConfidence
+            )
+        }
+    }
+
     fun submitConversationTextTurn(isPersonA: Boolean, text: String) {
         val trimmed = text.trim()
         if (trimmed.isEmpty()) return
@@ -804,7 +890,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                 sourceLang = speakerSource,
                 targetLang = speakerTarget,
                 transcript = trimmed,
-                confidence = 1.0f
+                confidence = null
             )
         }
     }
@@ -814,7 +900,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
         sourceLang: String,
         targetLang: String,
         transcript: String,
-        confidence: Float
+        confidence: Float?
     ) {
         val settings = settingsState.value ?: AppSettingsEntity()
         val outcome = pipeline.translateAndSynthesize(
@@ -934,7 +1020,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                     originalText = input,
                     translatedText = mtRes.translatedText,
                     mode = "TEXT",
-                    confidence = 1.0f,
+                    confidence = null,
                     latencyMs = mtRes.latencyMs
                 )
             } else {

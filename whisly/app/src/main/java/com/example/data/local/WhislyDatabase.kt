@@ -20,7 +20,7 @@ import java.io.File
         AppSettingsEntity::class,
         PendingCorrectionEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = true
 )
 abstract class WhislyDatabase : RoomDatabase() {
@@ -113,6 +113,47 @@ abstract class WhislyDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * Fix (c) — allow STT confidence to be genuinely absent. Nullable confidence replaces
+         * fabricated 0f/1f placeholders. All history rows and the createdAt index are preserved.
+         */
+        val MIGRATION_4_5: Migration = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE `translation_history_new` (
+                        `id` TEXT NOT NULL,
+                        `sourceLangCode` TEXT NOT NULL,
+                        `targetLangCode` TEXT NOT NULL,
+                        `originalTextEncrypted` TEXT NOT NULL,
+                        `translatedTextEncrypted` TEXT NOT NULL,
+                        `mode` TEXT NOT NULL,
+                        `sttConfidence` REAL,
+                        `inferenceLatencyMs` INTEGER NOT NULL,
+                        `createdAt` INTEGER NOT NULL,
+                        PRIMARY KEY(`id`)
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    INSERT INTO `translation_history_new` (
+                        id, sourceLangCode, targetLangCode, originalTextEncrypted,
+                        translatedTextEncrypted, mode, sttConfidence, inferenceLatencyMs, createdAt
+                    )
+                    SELECT id, sourceLangCode, targetLangCode, originalTextEncrypted,
+                        translatedTextEncrypted, mode, sttConfidence, inferenceLatencyMs, createdAt
+                    FROM `translation_history`
+                    """.trimIndent()
+                )
+                db.execSQL("DROP TABLE `translation_history`")
+                db.execSQL("ALTER TABLE `translation_history_new` RENAME TO `translation_history`")
+                db.execSQL(
+                    "CREATE INDEX `index_translation_history_createdAt` ON `translation_history` (`createdAt`)"
+                )
+            }
+        }
+
         fun getInstance(context: Context): WhislyDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: run {
@@ -125,7 +166,7 @@ abstract class WhislyDatabase : RoomDatabase() {
                             WhislyDatabase::class.java,
                             "whisly_offline_ai.db"
                         )
-                            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                             // No destructive fallback: a missing migration must fail loudly rather than wipe user data.
                             .build()
                         // Force-open so a broken migration surfaces here instead of crashing later.
@@ -150,7 +191,7 @@ abstract class WhislyDatabase : RoomDatabase() {
                             WhislyDatabase::class.java,
                             "whisly_offline_ai.db"
                         )
-                            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                             .build()
                             .also { INSTANCE = it }
                     }

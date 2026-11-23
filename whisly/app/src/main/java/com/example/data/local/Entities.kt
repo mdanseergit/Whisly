@@ -116,7 +116,7 @@ data class TranslationHistoryEntity(
     val originalTextEncrypted: String,
     val translatedTextEncrypted: String,
     val mode: String, // VOICE, CONVERSATION, TEXT
-    val sttConfidence: Float,
+    val sttConfidence: Float?,
     val inferenceLatencyMs: Long,
     val createdAt: Long = System.currentTimeMillis()
 )

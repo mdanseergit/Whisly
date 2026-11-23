@@ -277,6 +277,7 @@ fun TranslateScreen(
                 sourceLanguageName = sourceDisplay,
                 targetLanguageName = "${targetLang?.nativeName ?: ""} (${targetLang?.englishName ?: "Bengali"})",
                 recognizedTranscript = uiState.recognizedTranscript,
+                transcriptReviewNotice = uiState.transcriptReviewNotice,
                 translatedSentence = uiState.translatedSentence,
                 sttConfidence = uiState.sttConfidence,
                 latencyBadgeText = "",

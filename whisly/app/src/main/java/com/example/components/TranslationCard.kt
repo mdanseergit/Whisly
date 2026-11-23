@@ -52,6 +52,7 @@ fun TranslationWorkspaceCard(
     sourceLanguageName: String,
     targetLanguageName: String,
     recognizedTranscript: String,
+    transcriptReviewNotice: String?,
     translatedSentence: String,
     sttConfidence: Float?,
     latencyBadgeText: String,
@@ -109,6 +110,18 @@ fun TranslationWorkspaceCard(
             }
 
             Spacer(modifier = Modifier.height(WhislyTokens.Space8))
+
+            if (transcriptReviewNotice != null) {
+                Text(
+                    text = transcriptReviewNotice,
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        color = WhislyTokens.WarningText,
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    modifier = Modifier.testTag("transcript_review_notice")
+                )
+                Spacer(modifier = Modifier.height(WhislyTokens.Space4))
+            }
 
             OutlinedTextField(
                 value = recognizedTranscript,

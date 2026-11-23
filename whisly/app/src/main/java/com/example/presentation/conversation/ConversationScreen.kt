@@ -67,6 +67,8 @@ fun ConversationScreen(
     onSwapLanguages: () -> Unit,
     onSpeakerTurnAction: (Boolean) -> Unit,
     onSubmitTextTurn: (Boolean, String) -> Unit,
+    onTranscriptChanged: (String) -> Unit,
+    onConfirmConversationTranscript: () -> Unit,
     onPlayTurnAudio: (ConversationTurn) -> Unit,
     onClearConversation: () -> Unit,
     onBack: () -> Unit = {},
@@ -230,6 +232,51 @@ fun ConversationScreen(
                     .fillMaxWidth()
                     .padding(horizontal = WhislyTokens.ScreenHorizontalPadding, vertical = WhislyTokens.Space12)
             ) {
+                val reviewNotice = uiState.transcriptReviewNotice
+                if (reviewNotice != null && uiState.recognizedTranscript.isNotBlank()) {
+                    Surface(
+                        shape = RoundedCornerShape(WhislyTokens.RadiusControl),
+                        color = colors.background,
+                        border = BorderStroke(1.dp, WhislyTokens.WarningText),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("conversation_transcript_review")
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(WhislyTokens.Space12)
+                        ) {
+                            Text(
+                                text = reviewNotice,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    color = WhislyTokens.WarningText,
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                modifier = Modifier.testTag("transcript_review_notice")
+                            )
+                            Spacer(modifier = Modifier.height(WhislyTokens.Space8))
+                            OutlinedTextField(
+                                value = uiState.recognizedTranscript,
+                                onValueChange = onTranscriptChanged,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("conversation_transcript_input")
+                            )
+                            Spacer(modifier = Modifier.height(WhislyTokens.Space8))
+                            Button(
+                                onClick = onConfirmConversationTranscript,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("conversation_confirm_transcript_button")
+                            ) {
+                                Text("Translate")
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(WhislyTokens.Space8))
+                }
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(WhislyTokens.Space8),
@@ -463,7 +510,7 @@ private fun ConversationScreenLightPreview() {
                         originalText = "Sample text",
                         translatedText = "Sample text",
                         timestamp = 1730000000000L,
-                        confidence = 0.95f,
+                        confidence = null,
                         ttsAvailable = true
                     )
                 )
@@ -474,6 +521,8 @@ private fun ConversationScreenLightPreview() {
             onSwapLanguages = {},
             onSpeakerTurnAction = {},
             onSubmitTextTurn = { _, _ -> },
+            onTranscriptChanged = {},
+            onConfirmConversationTranscript = {},
             onPlayTurnAudio = {},
             onClearConversation = {}
         )
@@ -492,6 +541,8 @@ private fun ConversationScreenDarkPreview() {
             onSwapLanguages = {},
             onSpeakerTurnAction = {},
             onSubmitTextTurn = { _, _ -> },
+            onTranscriptChanged = {},
+            onConfirmConversationTranscript = {},
             onPlayTurnAudio = {},
             onClearConversation = {}
         )

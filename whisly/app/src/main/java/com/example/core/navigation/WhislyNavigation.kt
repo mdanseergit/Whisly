@@ -296,6 +296,8 @@ fun WhislyAppRoot(
                     onSwapLanguages = viewModel::swapLanguages,
                     onSpeakerTurnAction = viewModel::toggleConversationTurnRecording,
                     onSubmitTextTurn = viewModel::submitConversationTextTurn,
+                    onTranscriptChanged = viewModel::updateRecognizedTranscript,
+                    onConfirmConversationTranscript = viewModel::confirmConversationTranscript,
                     onPlayTurnAudio = { turn ->
                         viewModel.speakArbitraryText(turn.translatedText, turn.targetLangCode)
                     },

@@ -4,6 +4,7 @@ import com.example.ai.audio.AudioProcessor
 import com.example.ai.evaluation.AiEvaluationSuite
 import com.example.ai.lid.LanguageIdEngine
 import com.example.ai.registry.CapabilityRegistry
+import com.example.ai.stt.TranscriptFirewall
 import com.example.ai.translation.IndicLanguageCatalog
 import com.example.ai.translation.IndicTrans2Engine
 import com.example.core.security.KeystoreCryptoManager
@@ -445,6 +446,50 @@ class ExampleUnitTest {
             "Typed text fallback must remain available in the text-only screen",
             java.io.File(presentationDir, "text_translation/TextTranslationScreen.kt")
                 .readText().contains("allowAutoDetect = true")
+        )
+    }
+
+    @Test
+    fun `transcript firewall fails closed without per token confidence`() {
+        assertEquals(
+            TranscriptFirewall.Outcome.FAIL,
+            TranscriptFirewall.evaluate("", null)
+        )
+        assertEquals(
+            TranscriptFirewall.Outcome.LOW_CONFIDENCE,
+            TranscriptFirewall.evaluate("hello", null)
+        )
+        assertEquals(
+            TranscriptFirewall.Outcome.LOW_CONFIDENCE,
+            TranscriptFirewall.evaluate("hello", 0.99f)
+        )
+        assertEquals(
+            TranscriptFirewall.Outcome.PASS,
+            TranscriptFirewall.evaluate("hello", 0.9f, 0.8f)
+        )
+        assertEquals("Not sure: check and edit", TranscriptFirewall.LOW_CONFIDENCE_LABEL)
+        assertEquals("Couldn't understand. Try again.", TranscriptFirewall.FAILURE_MESSAGE)
+    }
+
+    @Test
+    fun `grep check enforces no fabricated confidence and no automatic translation`() {
+        val viewModel = java.io.File("src/main/java/com/example/presentation/WhislyViewModel.kt")
+            .readText()
+        assertFalse(
+            "STT confidence must never be fabricated as 1.0f",
+            viewModel.contains("outcome.confidence ?: 1.0f")
+        )
+        assertFalse(
+            "STT confidence must never be fabricated as 0f",
+            viewModel.contains("state.sttConfidence ?: 0f")
+        )
+        assertTrue(
+            "Speech results must pass through the transcript firewall",
+            viewModel.contains("TranscriptFirewall.evaluate")
+        )
+        assertFalse(
+            "No STT result may auto-call translation",
+            Regex("(?m)^\\s+confirmTranscriptAndTranslate\\(\\)\\s*$").containsMatchIn(viewModel)
         )
     }
 

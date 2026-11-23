@@ -207,7 +207,7 @@ data class ConversationTurn(
     val originalText: String,
     val translatedText: String,
     val timestamp: Long,
-    val confidence: Float,
+    val confidence: Float?,
     val ttsAvailable: Boolean
 )
 
