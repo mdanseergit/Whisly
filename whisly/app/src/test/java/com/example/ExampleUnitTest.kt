@@ -193,15 +193,17 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun `audio gate rejects silence and low confidence before any bundled decoder runs`() {
+    fun `audio gate rejects silence before any bundled decoder runs`() {
         val silentVad = AudioProcessor.preprocessAndRunVad(ShortArray(1600) { 0 }, 16000, 100L)
         assertFalse(silentVad.vadSpeechDetected)
         assertTrue(silentVad.tooQuietDetected)
         assertEquals(0L, silentVad.voicedDurationMs)
 
-        assertEquals(0.55f, AudioProcessor.MIN_STT_CONFIDENCE, 0.0001f)
-        val lowConfidence = 0.42f
-        assertTrue(lowConfidence < AudioProcessor.MIN_STT_CONFIDENCE)
+        // Confidence never uses a fabricated local threshold; only the firewall may decide.
+        val recognizer = java.io.File("src/main/java/com/example/ai/stt/WhislyOfflineSpeechRecognizer.kt").readText()
+        val processor = java.io.File("src/main/java/com/example/ai/audio/AudioProcessor.kt").readText()
+        assertFalse(processor.contains("MIN_STT_CONFIDENCE"))
+        assertFalse(recognizer.contains("MIN_STT_CONFIDENCE"))
     }
 
     @Test
@@ -494,6 +496,40 @@ class ExampleUnitTest {
         assertFalse(
             "No STT result may auto-call translation",
             Regex("(?m)^\\s+confirmTranscriptAndTranslate\\(\\)\\s*$").containsMatchIn(viewModel)
+        )
+    }
+
+    @Test
+    fun `registry rows and stage profiles cover the same languages with no stale speech claims`() {
+        val manifestCodes = CapabilityRegistry.allLanguages.map { it.code }.toSet()
+        assertEquals(manifestCodes, CapabilityRegistry.stageProfiles.keys)
+        val seeded = CapabilityRegistry.buildInitialLanguageEntities()
+        assertEquals(listOf("en"), seeded.filter { it.canListen }.map { it.code })
+        assertEquals(
+            listOf("en"),
+            CapabilityRegistry.allLanguages.filter { CapabilityRegistry.canRunSpeechRecognition(it.code) }
+                .map { it.code }
+        )
+        // canSpeak is only a device-voice mapping hint; runtime TTS gating is authoritative.
+        assertFalse(CapabilityRegistry.stageProfile("sat")?.ttsAvailable ?: true)
+    }
+
+    @Test
+    fun `firewall strips measured annotation tokens and fails closed on wrong script`() {
+        assertEquals(
+            "Hello world",
+            TranscriptFirewall.sanitize("<|hi|> [MUSIC] Hello\u00A0 world [SUMMING]")
+        )
+        val english = TranscriptFirewall.evaluateForLanguage("[MUSIC] hello there 123", "en", null)
+        assertEquals(TranscriptFirewall.Outcome.LOW_CONFIDENCE, english.outcome)
+        assertEquals("hello there 123", english.text)
+        assertEquals(
+            TranscriptFirewall.Outcome.FAIL,
+            TranscriptFirewall.evaluateForLanguage("<|hi|> Major kinkanam pohumadheesagar", "hi", null).outcome
+        )
+        assertEquals(
+            TranscriptFirewall.Outcome.FAIL,
+            TranscriptFirewall.evaluateForLanguage("[speaking in foreign language]", "ta", null).outcome
         )
     }
 

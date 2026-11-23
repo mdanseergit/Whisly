@@ -296,11 +296,6 @@ class WhislyOfflineSpeechRecognizer(
                 when {
                     text.isEmpty() ->
                         SttOutcome.Failure(PipelineErrorType.STT_FAILURE, "engine returned blank text")
-                    confidence != null && confidence < AudioProcessor.MIN_STT_CONFIDENCE ->
-                        SttOutcome.Failure(
-                            PipelineErrorType.STT_LOW_CONFIDENCE,
-                            "confidence=$confidence"
-                        )
                     else -> SttOutcome.Transcript(
                         text = text,
                         confidence = confidence,

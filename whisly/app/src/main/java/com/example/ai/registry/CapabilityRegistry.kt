@@ -840,8 +840,9 @@ object CapabilityRegistry {
     }
 
     fun sttCapabilityStatus(code: String, installed: Boolean): CapabilityStatus {
-        val entry = getLanguage(code) ?: return CapabilityStatus.NOT_AVAILABLE
-        if (!entry.canListen) return CapabilityStatus.UNAVAILABLE
+        if (getLanguage(code) == null) return CapabilityStatus.NOT_AVAILABLE
+        // Measured stage tier is authoritative; the legacy canListen row is not.
+        if (!canRunSpeechRecognition(code)) return CapabilityStatus.UNAVAILABLE
         return if (installed) CapabilityStatus.READY else CapabilityStatus.IMPORT_REQUIRED
     }
 
@@ -873,7 +874,7 @@ object CapabilityRegistry {
     ): Boolean {
         val src = getLanguage(sourceCode) ?: return false
         val tgt = getLanguage(targetCode) ?: return false
-        if (!src.canListen || !tgt.canSpeak) return false
+        if (!canRunSpeechRecognition(sourceCode) || !tgt.canSpeak) return false
 
         val sttPack = src.sttPackId ?: return false
         if (!isPackInstalledAndVerified(sttPack)) return false
@@ -922,7 +923,7 @@ object CapabilityRegistry {
             sttModelId = entry.sttPackId ?: "",
             mtModelId = entry.mtPackId,
             ttsModelId = entry.ttsPackId,
-            sttAvailable = entry.canListen,
+            sttAvailable = canRunSpeechRecognition(entry.code),
             mtAvailable = true,
             ttsCapability = if (entry.canSpeak) {
                 TtsCapabilityStatus.SYSTEM_FALLBACK_ONLY
@@ -948,7 +949,7 @@ object CapabilityRegistry {
                 englishName = entry.name,
                 nativeName = entry.nativeName,
                 scriptName = entry.script,
-                sttSupported = entry.canListen,
+                sttSupported = canRunSpeechRecognition(entry.code),
                 mtSupported = true,
                 ttsCapability = if (entry.canSpeak) {
                     TtsCapabilityStatus.SYSTEM_FALLBACK_ONLY.name
@@ -963,7 +964,7 @@ object CapabilityRegistry {
                 installStatus = if (installed) "INSTALLED" else "NOT_INSTALLED",
                 version = entry.version,
                 totalSizeBytes = entry.totalDownloadSizeBytes,
-                canListen = entry.canListen,
+                canListen = canRunSpeechRecognition(entry.code),
                 canIdentify = entry.canIdentify,
                 canSpeak = entry.canSpeak,
                 voiceLocale = entry.voiceLocale,

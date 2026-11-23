@@ -70,7 +70,6 @@ class AudioProcessor(private val context: Context) {
         const val END_OF_SPEECH_SILENCE_FRAMES = 35 // 700ms continuous trailing silence marks end of speech
         const val MIN_VOICED_DURATION_MS = 120L
         const val MAX_RECORDING_DURATION_MS = 30_000L
-        const val MIN_STT_CONFIDENCE = 0.55f
 
         // Adaptive VAD floor bounds (tuned for real phone microphones & conversational speech)
         const val MIN_NOISE_FLOOR_RMS = 0.0018f

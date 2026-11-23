@@ -458,17 +458,6 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
     private var recordingTimerJob: kotlinx.coroutines.Job? = null
     private var sttJob: kotlinx.coroutines.Job? = null
 
-    private fun sanitizeTranscript(raw: String): String {
-        val trimmed = raw.trim()
-        if (trimmed.isEmpty()) return ""
-        val capitalized = if (trimmed.length > 1 && trimmed[0].isLowerCase()) {
-            trimmed.replaceFirstChar { it.uppercase() }
-        } else {
-            trimmed
-        }
-        return capitalized.replace(Regex("\\s+"), " ")
-    }
-
     /** Visible Beta badge required by the STT acceptance gate for BETA-tier results. */
     private fun sttTierLabel(code: String): String? =
         if (CapabilityRegistry.sttTier(code) == CapabilityRegistry.StageTier.BETA) "Beta" else null
@@ -596,12 +585,15 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
             val outcome = speechRecognizer.stopAndRecognize()
             when (outcome) {
                 is com.example.ai.stt.SttOutcome.Transcript -> {
-                    val transcript = sanitizeTranscript(outcome.text)
                     // Speech auto-detect is UNAVAILABLE. The decoder was forced with the
                     // user-selected source language; never override it with a text LID guess.
                     val selectedSource = _uiState.value.sourceLangCode
-                    val firewall = TranscriptFirewall.evaluate(transcript, outcome.confidence)
-                    when (firewall) {
+                    val checked = TranscriptFirewall.evaluateForLanguage(
+                        raw = outcome.text,
+                        languageCode = selectedSource,
+                        confidence = outcome.confidence
+                    )
+                    when (checked.outcome) {
                         TranscriptFirewall.Outcome.FAIL -> {
                             _uiState.update {
                                 it.copy(
@@ -618,15 +610,15 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                         }
                         TranscriptFirewall.Outcome.LOW_CONFIDENCE,
                         TranscriptFirewall.Outcome.PASS -> {
-                            val reviewNotice = if (firewall == TranscriptFirewall.Outcome.LOW_CONFIDENCE) {
+                            val reviewNotice = if (checked.outcome == TranscriptFirewall.Outcome.LOW_CONFIDENCE) {
                                 TranscriptFirewall.LOW_CONFIDENCE_LABEL
                             } else {
                                 null
                             }
                             _uiState.update {
                                 it.copy(
-                                    recognizedTranscript = transcript,
-                                    initialSttTranscript = transcript,
+                                    recognizedTranscript = checked.text,
+                                    initialSttTranscript = checked.text,
                                     sttConfidence = outcome.confidence,
                                     sttTierLabel = sttTierLabel(selectedSource),
                                     transcriptReviewNotice = reviewNotice,
@@ -827,9 +819,12 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
             viewModelScope.launch {
                 when (val outcome = speechRecognizer.stopAndRecognize()) {
                     is com.example.ai.stt.SttOutcome.Transcript -> {
-                        val transcript = sanitizeTranscript(outcome.text)
-                        val firewall = TranscriptFirewall.evaluate(transcript, outcome.confidence)
-                        if (firewall == TranscriptFirewall.Outcome.FAIL) {
+                        val checked = TranscriptFirewall.evaluateForLanguage(
+                            raw = outcome.text,
+                            languageCode = speakerSource,
+                            confidence = outcome.confidence
+                        )
+                        if (checked.outcome == TranscriptFirewall.Outcome.FAIL) {
                             _uiState.update {
                                 it.copy(
                                     recognizedTranscript = "",
@@ -842,15 +837,15 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                             emitStage(PipelineStage.ERROR)
                             return@launch
                         }
-                        val reviewNotice = if (firewall == TranscriptFirewall.Outcome.LOW_CONFIDENCE) {
+                        val reviewNotice = if (checked.outcome == TranscriptFirewall.Outcome.LOW_CONFIDENCE) {
                             TranscriptFirewall.LOW_CONFIDENCE_LABEL
                         } else {
                             null
                         }
                         _uiState.update {
                             it.copy(
-                                recognizedTranscript = transcript,
-                                initialSttTranscript = transcript,
+                                recognizedTranscript = checked.text,
+                                initialSttTranscript = checked.text,
                                 sttConfidence = outcome.confidence,
                                 sttTierLabel = sttTierLabel(speakerSource),
                                 transcriptReviewNotice = reviewNotice,
