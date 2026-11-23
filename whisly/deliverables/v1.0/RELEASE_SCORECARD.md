@@ -15,7 +15,7 @@ pasted evidence and the user has approved any model/bundle change.
 
 | Gate | Phase | Status | Evidence / blocker |
 |---|---|---|---|
-| Git clean + tag + outside backup | 0 | PASS | `voice-reset`, `pre-voice-reset` at `033b53f`; baseline backup ZIP 254,493,504 B with SHA-256 in `docs/APP_STACK_MAP.md`; fresh post-Phase-0 backup created outside OneDrive after the commit |
+| Git clean + tag + outside backup | 0 | PASS | `voice-reset` at `b6ab62e`, clean tree, `pre-voice-reset` at `033b53f`; baseline backup 254,493,504 B (SHA-256 `2ED041F15DF8EC92ACE7A77FD26E4A367DCC36D2AC030A001096F86E9BF8793B`); post-Phase-0 backup `C:\dev\Whisly-backups\Whisly_phase0_20261123_140456.zip` 844,346,113 B SHA-256 `3D6148C6761388216277A8F19C638E0BE5E52A01113DDCB3E17CEB5A0855E132` |
 | Secrets absent from repo + history | 0 | PASS with limitation | Full-history scan of 18 commits: `TOTAL_HITS=0`; gitleaks not installed, so regex substitution only; no keystore/.env tracked |
 | Real APK/AAB/size measured | 0 | PASS | `docs/BUILD_EVIDENCE.md`, `deliverables/final_v1.0.7/apkanalyzer/`; Play Console size still UNMEASURED |
 | Baseline map matches code | 0 | PASS (corrected) | Phase 0 addendum in `docs/APP_STACK_MAP.md` supersedes stale baseline sections |

@@ -12,6 +12,9 @@ Evidence method: local source files were read/grepped; package and artifact hash
 > - Git: branch `voice-reset`, baseline tag `pre-voice-reset` at `033b53f`, 18 reachable commits.
 >   Backup outside OneDrive: `C:\dev\Whisly-backups\Whisly_pre-voice-reset_20261122_113141.zip`,
 >   254,493,504 bytes, SHA-256 `2ED041F15DF8EC92ACE7A77FD26E4A367DCC36D2AC030A001096F86E9BF8793B`.
+>   Post-Phase-0 backup at commit `b6ab62e`:
+>   `C:\dev\Whisly-backups\Whisly_phase0_20261123_140456.zip`, 844,346,113 bytes, SHA-256
+>   `3D6148C6761388216277A8F19C638E0BE5E52A01113DDCB3E17CEB5A0855E132`.
 >   OneDrive is not a safe git/Gradle location; move the project to `C:\dev\Whisly` (user decision pending).
 > - The local `androidx/core/splashscreen/SplashScreen.kt` shim is **gone** (no file found); `MainActivity`
 >   imports `androidx.core.splashscreen.SplashScreen` from official `core-splashscreen:1.2.0`.
