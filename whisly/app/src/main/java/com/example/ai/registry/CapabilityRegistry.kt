@@ -828,6 +828,17 @@ object CapabilityRegistry {
     fun mlKitLidTag(code: String): String? =
         stageProfile(code)?.mlKitLidTag?.takeIf { it != NO_ML_KIT_TAG }
 
+    /**
+     * Typed text translation has no fallback engine: if either side has no ML Kit tag (for example
+     * Malayalam or Punjabi), no transliteration, echo or canned text may run. The caller must show
+     * [typedTranslationUnavailableMessage] and must not enter the translation pipeline.
+     */
+    fun typedTranslationUnavailableLanguage(source: String, target: String): String? =
+        listOf(source, target).firstOrNull { mlKitTranslationTag(it) == null }
+
+    fun typedTranslationUnavailableMessage(code: String): String =
+        "Translation isn't available for ${getLanguage(code)?.name ?: code} offline yet"
+
     fun ttsLocale(code: String): String? = stageProfile(code)?.ttsLocale
 
     fun sttTier(code: String): StageTier = stageProfile(code)?.sttTier ?: StageTier.UNAVAILABLE

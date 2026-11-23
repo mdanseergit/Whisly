@@ -781,4 +781,19 @@ class ExampleUnitTest {
         supported.forEach { assertTrue("$it should be supported", com.example.ai.stt.SherpaOnnxSttEngine.isLanguageSupported(it)) }
         unsupported.forEach { assertFalse("$it must remain unavailable for bundled STT", com.example.ai.stt.SherpaOnnxSttEngine.isLanguageSupported(it)) }
     }
+
+    @Test
+    fun `typed translation fails closed for Malayalam and Punjabi with exact offline message`() {
+        assertEquals("ml", CapabilityRegistry.typedTranslationUnavailableLanguage("ml", "en"))
+        assertEquals("pa", CapabilityRegistry.typedTranslationUnavailableLanguage("en", "pa"))
+        assertNull(CapabilityRegistry.typedTranslationUnavailableLanguage("hi", "bn"))
+        assertEquals(
+            "Translation isn't available for Malayalam offline yet",
+            CapabilityRegistry.typedTranslationUnavailableMessage("ml")
+        )
+        assertEquals(
+            "Translation isn't available for Punjabi offline yet",
+            CapabilityRegistry.typedTranslationUnavailableMessage("pa")
+        )
+    }
 }

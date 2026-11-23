@@ -676,6 +676,22 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
             return
         }
 
+        val unsupported = CapabilityRegistry.typedTranslationUnavailableLanguage(
+            effectiveSource,
+            state.targetLangCode
+        )
+        if (unsupported != null) {
+            emitStage(PipelineStage.IDLE)
+            _uiState.update {
+                it.copy(
+                    translatedSentence = "",
+                    activeError = PipelineErrorType.UNSUPPORTED_LANGUAGE_DIRECTION,
+                    statusBannerMessage = CapabilityRegistry.typedTranslationUnavailableMessage(unsupported)
+                )
+            }
+            return
+        }
+
         viewModelScope.launch {
             val isPairReady = isPairReadyOffline(effectiveSource, state.targetLangCode)
             if (!isPairReady) {
@@ -979,6 +995,16 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
         transcript: String,
         confidence: Float?
     ) {
+        val unsupported = CapabilityRegistry.typedTranslationUnavailableLanguage(sourceLang, targetLang)
+        if (unsupported != null) {
+            _uiState.update {
+                it.copy(
+                    activeError = PipelineErrorType.UNSUPPORTED_LANGUAGE_DIRECTION,
+                    statusBannerMessage = CapabilityRegistry.typedTranslationUnavailableMessage(unsupported)
+                )
+            }
+            return
+        }
         val settings = settingsState.value ?: AppSettingsEntity()
         val outcome = pipeline.translateAndSynthesize(
             confirmedText = transcript,
@@ -1051,6 +1077,23 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                     translatedSentence = "",
                     activeError = PipelineErrorType.SAME_LANGUAGE_SOURCE_TARGET,
                     statusBannerMessage = "Source and target languages are the same ($targetName)."
+                )
+            }
+            return
+        }
+
+        val unsupported = CapabilityRegistry.typedTranslationUnavailableLanguage(
+            effectiveSource,
+            state.targetLangCode
+        )
+        if (unsupported != null) {
+            emitStage(PipelineStage.IDLE)
+            _uiState.update {
+                it.copy(
+                    textModeOutput = "",
+                    translatedSentence = "",
+                    activeError = PipelineErrorType.UNSUPPORTED_LANGUAGE_DIRECTION,
+                    statusBannerMessage = CapabilityRegistry.typedTranslationUnavailableMessage(unsupported)
                 )
             }
             return
