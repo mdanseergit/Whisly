@@ -3,6 +3,8 @@ local.properties
 **/local.properties
 .env
 **/.env
+.env.*
+**/.env.*
 !.env.example
 !**/.env.example
 *.keystore
@@ -15,6 +17,23 @@ local.properties
 **/*.pem
 *.key
 **/*.key
+
+# Python / Node / generated junk
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+**/.venv/
+venv/
+**/venv/
+node_modules/
+**/node_modules/
+*.egg-info/
+dist/
+**/dist/
 
 # Gradle / Kotlin / IDE caches
 .gradle/
