@@ -1,0 +1,1208 @@
+{
+  "speech": [
+    {
+      "voiced_ratio": 0.7898550724637681,
+      "f0_median": 107.38255033557047,
+      "f0_spread_semitones": 4.772442403406647,
+      "pitch_change_rate": 0.32407407407407407,
+      "harmonicity_med": 0.43660810589790344,
+      "active": 138
+    },
+    {
+      "voiced_ratio": 0.9875518672199171,
+      "f0_median": 216.21621621621622,
+      "f0_spread_semitones": 2.8873979303329045,
+      "pitch_change_rate": 0.19831223628691982,
+      "harmonicity_med": 0.7309534847736359,
+      "active": 241
+    },
+    {
+      "voiced_ratio": 0.9580838323353293,
+      "f0_median": 119.40298507462687,
+      "f0_spread_semitones": 3.624478108227321,
+      "pitch_change_rate": 0.27044025157232704,
+      "harmonicity_med": 0.5226699411869049,
+      "active": 167
+    },
+    {
+      "voiced_ratio": 0.9761904761904762,
+      "f0_median": 214.77477477477478,
+      "f0_spread_semitones": 4.656408906084086,
+      "pitch_change_rate": 0.16049382716049382,
+      "harmonicity_med": 0.7155706286430359,
+      "active": 84
+    },
+    {
+      "voiced_ratio": 1.0,
+      "f0_median": 213.33333333333334,
+      "f0_spread_semitones": 2.921901706228582,
+      "pitch_change_rate": 0.23711340206185566,
+      "harmonicity_med": 0.7274575531482697,
+      "active": 98
+    },
+    {
+      "voiced_ratio": 0.8376068376068376,
+      "f0_median": 225.35211267605635,
+      "f0_spread_semitones": 4.976190800951092,
+      "pitch_change_rate": 0.3402061855670103,
+      "harmonicity_med": 0.7137662172317505,
+      "active": 117
+    },
+    {
+      "voiced_ratio": 0.8656716417910447,
+      "f0_median": 130.61442089830734,
+      "f0_spread_semitones": 4.4997031729603725,
+      "pitch_change_rate": 0.2782608695652174,
+      "harmonicity_med": 0.5578420162200928,
+      "active": 134
+    },
+    {
+      "voiced_ratio": 0.9954337899543378,
+      "f0_median": 201.26582278481013,
+      "f0_spread_semitones": 3.1364082701211746,
+      "pitch_change_rate": 0.1889400921658986,
+      "harmonicity_med": 0.7044930458068848,
+      "active": 219
+    },
+    {
+      "voiced_ratio": 0.6293706293706294,
+      "f0_median": 129.55677943876213,
+      "f0_spread_semitones": 4.485136544996524,
+      "pitch_change_rate": 0.24719101123595505,
+      "harmonicity_med": 0.5598679184913635,
+      "active": 143
+    },
+    {
+      "voiced_ratio": 0.9868421052631579,
+      "f0_median": 216.21621621621622,
+      "f0_spread_semitones": 3.061529036475205,
+      "pitch_change_rate": 0.20134228187919462,
+      "harmonicity_med": 0.7297732532024384,
+      "active": 152
+    },
+    {
+      "voiced_ratio": 0.9322033898305084,
+      "f0_median": 186.04651162790697,
+      "f0_spread_semitones": 2.0374934795166246,
+      "pitch_change_rate": 0.22188449848024316,
+      "harmonicity_med": 0.6905018091201782,
+      "active": 354
+    },
+    {
+      "voiced_ratio": 0.918918918918919,
+      "f0_median": 210.52631578947367,
+      "f0_spread_semitones": 2.445110780367582,
+      "pitch_change_rate": 0.21182266009852216,
+      "harmonicity_med": 0.6816341876983643,
+      "active": 222
+    },
+    {
+      "voiced_ratio": 0.9340277777777778,
+      "f0_median": 128.0,
+      "f0_spread_semitones": 4.9815085223433355,
+      "pitch_change_rate": 0.3805970149253731,
+      "harmonicity_med": 0.5408270955085754,
+      "active": 288
+    },
+    {
+      "voiced_ratio": 0.96875,
+      "f0_median": 202.53164556962025,
+      "f0_spread_semitones": 3.6862253297101426,
+      "pitch_change_rate": 0.24025974025974026,
+      "harmonicity_med": 0.7156872153282166,
+      "active": 160
+    },
+    {
+      "voiced_ratio": 0.9944444444444445,
+      "f0_median": 142.85714285714286,
+      "f0_spread_semitones": 1.6057121600031696,
+      "pitch_change_rate": 0.09803921568627451,
+      "harmonicity_med": 0.6166624426841736,
+      "active": 360
+    },
+    {
+      "voiced_ratio": 0.9958847736625515,
+      "f0_median": 140.35087719298247,
+      "f0_spread_semitones": 1.5917054995076283,
+      "pitch_change_rate": 0.15767634854771784,
+      "harmonicity_med": 0.617732971906662,
+      "active": 243
+    },
+    {
+      "voiced_ratio": 0.9722222222222222,
+      "f0_median": 144.14414414414415,
+      "f0_spread_semitones": 2.43468319388401,
+      "pitch_change_rate": 0.302158273381295,
+      "harmonicity_med": 0.6051006317138672,
+      "active": 144
+    },
+    {
+      "voiced_ratio": 0.944954128440367,
+      "f0_median": 132.23140495867767,
+      "f0_spread_semitones": 1.9167165713420318,
+      "pitch_change_rate": 0.15584415584415584,
+      "harmonicity_med": 0.5685813426971436,
+      "active": 327
+    },
+    {
+      "voiced_ratio": 0.9102040816326531,
+      "f0_median": 140.35087719298247,
+      "f0_spread_semitones": 2.745498723412751,
+      "pitch_change_rate": 0.1036036036036036,
+      "harmonicity_med": 0.5909318327903748,
+      "active": 245
+    },
+    {
+      "voiced_ratio": 0.9527272727272728,
+      "f0_median": 132.23140495867767,
+      "f0_spread_semitones": 1.8540627828351823,
+      "pitch_change_rate": 0.13409961685823754,
+      "harmonicity_med": 0.5645382404327393,
+      "active": 275
+    },
+    {
+      "voiced_ratio": 0.9478260869565217,
+      "f0_median": 195.1219512195122,
+      "f0_spread_semitones": 2.7469107788165106,
+      "pitch_change_rate": 0.16666666666666666,
+      "harmonicity_med": 0.7146468162536621,
+      "active": 115
+    },
+    {
+      "voiced_ratio": 0.9944444444444445,
+      "f0_median": 158.41584158415841,
+      "f0_spread_semitones": 2.946866907295301,
+      "pitch_change_rate": 0.25842696629213485,
+      "harmonicity_med": 0.6593096852302551,
+      "active": 180
+    },
+    {
+      "voiced_ratio": 0.9625935162094763,
+      "f0_median": 136.75213675213675,
+      "f0_spread_semitones": 2.7308164568230353,
+      "pitch_change_rate": 0.17922077922077922,
+      "harmonicity_med": 0.5624407231807709,
+      "active": 401
+    },
+    {
+      "voiced_ratio": 0.7862318840579711,
+      "f0_median": 266.6666666666667,
+      "f0_spread_semitones": 2.201920273105916,
+      "pitch_change_rate": 0.16628175519630484,
+      "harmonicity_med": 0.44504833221435547,
+      "active": 552
+    },
+    {
+      "voiced_ratio": 0.9060402684563759,
+      "f0_median": 202.53164556962025,
+      "f0_spread_semitones": 2.2404894398427553,
+      "pitch_change_rate": 0.12871287128712872,
+      "harmonicity_med": 0.7039210200309753,
+      "active": 447
+    },
+    {
+      "voiced_ratio": 0.9906976744186047,
+      "f0_median": 156.86274509803923,
+      "f0_spread_semitones": 2.0501895937628394,
+      "pitch_change_rate": 0.20754716981132076,
+      "harmonicity_med": 0.648100733757019,
+      "active": 215
+    },
+    {
+      "voiced_ratio": 0.7046413502109705,
+      "f0_median": 301.8867924528302,
+      "f0_spread_semitones": 1.9078284244226023,
+      "pitch_change_rate": 0.10810810810810811,
+      "harmonicity_med": 0.40350842475891113,
+      "active": 474
+    },
+    {
+      "voiced_ratio": 0.7,
+      "f0_median": 301.8867924528302,
+      "f0_spread_semitones": 1.6063046427082754,
+      "pitch_change_rate": 0.13900414937759337,
+      "harmonicity_med": 0.41387176513671875,
+      "active": 690
+    },
+    {
+      "voiced_ratio": 0.7224669603524229,
+      "f0_median": 301.8867924528302,
+      "f0_spread_semitones": 2.392901357132174,
+      "pitch_change_rate": 0.18533604887983707,
+      "harmonicity_med": 0.41986240446567535,
+      "active": 681
+    },
+    {
+      "voiced_ratio": 1.0,
+      "f0_median": 158.41584158415841,
+      "f0_spread_semitones": 2.7113017072601995,
+      "pitch_change_rate": 0.34523809523809523,
+      "harmonicity_med": 0.6343390345573425,
+      "active": 85
+    },
+    {
+      "voiced_ratio": 0.9846743295019157,
+      "f0_median": 133.33333333333334,
+      "f0_spread_semitones": 3.1278056124621783,
+      "pitch_change_rate": 0.25390625,
+      "harmonicity_med": 0.6069236993789673,
+      "active": 261
+    },
+    {
+      "voiced_ratio": 0.9911764705882353,
+      "f0_median": 179.77528089887642,
+      "f0_spread_semitones": 1.6254699901655505,
+      "pitch_change_rate": 0.13988095238095238,
+      "harmonicity_med": 0.6940493583679199,
+      "active": 340
+    },
+    {
+      "voiced_ratio": 0.9959016393442623,
+      "f0_median": 168.42105263157896,
+      "f0_spread_semitones": 1.5125413691477108,
+      "pitch_change_rate": 0.17768595041322313,
+      "harmonicity_med": 0.6735719442367554,
+      "active": 244
+    },
+    {
+      "voiced_ratio": 0.9713114754098361,
+      "f0_median": 115.94202898550725,
+      "f0_spread_semitones": 4.277452179734166,
+      "pitch_change_rate": 0.2966101694915254,
+      "harmonicity_med": 0.5132733583450317,
+      "active": 244
+    },
+    {
+      "voiced_ratio": 0.9613259668508287,
+      "f0_median": 130.08130081300814,
+      "f0_spread_semitones": 3.4158014053852996,
+      "pitch_change_rate": 0.18497109826589594,
+      "harmonicity_med": 0.5798743963241577,
+      "active": 181
+    },
+    {
+      "voiced_ratio": 0.9760479041916168,
+      "f0_median": 163.26530612244898,
+      "f0_spread_semitones": 2.7270586895496454,
+      "pitch_change_rate": 0.20987654320987653,
+      "harmonicity_med": 0.6520693898200989,
+      "active": 167
+    },
+    {
+      "voiced_ratio": 0.9661654135338346,
+      "f0_median": 122.13740458015268,
+      "f0_spread_semitones": 1.791512367892321,
+      "pitch_change_rate": 0.125,
+      "harmonicity_med": 0.5354714393615723,
+      "active": 266
+    },
+    {
+      "voiced_ratio": 0.9712230215827338,
+      "f0_median": 235.2941176470588,
+      "f0_spread_semitones": 2.844568934991294,
+      "pitch_change_rate": 0.2342007434944238,
+      "harmonicity_med": 0.6785090565681458,
+      "active": 278
+    },
+    {
+      "voiced_ratio": 0.9791666666666666,
+      "f0_median": 126.98412698412699,
+      "f0_spread_semitones": 2.9366083201908886,
+      "pitch_change_rate": 0.27350427350427353,
+      "harmonicity_med": 0.558208703994751,
+      "active": 240
+    },
+    {
+      "voiced_ratio": 0.9815668202764977,
+      "f0_median": 137.93103448275863,
+      "f0_spread_semitones": 3.9181300926231666,
+      "pitch_change_rate": 0.24528301886792453,
+      "harmonicity_med": 0.5877519249916077,
+      "active": 217
+    },
+    {
+      "voiced_ratio": 0.945859872611465,
+      "f0_median": 139.1304347826087,
+      "f0_spread_semitones": 1.7056462804898755,
+      "pitch_change_rate": 0.11148648648648649,
+      "harmonicity_med": 0.5527600049972534,
+      "active": 314
+    },
+    {
+      "voiced_ratio": 0.9195402298850575,
+      "f0_median": 225.35211267605635,
+      "f0_spread_semitones": 1.69065764086748,
+      "pitch_change_rate": 0.12658227848101267,
+      "harmonicity_med": 0.7317149341106415,
+      "active": 87
+    },
+    {
+      "voiced_ratio": 0.9795918367346939,
+      "f0_median": 144.14414414414415,
+      "f0_spread_semitones": 1.4487423837040596,
+      "pitch_change_rate": 0.1589958158995816,
+      "harmonicity_med": 0.6105358600616455,
+      "active": 245
+    },
+    {
+      "voiced_ratio": 0.9495798319327731,
+      "f0_median": 119.40298507462687,
+      "f0_spread_semitones": 2.953527524616385,
+      "pitch_change_rate": 0.13392857142857142,
+      "harmonicity_med": 0.5312181115150452,
+      "active": 119
+    },
+    {
+      "voiced_ratio": 1.0,
+      "f0_median": 228.57142857142858,
+      "f0_spread_semitones": 1.388365515227288,
+      "pitch_change_rate": 0.1046831955922865,
+      "harmonicity_med": 0.7530460059642792,
+      "active": 364
+    },
+    {
+      "voiced_ratio": 0.9470899470899471,
+      "f0_median": 108.10810810810811,
+      "f0_spread_semitones": 1.75188299874627,
+      "pitch_change_rate": 0.08426966292134831,
+      "harmonicity_med": 0.4950615465641022,
+      "active": 189
+    },
+    {
+      "voiced_ratio": 0.9906976744186047,
+      "f0_median": 142.85714285714286,
+      "f0_spread_semitones": 1.9512467078738471,
+      "pitch_change_rate": 0.1509433962264151,
+      "harmonicity_med": 0.604996919631958,
+      "active": 215
+    },
+    {
+      "voiced_ratio": 0.9748743718592965,
+      "f0_median": 120.30075187969925,
+      "f0_spread_semitones": 2.6391389577341497,
+      "pitch_change_rate": 0.13471502590673576,
+      "harmonicity_med": 0.538764238357544,
+      "active": 199
+    },
+    {
+      "voiced_ratio": 0.976303317535545,
+      "f0_median": 225.35211267605635,
+      "f0_spread_semitones": 1.7384651161412348,
+      "pitch_change_rate": 0.13170731707317074,
+      "harmonicity_med": 0.7435746490955353,
+      "active": 211
+    },
+    {
+      "voiced_ratio": 0.979381443298969,
+      "f0_median": 181.8181818181818,
+      "f0_spread_semitones": 1.793710070934564,
+      "pitch_change_rate": 0.17253521126760563,
+      "harmonicity_med": 0.653338611125946,
+      "active": 291
+    },
+    {
+      "voiced_ratio": 0.9940239043824701,
+      "f0_median": 219.17808219178082,
+      "f0_spread_semitones": 3.238756850469623,
+      "pitch_change_rate": 0.20883534136546184,
+      "harmonicity_med": 0.7004174590110779,
+      "active": 502
+    },
+    {
+      "voiced_ratio": 0.996031746031746,
+      "f0_median": 205.12820512820514,
+      "f0_spread_semitones": 3.1895242204664966,
+      "pitch_change_rate": 0.212,
+      "harmonicity_med": 0.6845639944076538,
+      "active": 252
+    },
+    {
+      "voiced_ratio": 0.9692982456140351,
+      "f0_median": 148.14814814814815,
+      "f0_spread_semitones": 3.007521978335424,
+      "pitch_change_rate": 0.2863636363636364,
+      "harmonicity_med": 0.5668995976448059,
+      "active": 228
+    },
+    {
+      "voiced_ratio": 1.0,
+      "f0_median": 219.17808219178082,
+      "f0_spread_semitones": 3.2087968745451754,
+      "pitch_change_rate": 0.2578947368421053,
+      "harmonicity_med": 0.698880136013031,
+      "active": 191
+    },
+    {
+      "voiced_ratio": 0.9837837837837838,
+      "f0_median": 238.80597014925374,
+      "f0_spread_semitones": 3.8286497716834935,
+      "pitch_change_rate": 0.2534435261707989,
+      "harmonicity_med": 0.6955951452255249,
+      "active": 370
+    },
+    {
+      "voiced_ratio": 0.9834710743801653,
+      "f0_median": 142.85714285714286,
+      "f0_spread_semitones": 2.88157404886574,
+      "pitch_change_rate": 0.17134831460674158,
+      "harmonicity_med": 0.6085737347602844,
+      "active": 363
+    },
+    {
+      "voiced_ratio": 0.9676113360323887,
+      "f0_median": 133.33333333333334,
+      "f0_spread_semitones": 2.634498680164523,
+      "pitch_change_rate": 0.15126050420168066,
+      "harmonicity_med": 0.5310219526290894,
+      "active": 247
+    },
+    {
+      "voiced_ratio": 0.984472049689441,
+      "f0_median": 148.14814814814815,
+      "f0_spread_semitones": 2.7601158070672316,
+      "pitch_change_rate": 0.2310126582278481,
+      "harmonicity_med": 0.6252203583717346,
+      "active": 322
+    },
+    {
+      "voiced_ratio": 1.0,
+      "f0_median": 231.8840579710145,
+      "f0_spread_semitones": 3.6021382645441262,
+      "pitch_change_rate": 0.296875,
+      "harmonicity_med": 0.7331355214118958,
+      "active": 257
+    },
+    {
+      "voiced_ratio": 0.9491525423728814,
+      "f0_median": 144.14414414414415,
+      "f0_spread_semitones": 3.33605653029556,
+      "pitch_change_rate": 0.19161676646706588,
+      "harmonicity_med": 0.6105032861232758,
+      "active": 177
+    },
+    {
+      "voiced_ratio": 0.9885057471264368,
+      "f0_median": 226.96177062374247,
+      "f0_spread_semitones": 1.7576031100845653,
+      "pitch_change_rate": 0.12941176470588237,
+      "harmonicity_med": 0.7377907633781433,
+      "active": 87
+    },
+    {
+      "voiced_ratio": 0.9782608695652174,
+      "f0_median": 242.42424242424244,
+      "f0_spread_semitones": 1.0930805131533008,
+      "pitch_change_rate": 0.13636363636363635,
+      "harmonicity_med": 0.7271125912666321,
+      "active": 46
+    },
+    {
+      "voiced_ratio": 0.9655172413793104,
+      "f0_median": 192.7710843373494,
+      "f0_spread_semitones": 2.5727742712279635,
+      "pitch_change_rate": 0.2529832935560859,
+      "harmonicity_med": 0.6669788062572479,
+      "active": 435
+    },
+    {
+      "voiced_ratio": 0.9583333333333334,
+      "f0_median": 250.0,
+      "f0_spread_semitones": 1.7056779445320716,
+      "pitch_change_rate": 0.13636363636363635,
+      "harmonicity_med": 0.7474222183227539,
+      "active": 24
+    },
+    {
+      "voiced_ratio": 0.9508196721311475,
+      "f0_median": 220.7001522070015,
+      "f0_spread_semitones": 3.0186000151328543,
+      "pitch_change_rate": 0.2943722943722944,
+      "harmonicity_med": 0.67388516664505,
+      "active": 244
+    },
+    {
+      "voiced_ratio": 0.9933993399339934,
+      "f0_median": 210.52631578947367,
+      "f0_spread_semitones": 2.327570475227401,
+      "pitch_change_rate": 0.27666666666666667,
+      "harmonicity_med": 0.6613215804100037,
+      "active": 303
+    },
+    {
+      "voiced_ratio": 0.9826086956521739,
+      "f0_median": 197.53086419753086,
+      "f0_spread_semitones": 2.3246151575204763,
+      "pitch_change_rate": 0.31555555555555553,
+      "harmonicity_med": 0.6669566929340363,
+      "active": 230
+    },
+    {
+      "voiced_ratio": 0.9322033898305084,
+      "f0_median": 228.57142857142858,
+      "f0_spread_semitones": 1.4587380028268675,
+      "pitch_change_rate": 0.12804878048780488,
+      "harmonicity_med": 0.7336421608924866,
+      "active": 177
+    },
+    {
+      "voiced_ratio": 0.982367758186398,
+      "f0_median": 150.9433962264151,
+      "f0_spread_semitones": 2.1355129440133074,
+      "pitch_change_rate": 0.16709511568123395,
+      "harmonicity_med": 0.6124824583530426,
+      "active": 397
+    },
+    {
+      "voiced_ratio": 0.9694749694749695,
+      "f0_median": 222.22222222222223,
+      "f0_spread_semitones": 1.7252355031394213,
+      "pitch_change_rate": 0.11349306431273644,
+      "harmonicity_med": 0.7223634123802185,
+      "active": 819
+    },
+    {
+      "voiced_ratio": 0.976,
+      "f0_median": 190.47619047619048,
+      "f0_spread_semitones": 2.8873138692561913,
+      "pitch_change_rate": 0.1589041095890411,
+      "harmonicity_med": 0.6781928539276123,
+      "active": 375
+    },
+    {
+      "voiced_ratio": 0.9611111111111111,
+      "f0_median": 163.26530612244898,
+      "f0_spread_semitones": 1.2432571307885099,
+      "pitch_change_rate": 0.05232558139534884,
+      "harmonicity_med": 0.6479085683822632,
+      "active": 180
+    },
+    {
+      "voiced_ratio": 0.9446064139941691,
+      "f0_median": 188.23529411764707,
+      "f0_spread_semitones": 3.9280926416663573,
+      "pitch_change_rate": 0.34365325077399383,
+      "harmonicity_med": 0.6474589407444,
+      "active": 343
+    },
+    {
+      "voiced_ratio": 0.9773755656108597,
+      "f0_median": 238.80597014925374,
+      "f0_spread_semitones": 2.5462182154540267,
+      "pitch_change_rate": 0.14883720930232558,
+      "harmonicity_med": 0.7651243209838867,
+      "active": 221
+    },
+    {
+      "voiced_ratio": 0.8788732394366198,
+      "f0_median": 197.53086419753086,
+      "f0_spread_semitones": 3.528460688918881,
+      "pitch_change_rate": 0.2733118971061093,
+      "harmonicity_med": 0.6854920387268066,
+      "active": 355
+    },
+    {
+      "voiced_ratio": 0.944954128440367,
+      "f0_median": 151.66217430368374,
+      "f0_spread_semitones": 5.341002541667519,
+      "pitch_change_rate": 0.424390243902439,
+      "harmonicity_med": 0.5530270934104919,
+      "active": 218
+    },
+    {
+      "voiced_ratio": 0.9765625,
+      "f0_median": 152.38095238095238,
+      "f0_spread_semitones": 1.3896234084266599,
+      "pitch_change_rate": 0.06684491978609626,
+      "harmonicity_med": 0.6306964755058289,
+      "active": 384
+    },
+    {
+      "voiced_ratio": 0.9002695417789758,
+      "f0_median": 225.35211267605635,
+      "f0_spread_semitones": 3.312630093246476,
+      "pitch_change_rate": 0.2552552552552553,
+      "harmonicity_med": 0.7027044892311096,
+      "active": 371
+    },
+    {
+      "voiced_ratio": 0.9751243781094527,
+      "f0_median": 231.8840579710145,
+      "f0_spread_semitones": 2.8489252829092977,
+      "pitch_change_rate": 0.14066496163682865,
+      "harmonicity_med": 0.7556818127632141,
+      "active": 402
+    },
+    {
+      "voiced_ratio": 0.9900990099009901,
+      "f0_median": 172.04301075268816,
+      "f0_spread_semitones": 0.6656246291721255,
+      "pitch_change_rate": 0.09090909090909091,
+      "harmonicity_med": 0.6561703085899353,
+      "active": 101
+    },
+    {
+      "voiced_ratio": 0.9494163424124513,
+      "f0_median": 155.3398058252427,
+      "f0_spread_semitones": 2.932731315840787,
+      "pitch_change_rate": 0.24279835390946503,
+      "harmonicity_med": 0.6124077439308167,
+      "active": 257
+    },
+    {
+      "voiced_ratio": 0.9593023255813954,
+      "f0_median": 222.22222222222223,
+      "f0_spread_semitones": 3.2435698971895,
+      "pitch_change_rate": 0.3353658536585366,
+      "harmonicity_med": 0.6726168394088745,
+      "active": 172
+    },
+    {
+      "voiced_ratio": 0.9312320916905444,
+      "f0_median": 205.12820512820514,
+      "f0_spread_semitones": 3.6609072590583955,
+      "pitch_change_rate": 0.37037037037037035,
+      "harmonicity_med": 0.671602189540863,
+      "active": 349
+    },
+    {
+      "voiced_ratio": 0.9330543933054394,
+      "f0_median": 163.26530612244898,
+      "f0_spread_semitones": 3.8950390461616973,
+      "pitch_change_rate": 0.36486486486486486,
+      "harmonicity_med": 0.6221375465393066,
+      "active": 239
+    },
+    {
+      "voiced_ratio": 0.9731182795698925,
+      "f0_median": 190.47619047619048,
+      "f0_spread_semitones": 2.3628299290375696,
+      "pitch_change_rate": 0.21666666666666667,
+      "harmonicity_med": 0.7078336477279663,
+      "active": 186
+    },
+    {
+      "voiced_ratio": 0.9925925925925926,
+      "f0_median": 226.96177062374247,
+      "f0_spread_semitones": 2.708106736846567,
+      "pitch_change_rate": 0.2706766917293233,
+      "harmonicity_med": 0.7300889492034912,
+      "active": 135
+    },
+    {
+      "voiced_ratio": 0.9562043795620438,
+      "f0_median": 219.17808219178082,
+      "f0_spread_semitones": 3.348097527642248,
+      "pitch_change_rate": 0.3769230769230769,
+      "harmonicity_med": 0.7059707641601562,
+      "active": 137
+    },
+    {
+      "voiced_ratio": 0.8978102189781022,
+      "f0_median": 173.91304347826087,
+      "f0_spread_semitones": 2.874049304117032,
+      "pitch_change_rate": 0.319672131147541,
+      "harmonicity_med": 0.6385326981544495,
+      "active": 137
+    },
+    {
+      "voiced_ratio": 0.9782608695652174,
+      "f0_median": 238.85918003565064,
+      "f0_spread_semitones": 3.549725653226219,
+      "pitch_change_rate": 0.34831460674157305,
+      "harmonicity_med": 0.7446587383747101,
+      "active": 92
+    },
+    {
+      "voiced_ratio": 0.900990099009901,
+      "f0_median": 175.82417582417582,
+      "f0_spread_semitones": 2.628868115877562,
+      "pitch_change_rate": 0.3333333333333333,
+      "harmonicity_med": 0.64070063829422,
+      "active": 101
+    },
+    {
+      "voiced_ratio": 0.9265734265734266,
+      "f0_median": 246.15384615384616,
+      "f0_spread_semitones": 3.4786489487970895,
+      "pitch_change_rate": 0.23106060606060605,
+      "harmonicity_med": 0.7483618259429932,
+      "active": 286
+    },
+    {
+      "voiced_ratio": 0.9875621890547264,
+      "f0_median": 235.2941176470588,
+      "f0_spread_semitones": 3.013381388164288,
+      "pitch_change_rate": 0.20454545454545456,
+      "harmonicity_med": 0.7521785497665405,
+      "active": 402
+    },
+    {
+      "voiced_ratio": 1.0,
+      "f0_median": 222.22222222222223,
+      "f0_spread_semitones": 2.281675646811429,
+      "pitch_change_rate": 0.2804878048780488,
+      "harmonicity_med": 0.7169851064682007,
+      "active": 165
+    },
+    {
+      "voiced_ratio": 1.0,
+      "f0_median": 271.1864406779661,
+      "f0_spread_semitones": 1.349000653791613,
+      "pitch_change_rate": 0.11650485436893204,
+      "harmonicity_med": 0.7488580346107483,
+      "active": 104
+    },
+    {
+      "voiced_ratio": 0.6877323420074349,
+      "f0_median": 228.57142857142858,
+      "f0_spread_semitones": 3.1730661740065664,
+      "pitch_change_rate": 0.22826086956521738,
+      "harmonicity_med": 0.5422085523605347,
+      "active": 269
+    },
+    {
+      "voiced_ratio": 0.8,
+      "f0_median": 242.42424242424244,
+      "f0_spread_semitones": 1.6689420449955783,
+      "pitch_change_rate": 0.1647940074906367,
+      "harmonicity_med": 0.5755856931209564,
+      "active": 335
+    },
+    {
+      "voiced_ratio": 1.0,
+      "f0_median": 238.80597014925374,
+      "f0_spread_semitones": 1.5705052124422079,
+      "pitch_change_rate": 0.18274111675126903,
+      "harmonicity_med": 0.7319016754627228,
+      "active": 198
+    },
+    {
+      "voiced_ratio": 0.9927536231884058,
+      "f0_median": 253.96825396825398,
+      "f0_spread_semitones": 2.8527746696935536,
+      "pitch_change_rate": 0.23529411764705882,
+      "harmonicity_med": 0.7582194805145264,
+      "active": 138
+    },
+    {
+      "voiced_ratio": 0.954248366013072,
+      "f0_median": 262.2950819672131,
+      "f0_spread_semitones": 2.993527388766571,
+      "pitch_change_rate": 0.24054982817869416,
+      "harmonicity_med": 0.7628829181194305,
+      "active": 306
+    },
+    {
+      "voiced_ratio": 0.4457831325301205,
+      "f0_median": 106.66666666666667,
+      "f0_spread_semitones": 4.6789762762082185,
+      "pitch_change_rate": 0.5374149659863946,
+      "harmonicity_med": 0.3541475981473923,
+      "active": 332
+    },
+    {
+      "voiced_ratio": 0.9523809523809523,
+      "f0_median": 253.96825396825398,
+      "f0_spread_semitones": 4.414677132016889,
+      "pitch_change_rate": 0.2785388127853881,
+      "harmonicity_med": 0.7163624465465546,
+      "active": 231
+    },
+    {
+      "voiced_ratio": 0.9857549857549858,
+      "f0_median": 258.06451612903226,
+      "f0_spread_semitones": 3.9185479271906143,
+      "pitch_change_rate": 0.24347826086956523,
+      "harmonicity_med": 0.7692457437515259,
+      "active": 351
+    },
+    {
+      "voiced_ratio": 0.983132530120482,
+      "f0_median": 258.06451612903226,
+      "f0_spread_semitones": 3.1385328335201836,
+      "pitch_change_rate": 0.11793611793611794,
+      "harmonicity_med": 0.7622550129890442,
+      "active": 415
+    },
+    {
+      "voiced_ratio": 0.9120879120879121,
+      "f0_median": 235.2941176470588,
+      "f0_spread_semitones": 2.6427994959234153,
+      "pitch_change_rate": 0.2606060606060606,
+      "harmonicity_med": 0.7474621832370758,
+      "active": 182
+    },
+    {
+      "voiced_ratio": 0.9036144578313253,
+      "f0_median": 262.2950819672131,
+      "f0_spread_semitones": 4.573813883595879,
+      "pitch_change_rate": 0.23660714285714285,
+      "harmonicity_med": 0.7483290433883667,
+      "active": 249
+    },
+    {
+      "voiced_ratio": 0.8873873873873874,
+      "f0_median": 258.06451612903226,
+      "f0_spread_semitones": 5.146588633573212,
+      "pitch_change_rate": 0.3520408163265306,
+      "harmonicity_med": 0.6761045455932617,
+      "active": 222
+    },
+    {
+      "voiced_ratio": 0.9758454106280193,
+      "f0_median": 222.22222222222223,
+      "f0_spread_semitones": 1.974551380416696,
+      "pitch_change_rate": 0.18407960199004975,
+      "harmonicity_med": 0.7289714515209198,
+      "active": 207
+    },
+    {
+      "voiced_ratio": 0.98125,
+      "f0_median": 242.42424242424244,
+      "f0_spread_semitones": 1.6681379452920932,
+      "pitch_change_rate": 0.16025641025641027,
+      "harmonicity_med": 0.7576801776885986,
+      "active": 160
+    },
+    {
+      "voiced_ratio": 0.9694323144104804,
+      "f0_median": 248.0769230769231,
+      "f0_spread_semitones": 2.8055771800405904,
+      "pitch_change_rate": 0.2171945701357466,
+      "harmonicity_med": 0.7586947679519653,
+      "active": 229
+    },
+    {
+      "voiced_ratio": 0.9836956521739131,
+      "f0_median": 262.2950819672131,
+      "f0_spread_semitones": 2.8544224618565415,
+      "pitch_change_rate": 0.14444444444444443,
+      "harmonicity_med": 0.7659123539924622,
+      "active": 184
+    },
+    {
+      "voiced_ratio": 1.0,
+      "f0_median": 235.2941176470588,
+      "f0_spread_semitones": 2.0096440598663046,
+      "pitch_change_rate": 0.16842105263157894,
+      "harmonicity_med": 0.7571361660957336,
+      "active": 96
+    },
+    {
+      "voiced_ratio": 0.7272727272727273,
+      "f0_median": 301.8867924528302,
+      "f0_spread_semitones": 0.0,
+      "pitch_change_rate": 0.0,
+      "harmonicity_med": 0.4212273508310318,
+      "active": 11
+    },
+    {
+      "voiced_ratio": 0.8461538461538461,
+      "f0_median": 301.8867924528302,
+      "f0_spread_semitones": 0.0,
+      "pitch_change_rate": 0.0,
+      "harmonicity_med": 0.4955475330352783,
+      "active": 13
+    },
+    {
+      "voiced_ratio": 0.9978813559322034,
+      "f0_median": 222.22222222222223,
+      "f0_spread_semitones": 2.8154710796197753,
+      "pitch_change_rate": 0.2148936170212766,
+      "harmonicity_med": 0.7174746990203857,
+      "active": 472
+    },
+    {
+      "voiced_ratio": 0.9090909090909091,
+      "f0_median": 301.8867924528302,
+      "f0_spread_semitones": 1.7335184798367038,
+      "pitch_change_rate": 0.2222222222222222,
+      "harmonicity_med": 0.45929138362407684,
+      "active": 11
+    },
+    {
+      "voiced_ratio": 0.8469565217391304,
+      "f0_median": 200.0,
+      "f0_spread_semitones": 5.082888601473546,
+      "pitch_change_rate": 0.3991769547325103,
+      "harmonicity_med": 0.5614845752716064,
+      "active": 575
+    },
+    {
+      "voiced_ratio": 1.0,
+      "f0_median": 235.2941176470588,
+      "f0_spread_semitones": 2.1807766524782553,
+      "pitch_change_rate": 0.25,
+      "harmonicity_med": 0.7551484704017639,
+      "active": 49
+    },
+    {
+      "voiced_ratio": 0.9090909090909091,
+      "f0_median": 301.8867924528302,
+      "f0_spread_semitones": 0.5570013412751109,
+      "pitch_change_rate": 0.2222222222222222,
+      "harmonicity_med": 0.47639113664627075,
+      "active": 11
+    },
+    {
+      "voiced_ratio": 1.0,
+      "f0_median": 242.42424242424244,
+      "f0_spread_semitones": 2.7798191595234725,
+      "pitch_change_rate": 0.3076923076923077,
+      "harmonicity_med": 0.7384602427482605,
+      "active": 105
+    },
+    {
+      "voiced_ratio": 0.8738738738738738,
+      "f0_median": 210.52631578947367,
+      "f0_spread_semitones": 3.850261602212011,
+      "pitch_change_rate": 0.38275862068965516,
+      "harmonicity_med": 0.5844089388847351,
+      "active": 333
+    },
+    {
+      "voiced_ratio": 0.995260663507109,
+      "f0_median": 219.17808219178082,
+      "f0_spread_semitones": 2.2850642194877175,
+      "pitch_change_rate": 0.1722488038277512,
+      "harmonicity_med": 0.7426972985267639,
+      "active": 211
+    },
+    {
+      "voiced_ratio": 0.972568578553616,
+      "f0_median": 153.84615384615384,
+      "f0_spread_semitones": 3.9439571052165387,
+      "pitch_change_rate": 0.2365038560411311,
+      "harmonicity_med": 0.6152243316173553,
+      "active": 401
+    },
+    {
+      "voiced_ratio": 0.9925925925925926,
+      "f0_median": 222.22222222222223,
+      "f0_spread_semitones": 2.290133587589202,
+      "pitch_change_rate": 0.21348314606741572,
+      "harmonicity_med": 0.7450699508190155,
+      "active": 270
+    },
+    {
+      "voiced_ratio": 0.993103448275862,
+      "f0_median": 219.17808219178082,
+      "f0_spread_semitones": 1.781613506520624,
+      "pitch_change_rate": 0.1958041958041958,
+      "harmonicity_med": 0.7355303764343262,
+      "active": 145
+    },
+    {
+      "voiced_ratio": 0.9406130268199234,
+      "f0_median": 139.1304347826087,
+      "f0_spread_semitones": 4.624449056465935,
+      "pitch_change_rate": 0.22244897959183674,
+      "harmonicity_med": 0.5892583727836609,
+      "active": 522
+    },
+    {
+      "voiced_ratio": 0.9653579676674365,
+      "f0_median": 148.14814814814815,
+      "f0_spread_semitones": 3.8357466756147134,
+      "pitch_change_rate": 0.302158273381295,
+      "harmonicity_med": 0.5963343679904938,
+      "active": 433
+    },
+    {
+      "voiced_ratio": 0.9765625,
+      "f0_median": 231.8840579710145,
+      "f0_spread_semitones": 2.988629652023681,
+      "pitch_change_rate": 0.20080321285140562,
+      "harmonicity_med": 0.7492037713527679,
+      "active": 256
+    },
+    {
+      "voiced_ratio": 0.956989247311828,
+      "f0_median": 149.53271028037383,
+      "f0_spread_semitones": 3.107537159927417,
+      "pitch_change_rate": 0.22180451127819548,
+      "harmonicity_med": 0.607059121131897,
+      "active": 279
+    },
+    {
+      "voiced_ratio": 0.9665071770334929,
+      "f0_median": 141.5929203539823,
+      "f0_spread_semitones": 4.291842211759631,
+      "pitch_change_rate": 0.2878411910669975,
+      "harmonicity_med": 0.5903702080249786,
+      "active": 418
+    },
+    {
+      "voiced_ratio": 0.9562624254473161,
+      "f0_median": 135.59322033898306,
+      "f0_spread_semitones": 3.9558812927976987,
+      "pitch_change_rate": 0.3020833333333333,
+      "harmonicity_med": 0.5742708444595337,
+      "active": 503
+    }
+  ],
+  "music": [
+    {
+      "voiced_ratio": 0.875,
+      "f0_median": 96.44153957879448,
+      "f0_spread_semitones": 0.4172455995184663,
+      "pitch_change_rate": 0.0,
+      "harmonicity_med": 0.466351181268692,
+      "active": 16
+    },
+    {
+      "voiced_ratio": 0.9534883720930233,
+      "f0_median": 225.35211267605635,
+      "f0_spread_semitones": 5.330707351631174,
+      "pitch_change_rate": 0.36885245901639346,
+      "harmonicity_med": 0.48794421553611755,
+      "active": 129
+    },
+    {
+      "voiced_ratio": 0.967741935483871,
+      "f0_median": 111.4996114996115,
+      "f0_spread_semitones": 5.890271548235124,
+      "pitch_change_rate": 0.3016759776536313,
+      "harmonicity_med": 0.49593667685985565,
+      "active": 186
+    },
+    {
+      "voiced_ratio": 0.8373983739837398,
+      "f0_median": 177.77777777777777,
+      "f0_spread_semitones": 4.560249860164394,
+      "pitch_change_rate": 0.2549019607843137,
+      "harmonicity_med": 0.42831677198410034,
+      "active": 123
+    },
+    {
+      "voiced_ratio": 1.0,
+      "f0_median": 146.78899082568807,
+      "f0_spread_semitones": 1.6323565235738653,
+      "pitch_change_rate": 0.2391304347826087,
+      "harmonicity_med": 0.6599881052970886,
+      "active": 47
+    },
+    {
+      "voiced_ratio": 0.9545454545454546,
+      "f0_median": 280.70175438596493,
+      "f0_spread_semitones": 0.5351041070814226,
+      "pitch_change_rate": 0.1,
+      "harmonicity_med": 0.7880815863609314,
+      "active": 22
+    },
+    {
+      "voiced_ratio": 0.9815668202764977,
+      "f0_median": 262.2950819672131,
+      "f0_spread_semitones": 2.2410117000378196,
+      "pitch_change_rate": 0.07547169811320754,
+      "harmonicity_med": 0.6390588283538818,
+      "active": 217
+    },
+    {
+      "voiced_ratio": 1.0,
+      "f0_median": 173.91304347826087,
+      "f0_spread_semitones": 7.35316980653287,
+      "pitch_change_rate": 0.2,
+      "harmonicity_med": 0.4838397353887558,
+      "active": 56
+    },
+    {
+      "voiced_ratio": 0.9095477386934674,
+      "f0_median": 188.23529411764707,
+      "f0_spread_semitones": 5.126118351578881,
+      "pitch_change_rate": 0.20555555555555555,
+      "harmonicity_med": 0.486886203289032,
+      "active": 199
+    },
+    {
+      "voiced_ratio": 0.9186991869918699,
+      "f0_median": 195.1219512195122,
+      "f0_spread_semitones": 5.99824557463283,
+      "pitch_change_rate": 0.3125,
+      "harmonicity_med": 0.44938021898269653,
+      "active": 123
+    }
+  ],
+  "noise": [
+    {
+      "voiced_ratio": 0.05333333333333334,
+      "f0_median": 203.61351139041636,
+      "f0_spread_semitones": 6.448634583571222,
+      "pitch_change_rate": 0.8,
+      "harmonicity_med": 0.3486865907907486,
+      "active": 300
+    },
+    {
+      "voiced_ratio": 0.36363636363636365,
+      "f0_median": 301.8867924528302,
+      "f0_spread_semitones": 0.24521567807016612,
+      "pitch_change_rate": 0.0,
+      "harmonicity_med": 0.42147621512413025,
+      "active": 33
+    },
+    {
+      "voiced_ratio": 0.7647058823529411,
+      "f0_median": 299.0915443745632,
+      "f0_spread_semitones": 5.2748444564483,
+      "pitch_change_rate": 0.32,
+      "harmonicity_med": 0.4570462554693222,
+      "active": 34
+    },
+    {
+      "voiced_ratio": 0.21333333333333335,
+      "f0_median": 170.23203169213355,
+      "f0_spread_semitones": 5.138494358438553,
+      "pitch_change_rate": 0.9206349206349206,
+      "harmonicity_med": 0.34406378865242004,
+      "active": 300
+    },
+    {
+      "voiced_ratio": 0.24,
+      "f0_median": 97.28690766614918,
+      "f0_spread_semitones": 4.708131320625488,
+      "pitch_change_rate": 0.8181818181818182,
+      "harmonicity_med": 0.3999405652284622,
+      "active": 50
+    },
+    {
+      "voiced_ratio": 0.023333333333333334,
+      "f0_median": 290.90909090909093,
+      "f0_spread_semitones": 2.5647460299890987,
+      "pitch_change_rate": 0.5,
+      "harmonicity_med": 0.3572615385055542,
+      "active": 300
+    },
+    {
+      "voiced_ratio": 0.20333333333333334,
+      "f0_median": 200.0,
+      "f0_spread_semitones": 5.882584979703348,
+      "pitch_change_rate": 0.8333333333333334,
+      "harmonicity_med": 0.33792954683303833,
+      "active": 300
+    },
+    {
+      "voiced_ratio": 0.7857142857142857,
+      "f0_median": 301.8867924528302,
+      "f0_spread_semitones": 1.4210854715202004e-14,
+      "pitch_change_rate": 0.0,
+      "harmonicity_med": 0.5233293771743774,
+      "active": 28
+    },
+    {
+      "voiced_ratio": 0.5355805243445693,
+      "f0_median": 301.8867924528302,
+      "f0_spread_semitones": 3.1540112083276997,
+      "pitch_change_rate": 0.09154929577464789,
+      "harmonicity_med": 0.4348604679107666,
+      "active": 267
+    },
+    {
+      "voiced_ratio": 0.0163265306122449,
+      "f0_median": 130.89560148383677,
+      "f0_spread_semitones": 3.9813127873512224,
+      "pitch_change_rate": 0.6666666666666666,
+      "harmonicity_med": 0.32378678023815155,
+      "active": 245
+    }
+  ]
+}

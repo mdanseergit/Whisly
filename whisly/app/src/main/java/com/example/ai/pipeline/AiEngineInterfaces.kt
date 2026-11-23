@@ -28,6 +28,18 @@ data class AudioDiagnostics(
     val voicedFrames: Int = 0,
     val vadSpeechDetected: Boolean = false,
     val vadSpeechProbability: Float = 0f,
+    /** Debug-only telemetry for the measured normalize-then-adapt VAD path. */
+    val vadNormalizationGain: Float = 1f,
+    val vadSpeechlikeRatio: Float = 0f,
+    val vadSpectralRejectReason: String = "",
+    /** Debug-only outcome of the global speech-vs-music/noise classifier. */
+    val vadGlobalRejectReason: String = "",
+    val vadGlobalActiveFrames: Int = 0,
+    val vadGlobalBand2Fraction: Float = 0f,
+    val vadGlobalBand3Fraction: Float = 0f,
+    val vadGlobalFlatnessMedian: Float = 0f,
+    val vadGlobalHarmonicityMedian: Float = 0f,
+    val vadGlobalSyllableModulation: Float = 0f,
     val sttConfidence: Float? = null,
     val benchmarkWer: Double? = null,
     val benchmarkCer: Double? = null

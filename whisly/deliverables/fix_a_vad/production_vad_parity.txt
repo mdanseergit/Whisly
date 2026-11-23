@@ -1,0 +1,4 @@
+﻿source=C:\Users\danse\AppData\Local\Temp\whisly_build\app\test-results\testDebugUnitTest\TEST-com.example.ExampleUnitTest.xml
+<testsuite name="com.example.ExampleUnitTest" tests="19" skipped="0" failures="0" errors="0" timestamp="2026-11-23T04:50:44.278Z" hostname="MOHAMMEDDANSEER" time="13.053">
+<system-out><![CDATA[PRODUCTION_VAD_REAL_SPEECH accepted=130/130
+PRODUCTION_VAD_REAL_NONSPEECH rejected=20/20

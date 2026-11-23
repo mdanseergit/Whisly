@@ -27,9 +27,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.cos
+import kotlin.math.exp
+import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.PI
 import kotlin.math.roundToInt
+import kotlin.math.sin
 import kotlin.math.sqrt
 
 /**
@@ -73,6 +79,113 @@ class AudioProcessor(private val context: Context) {
         const val SPEECH_STOP_MULTIPLIER = 1.25f
         const val ABSOLUTE_MIN_START_RMS = 0.0035f
         const val ABSOLUTE_MIN_STOP_RMS = 0.0025f
+
+        // Measured VAD fix (DIAGNOSIS9 §12): normalize the input first, then apply the
+        // unchanged adaptive floor. No existing threshold is lowered.
+        const val SILENCE_PEAK_FLOOR = 0.0008f
+        const val NORMALIZATION_TARGET_PEAK = 0.5f
+        const val MAX_NORMALIZATION_GAIN = 80f
+        const val FFT_SIZE = 512
+        const val BAND_MIN_FRACTION = 0.06f
+        // Measured frame-level percentiles: speech flatness p1=0.00019 / p99=0.276;
+        // tonal proxy median=0.0; white noise median=0.574.
+        const val MIN_SPEECH_FLATNESS = 0.0001f
+        const val MAX_SPEECH_FLATNESS = 0.35f
+        const val MIN_SPEECHLIKE_RATIO = 0.50f
+        const val ACTIVE_RMS_FRACTION = 0.25f
+
+        /** Spectral validity of one 20 ms frame, measured on the normalized signal. */
+        private data class SpectralFrame(val bandCount: Int, val flatness: Float, val power: FloatArray)
+
+        /** Iterative radix-2 FFT power spectrum (512 bins input -> 257 power bins). */
+        private fun powerSpectrum(windowed: FloatArray): FloatArray {
+            val re = FloatArray(FFT_SIZE)
+            val im = FloatArray(FFT_SIZE)
+            for (i in windowed.indices) re[i] = windowed[i]
+
+            var j = 0
+            for (i in 1 until FFT_SIZE) {
+                var bit = FFT_SIZE shr 1
+                while (j and bit != 0) {
+                    j = j xor bit
+                    bit = bit shr 1
+                }
+                j = j xor bit
+                if (i < j) {
+                    val tr = re[i]; re[i] = re[j]; re[j] = tr
+                    val ti = im[i]; im[i] = im[j]; im[j] = ti
+                }
+            }
+
+            var len = 2
+            while (len <= FFT_SIZE) {
+                val angle = -2.0 * PI / len
+                val wLenRe = cos(angle).toFloat()
+                val wLenIm = sin(angle).toFloat()
+                var base = 0
+                while (base < FFT_SIZE) {
+                    var wr = 1f
+                    var wi = 0f
+                    val half = len / 2
+                    for (k in 0 until half) {
+                        val a = base + k
+                        val b = a + half
+                        val vr = re[b] * wr - im[b] * wi
+                        val vi = re[b] * wi + im[b] * wr
+                        val ur = re[a]
+                        val ui = im[a]
+                        re[a] = ur + vr; im[a] = ui + vi
+                        re[b] = ur - vr; im[b] = ui - vi
+                        val nextWr = wr * wLenRe - wi * wLenIm
+                        wi = wr * wLenIm + wi * wLenRe
+                        wr = nextWr
+                    }
+                    base += len
+                }
+                len *= 2
+            }
+
+            val power = FloatArray(FFT_SIZE / 2 + 1)
+            for (k in power.indices) power[k] = re[k] * re[k] + im[k] * im[k]
+            return power
+        }
+
+        private fun spectralFrameFeatures(frame: FloatArray): SpectralFrame {
+            val windowed = FloatArray(FFT_SIZE)
+            for (i in frame.indices) {
+                val w = 0.5f - 0.5f * cos(2.0 * PI * i / (frame.size - 1).toDouble()).toFloat()
+                windowed[i] = frame[i] * w
+            }
+            val power = powerSpectrum(windowed)
+            val hzPerBin = SAMPLE_RATE_HZ.toFloat() / FFT_SIZE.toFloat()
+            // Match NumPy masks exactly: freq[k] >= lo and freq[k] < hi.
+            fun lowerBin(hz: Float) = max(0, min(power.lastIndex, ceil((hz / hzPerBin).toDouble() - 1e-9).toInt()))
+            fun upperExclusiveBin(hz: Float) =
+                max(1, min(power.lastIndex + 1, ceil((hz / hzPerBin).toDouble() - 1e-9).toInt()))
+
+            val totalLo = lowerBin(150f)
+            val totalHi = upperExclusiveBin(5000f)
+            var total = 1e-20f
+            var logSum = 0.0
+            var count = 0
+            for (k in totalLo until totalHi) {
+                val p = power[k]
+                total += p
+                logSum += ln((p + 1e-20f).toDouble())
+                count++
+            }
+            if (count == 0) return SpectralFrame(0, 1f, power)
+            val flatness = (exp(logSum / count).toFloat() / (total / count)).coerceIn(0f, 1f)
+
+            val bands = arrayOf(250f to 800f, 800f to 2000f, 2000f to 4000f)
+            var bandCount = 0
+            for ((lo, hi) in bands) {
+                var e = 0f
+                for (k in lowerBin(lo) until upperExclusiveBin(hi)) e += power[k]
+                if (e >= BAND_MIN_FRACTION * total) bandCount++
+            }
+            return SpectralFrame(bandCount, flatness, power)
+        }
 
         fun pcm16ToNormalizedFloat(rawPcm: ShortArray): FloatArray {
             val out = FloatArray(rawPcm.size)
@@ -138,11 +251,54 @@ class AudioProcessor(private val context: Context) {
             val clippingDetected = clippingSamples >= 3 || peakAmp >= 0.998f
             val globalRms = sqrt(totalSumSq / rawPcm.size).toFloat()
 
+            // A muted or effectively silent input must never be amplified into a "speech" decision.
+            // This is an absolute input gate, not a lowered VAD threshold.
+            val inputMuted = effectiveAllZero || peakAmp < SILENCE_PEAK_FLOOR
+            if (inputMuted) {
+                return AudioInput(
+                    pcm16Samples = ShortArray(0),
+                    normalizedFloatSamples = FloatArray(0),
+                    sampleRateHz = SAMPLE_RATE_HZ,
+                    durationMs = computedDurationMs,
+                    voicedDurationMs = 0L,
+                    peakAmplitude = peakAmp,
+                    rmsEnergy = globalRms,
+                    silencePercentage = 100f,
+                    vadSpeechDetected = false,
+                    vadSpeechProbability = 0f,
+                    clippingDetected = clippingDetected,
+                    tooQuietDetected = true,
+                    isAllZeroStream = true,
+                    audioSource = audioSource,
+                    diagnostics = AudioDiagnostics(
+                        sampleRateHz = sourceSampleRateHz,
+                        isAllZeroStream = true,
+                        audioSource = audioSource,
+                        peakAmplitude = peakAmp,
+                        rmsEnergy = globalRms,
+                        tooQuietDetected = true,
+                        vadSpectralRejectReason = "INPUT_BELOW_SILENCE_PEAK_FLOOR"
+                    )
+                )
+            }
+
+            // Normalize first so the unchanged adaptive-floor thresholds are level independent.
+            // The segment handed to the model remains the ORIGINAL PCM16, never the amplified copy.
+            val gain = min(MAX_NORMALIZATION_GAIN, NORMALIZATION_TARGET_PEAK / max(peakAmp, 1e-9f))
+            val normalizedSamples = FloatArray(floatSamples.size) { i ->
+                (floatSamples[i] * gain).coerceIn(-1f, 1f)
+            }
+            var normalizedSumSq = 0.0
+            for (v in normalizedSamples) normalizedSumSq += (v * v).toDouble()
+            val normalizedGlobalRms = sqrt(normalizedSumSq / normalizedSamples.size).toFloat()
+
             val frameSize = SAMPLES_PER_FRAME
             val totalFrames = max(1, (rawPcm.size + frameSize - 1) / frameSize)
             val frameRmsList = FloatArray(totalFrames)
             val frameZcrList = FloatArray(totalFrames)
-            val frameSpectralDiffList = FloatArray(totalFrames)
+            val frameBandCountList = IntArray(totalFrames)
+            val frameFlatnessList = FloatArray(totalFrames)
+            val frameSpectra = ArrayList<FloatArray>(totalFrames)
 
             for (f in 0 until totalFrames) {
                 val startIdx = f * frameSize
@@ -150,22 +306,37 @@ class AudioProcessor(private val context: Context) {
                 val count = max(1, endIdx - startIdx)
                 var frameSumSq = 0.0
                 var zeroCrossings = 0
-                var firstOrderDiffSum = 0.0
                 for (i in startIdx until endIdx) {
-                    val v = floatSamples[i]
+                    val v = normalizedSamples[i]
                     frameSumSq += (v * v).toDouble()
                     if (i > startIdx) {
-                        val prev = floatSamples[i - 1]
+                        val prev = normalizedSamples[i - 1]
                         if ((v >= 0f && prev < 0f) || (v < 0f && prev >= 0f)) {
                             zeroCrossings++
                         }
-                        firstOrderDiffSum += abs(v - prev).toDouble()
                     }
                 }
                 frameRmsList[f] = sqrt(frameSumSq / count).toFloat()
-                frameZcrList[f] = zeroCrossings.toFloat() / count.toFloat()
-                frameSpectralDiffList[f] = (firstOrderDiffSum / count).toFloat()
+                frameZcrList[f] = zeroCrossings.toFloat() / max(1, count - 1).toFloat()
+
+                val frame = FloatArray(frameSize)
+                for (i in 0 until frameSize) {
+                    val src = startIdx + i
+                    frame[i] = if (src < endIdx) normalizedSamples[src] else 0f
+                }
+                val spectral = spectralFrameFeatures(frame)
+                frameBandCountList[f] = spectral.bandCount
+                frameFlatnessList[f] = spectral.flatness
+                frameSpectra.add(spectral.power)
             }
+
+            val authenticity = SpeechAuthenticityClassifier.evaluate(
+                normalizedSamples = normalizedSamples,
+                frameRms = frameRmsList,
+                frameZcr = frameZcrList,
+                frameFlatness = frameFlatnessList,
+                frameSpectra = frameSpectra
+            )
 
             val sortedRms = frameRmsList.sortedArray()
             val quietQuartileCount = max(1, totalFrames / 4)
@@ -178,19 +349,35 @@ class AudioProcessor(private val context: Context) {
             val speechStartThreshold = max(ABSOLUTE_MIN_START_RMS, estimatedNoiseFloor * SPEECH_START_MULTIPLIER)
             val speechStopThreshold = max(ABSOLUTE_MIN_STOP_RMS, estimatedNoiseFloor * SPEECH_STOP_MULTIPLIER)
 
+            var maxFrameRms = 0f
+            for (r in frameRmsList) if (r > maxFrameRms) maxFrameRms = r
+            val activeCut = ACTIVE_RMS_FRACTION * maxFrameRms
+
             var inSpeech = false
             var hangoverCounter = 0
             var voicedFrameCount = 0
             var firstVoicedFrame = -1
             var lastVoicedFrame = -1
+            var activeFrameCount = 0
+            var speechlikeFrameCount = 0
 
             for (f in 0 until totalFrames) {
                 val fRms = frameRmsList[f]
                 val fZcr = frameZcrList[f]
                 // Human speech at 16kHz has ZCR <= 0.48 (rejects broadband white-noise spikes)
                 val zcrPlausible = fZcr <= 0.48f
+                // Measured spectral band + flatness window keeps speech and rejects tonal proxies
+                // (flatness ~0) and broadband noise (flatness > 0.5) after normalization.
+                val spectralOk = frameBandCountList[f] >= 1 &&
+                    frameFlatnessList[f] >= MIN_SPEECH_FLATNESS &&
+                    frameFlatnessList[f] <= MAX_SPEECH_FLATNESS
+                if (fRms >= activeCut && zcrPlausible) {
+                    activeFrameCount++
+                    if (spectralOk) speechlikeFrameCount++
+                }
+                val speechLikeFrame = fRms >= speechStartThreshold && zcrPlausible && spectralOk
                 if (!inSpeech) {
-                    if (fRms >= speechStartThreshold && zcrPlausible) {
+                    if (speechLikeFrame) {
                         inSpeech = true
                         hangoverCounter = HANGOVER_FRAMES
                         voicedFrameCount++
@@ -198,7 +385,7 @@ class AudioProcessor(private val context: Context) {
                         lastVoicedFrame = f
                     }
                 } else {
-                    if (fRms >= speechStopThreshold && zcrPlausible) {
+                    if (fRms >= speechStopThreshold && zcrPlausible && spectralOk) {
                         voicedFrameCount++
                         hangoverCounter = HANGOVER_FRAMES
                         lastVoicedFrame = f
@@ -231,11 +418,21 @@ class AudioProcessor(private val context: Context) {
             val voicedDurationMs = voicedFrameCount * FRAME_DURATION_MS.toLong()
             val silencePct = ((totalFrames - voicedFrameCount).toFloat() / totalFrames.toFloat() * 100f)
                 .coerceIn(0f, 100f)
-            val vadPassed = voicedDurationMs >= MIN_VOICED_DURATION_MS && peakAmp >= speechStartThreshold
-            val tooQuietDetected = !vadPassed && peakAmp < speechStartThreshold
-            val snrRatio = if (speechStartThreshold > 0f) globalRms / speechStartThreshold else 0f
+            val speechlikeRatio = speechlikeFrameCount.toFloat() / max(1, activeFrameCount).toFloat()
+            val frameVadPassed = voicedDurationMs >= MIN_VOICED_DURATION_MS &&
+                speechlikeFrameCount >= 6 &&
+                speechlikeRatio >= MIN_SPEECHLIKE_RATIO
+            val vadPassed = frameVadPassed && authenticity.accepted
+            val tooQuietDetected = !vadPassed && peakAmp < ABSOLUTE_MIN_START_RMS
+            val spectralRejectReason = when {
+                !authenticity.accepted -> authenticity.rejectedReason
+                speechlikeRatio < MIN_SPEECHLIKE_RATIO -> "NON_SPEECH_SPECTRUM"
+                voicedDurationMs < MIN_VOICED_DURATION_MS -> "INSUFFICIENT_VOICED_DURATION"
+                else -> ""
+            }
+            val snrRatio = if (speechStartThreshold > 0f) normalizedGlobalRms / speechStartThreshold else 0f
             val vadProbability = if (!vadPassed) {
-                (snrRatio * 0.35f).coerceIn(0f, 0.45f)
+                0f
             } else {
                 (0.55f + 0.45f * min(1f, (snrRatio - 1f) / 2.5f)).coerceIn(0.55f, 0.99f)
             }
@@ -257,8 +454,18 @@ class AudioProcessor(private val context: Context) {
                 preRollFramesAttached = preRollAttached,
                 totalFrames = totalFrames,
                 voicedFrames = voicedFrameCount,
-                vadSpeechDetected = vadPassed && !effectiveAllZero,
-                vadSpeechProbability = if (effectiveAllZero) 0f else vadProbability
+                vadSpeechDetected = vadPassed && !inputMuted,
+                vadSpeechProbability = if (inputMuted) 0f else vadProbability,
+                vadNormalizationGain = gain,
+                vadSpeechlikeRatio = speechlikeRatio,
+                vadSpectralRejectReason = spectralRejectReason,
+                vadGlobalRejectReason = authenticity.rejectedReason,
+                vadGlobalActiveFrames = authenticity.activeFrames,
+                vadGlobalBand2Fraction = authenticity.band2Fraction,
+                vadGlobalBand3Fraction = authenticity.band3Fraction,
+                vadGlobalFlatnessMedian = authenticity.flatnessMedian,
+                vadGlobalHarmonicityMedian = authenticity.harmonicityMedian,
+                vadGlobalSyllableModulation = authenticity.syllableModulation
             )
             return AudioInput(
                 pcm16Samples = rawPcm,
@@ -269,8 +476,8 @@ class AudioProcessor(private val context: Context) {
                 peakAmplitude = peakAmp,
                 rmsEnergy = globalRms,
                 silencePercentage = silencePct,
-                vadSpeechDetected = vadPassed && !effectiveAllZero,
-                vadSpeechProbability = if (effectiveAllZero) 0f else vadProbability,
+                vadSpeechDetected = vadPassed && !inputMuted,
+                vadSpeechProbability = if (inputMuted) 0f else vadProbability,
                 clippingDetected = clippingDetected,
                 tooQuietDetected = tooQuietDetected,
                 isAllZeroStream = effectiveAllZero,

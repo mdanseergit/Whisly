@@ -11,14 +11,73 @@ import com.example.domain.models.PipelineErrorType
 import com.example.domain.models.TtsCapabilityStatus
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import java.io.File
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.math.PI
+import kotlin.math.roundToInt
 import kotlin.math.sin
 
 class ExampleUnitTest {
+
+    /**
+     * Synthetic speech-shaped fixture calibrated against the measured Python prototype in
+     * `docs/FIX_A_VAD.md`: alternating 120/178 Hz voiced frames, a 3 Hz syllabic envelope,
+     * low-level broadband noise, and a few high-frequency noise bursts that keep the
+     * two-band fraction below the measured 0.94 music boundary. This is only a unit-test
+     * fixture; the real pass/fail evidence uses the pinned FLEURS and CC0 WAV clips.
+     */
+    private fun speechLikeBlock(
+        frameCount: Int,
+        activeRange: IntRange,
+        floor: Short = 0
+    ): ShortArray {
+        val out = ShortArray(frameCount * AudioProcessor.SAMPLES_PER_FRAME) { floor }
+        val random = java.util.Random(11L)
+        for (frame in activeRange) {
+            val local = frame - activeRange.first
+            val base = frame * AudioProcessor.SAMPLES_PER_FRAME
+            val raw = FloatArray(AudioProcessor.SAMPLES_PER_FRAME) { random.nextGaussian().toFloat() }
+            if (local == 10 || local == 20 || local == 30) {
+                val highPassed = FloatArray(AudioProcessor.SAMPLES_PER_FRAME)
+                for (i in 2 until highPassed.size) {
+                    highPassed[i] = raw[i] - 2f * raw[i - 1] + raw[i - 2]
+                }
+                highPassed[0] = raw[0]
+                highPassed[1] = raw[1]
+                var sumSq = 0.0
+                for (v in highPassed) sumSq += v.toDouble() * v
+                val scale = 1500.0 / kotlin.math.sqrt(sumSq / highPassed.size)
+                for (i in highPassed.indices) {
+                    out[base + i] = (floor.toInt() + (highPassed[i] * scale).toInt()).toShort()
+                }
+            } else {
+                val f0 = if (local % 2 == 0) 120.0 else 178.0
+                val voiced = FloatArray(AudioProcessor.SAMPLES_PER_FRAME)
+                for (i in voiced.indices) {
+                    val t = (base + i).toDouble() / 16000.0
+                    var value = 0.0
+                    for (h in 1..12) value += kotlin.math.sin(2.0 * PI * h * f0 * t) / h
+                    value += 0.4 * kotlin.math.sin(2.0 * PI * 1050.0 * t)
+                    voiced[i] = value.toFloat()
+                }
+                var sumSq = 0.0
+                for (v in voiced) sumSq += v.toDouble() * v
+                val scale = 1500.0 / kotlin.math.sqrt(sumSq / voiced.size)
+                for (i in voiced.indices) {
+                    val t = (base + i).toDouble() / 16000.0
+                    val envelope = 0.6 + 0.4 * kotlin.math.sin(2.0 * PI * 3.0 * t)
+                    val sample = floor.toInt() + envelope * voiced[i] * scale + 10.0 * random.nextGaussian()
+                    out[base + i] = sample.toInt().toShort()
+                }
+            }
+        }
+        return out
+    }
 
     @Test
     fun `audio processor normalizes PCM16 to float, resamples to 16kHz, and detects clipping`() {
@@ -54,32 +113,47 @@ class ExampleUnitTest {
         val transientVad = AudioProcessor.preprocessAndRunVad(transientSamples, 16000, 1000L)
         assertFalse(transientVad.vadSpeechDetected)
 
-        // 3. Quiet speech (260ms voiced utterance over quiet room floor) -> detected
-        val quietSpeechSamples = ShortArray(16000) { idx ->
-            if (idx in 3200..7360) {
-                (900.0 * sin(2.0 * PI * 220.0 * idx / 16000.0)).toInt().toShort()
-            } else {
-                20.toShort()
-            }
-        }
+        // 3. Quiet speech (260ms voiced utterance over quiet room floor) -> detected.
+        // Peak is only 0.0316 full-scale; the old un-normalized floor rejected this shape.
+        val quietSpeechSamples = speechLikeBlock(50, 16..36, 20.toShort())
         val quietVad = AudioProcessor.preprocessAndRunVad(quietSpeechSamples, 16000, 1000L)
         assertTrue(quietVad.vadSpeechDetected)
         assertTrue(quietVad.voicedDurationMs >= 180L)
         assertTrue(quietVad.vadSpeechProbability > 0.35f)
+        assertTrue("gain must be measured, not fabricated", quietVad.diagnostics.vadNormalizationGain > 1f)
+        assertTrue("speechlike ratio must pass", quietVad.diagnostics.vadSpeechlikeRatio >= 0.5f)
+        assertEquals("", quietVad.diagnostics.vadSpectralRejectReason)
+    }
+
+    @Test
+    fun `spectral validity rejects pure tones and broadband noise after normalization`() {
+        val toneSamples = ShortArray(16000) { idx ->
+            (20 + 900.0 * sin(2.0 * PI * 220.0 * idx / 16000.0)).toInt().toShort()
+        }
+        val toneVad = AudioProcessor.preprocessAndRunVad(toneSamples, 16000, 1000L)
+        assertFalse("pure tone must not be accepted as speech", toneVad.vadSpeechDetected)
+        assertTrue(
+            "global classifier must give a measured reject reason",
+            toneVad.diagnostics.vadGlobalRejectReason.isNotEmpty()
+        )
+
+        val random = java.util.Random(7L)
+        val noiseSamples = ShortArray(16000) {
+            val g = random.nextGaussian()
+            (g * 2500.0).toInt().coerceIn(-32768, 32767).toShort()
+        }
+        val noiseVad = AudioProcessor.preprocessAndRunVad(noiseSamples, 16000, 1000L)
+        assertFalse("broadband noise must not be accepted as speech", noiseVad.vadSpeechDetected)
+        assertTrue(
+            "global classifier must give a measured reject reason",
+            noiseVad.diagnostics.vadGlobalRejectReason.isNotEmpty()
+        )
     }
 
     @Test
     fun `voiced segment trims leading and trailing silence before decoding`() {
-        // 1.0s silence, 0.5s speech, 2.0s silence.
-        val total = ShortArray(16000 * 7 / 2) { idx ->
-            val start = 16000
-            val end = 16000 + 8000
-            if (idx in start until end) {
-                (5000.0 * sin(2.0 * PI * 220.0 * idx / 16000.0)).toInt().toShort()
-            } else {
-                0.toShort()
-            }
-        }
+        // 1.0s silence, 0.5s speech, 2.0s silence (50 fps frames).
+        val total = speechLikeBlock(175, 50..74)
         val vad = AudioProcessor.preprocessAndRunVad(total, 16000, 3500L)
         assertTrue(vad.vadSpeechDetected)
         assertTrue("segment must exist", vad.voicedSegmentPcm16.isNotEmpty())
@@ -371,6 +445,133 @@ class ExampleUnitTest {
             ch == ' ' || ch == '.' || ch == '?' || ch == '!' || (ch.code in 0x0B80..0x0BFF)
         }
         assertTrue("Sentence must be in Tamil script", tamilOnly)
+    }
+
+    private fun le16(bytes: ByteArray, offset: Int): Int =
+        (bytes[offset].toInt() and 0xff) or ((bytes[offset + 1].toInt() and 0xff) shl 8)
+
+    private fun le32(bytes: ByteArray, offset: Int): Int =
+        (bytes[offset].toInt() and 0xff) or
+            ((bytes[offset + 1].toInt() and 0xff) shl 8) or
+            ((bytes[offset + 2].toInt() and 0xff) shl 16) or
+            ((bytes[offset + 3].toInt() and 0xff) shl 24)
+
+    /** Minimal PCM WAV reader for the pinned 16 kHz mono, 16-bit fixtures. */
+    private fun readMono16kPcm16(file: File): ShortArray {
+        val bytes = file.readBytes()
+        assertEquals("RIFF", String(bytes, 0, 4, Charsets.US_ASCII))
+        assertEquals("WAVE", String(bytes, 8, 4, Charsets.US_ASCII))
+        var formatCode = 0
+        var channels = 0
+        var sampleRate = 0
+        var bits = 0
+        var dataStart = -1
+        var dataSize = 0
+        var pos = 12
+        while (pos + 8 <= bytes.size) {
+            val id = String(bytes, pos, 4, Charsets.US_ASCII)
+            val size = le32(bytes, pos + 4)
+            val body = pos + 8
+            if (id == "fmt ") {
+                formatCode = le16(bytes, body)
+                channels = le16(bytes, body + 2)
+                sampleRate = le32(bytes, body + 4)
+                bits = le16(bytes, body + 14)
+            } else if (id == "data") {
+                dataStart = body
+                dataSize = size
+                break
+            }
+            pos = body + size + (size and 1)
+        }
+        assertEquals(1, channels)
+        assertEquals(16000, sampleRate)
+        assertTrue(
+            "unsupported WAV format=$formatCode bits=$bits",
+            (formatCode == 1 && bits == 16) || (formatCode == 3 && bits == 32)
+        )
+        assertTrue("WAV data chunk missing", dataStart >= 0)
+        if (formatCode == 3) {
+            val pcm = ShortArray(dataSize / 4)
+            for (i in pcm.indices) {
+                val value = ByteBuffer.wrap(bytes, dataStart + i * 4, 4)
+                    .order(ByteOrder.LITTLE_ENDIAN).float
+                pcm[i] = (value.toDouble() * 32768.0).roundToInt()
+                    .coerceIn(-32768, 32767).toShort()
+            }
+            return pcm
+        }
+        val pcm = ShortArray(dataSize / 2)
+        for (i in pcm.indices) {
+            pcm[i] = le16(bytes, dataStart + i * 2).toShort()
+        }
+        return pcm
+    }
+
+    @Test
+    fun `production VAD matches measured real speech and CC0 nonspeech fixtures`() {
+        val evidenceDirs = listOf(
+            File("deliverables/fix_a_vad"),
+            File(System.getProperty("user.dir"), "deliverables/fix_a_vad"),
+            File("C:/Users/danse/OneDrive/document/Whisly/whisly/deliverables/fix_a_vad")
+        )
+        val evidenceDir = evidenceDirs.firstOrNull {
+            File(it, "real_speech_paths.txt").exists() && File(it, "real_nonspeech_paths.tsv").exists()
+        } ?: evidenceDirs.first()
+        val speechListFile = File(evidenceDir, "real_speech_paths.txt")
+        val nonspeechListFile = File(evidenceDir, "real_nonspeech_paths.tsv")
+        if (!speechListFile.exists() || !nonspeechListFile.exists()) {
+            println("SKIP real-fixture VAD parity: evidence lists are not present in this checkout")
+            return
+        }
+
+        var speechTotal = 0
+        var speechAccepted = 0
+        val speechFailures = ArrayList<String>()
+        for (line in speechListFile.readLines()) {
+            val path = line.trim()
+            if (path.isEmpty()) continue
+            val file = File(path)
+            if (!file.exists()) continue
+            speechTotal++
+            val vad = AudioProcessor.preprocessAndRunVad(readMono16kPcm16(file), 16000, 0L)
+            if (vad.vadSpeechDetected) {
+                speechAccepted++
+            } else {
+                speechFailures.add(
+                    "${file.parentFile.name}-${file.name}:" +
+                        "base=${vad.diagnostics.vadSpectralRejectReason}," +
+                        "global=${vad.diagnostics.vadGlobalRejectReason}," +
+                        "b2=${vad.diagnostics.vadGlobalBand2Fraction}," +
+                        "b3=${vad.diagnostics.vadGlobalBand3Fraction}," +
+                        "flat=${vad.diagnostics.vadGlobalFlatnessMedian}," +
+                        "harm=${vad.diagnostics.vadGlobalHarmonicityMedian}," +
+                        "syll=${vad.diagnostics.vadGlobalSyllableModulation}"
+                )
+            }
+        }
+
+        var nonspeechTotal = 0
+        var nonspeechRejected = 0
+        for (line in nonspeechListFile.readLines()) {
+            val path = line.substringAfter('\t').trim()
+            if (path.isEmpty()) continue
+            val file = File(path)
+            if (!file.exists()) continue
+            nonspeechTotal++
+            val vad = AudioProcessor.preprocessAndRunVad(readMono16kPcm16(file), 16000, 0L)
+            if (!vad.vadSpeechDetected) nonspeechRejected++
+        }
+
+        println("PRODUCTION_VAD_REAL_SPEECH accepted=$speechAccepted/$speechTotal")
+        println("PRODUCTION_VAD_REAL_NONSPEECH rejected=$nonspeechRejected/$nonspeechTotal")
+        speechFailures.forEach { println("PRODUCTION_VAD_SPEECH_FAILURE $it") }
+        if (speechTotal == 0 || nonspeechTotal == 0) {
+            println("SKIP real-fixture VAD parity: pinned WAV files are not on this machine")
+            return
+        }
+        assertEquals("all pinned speech clips must pass", speechTotal, speechAccepted)
+        assertEquals("all real music/noise clips must be rejected", nonspeechTotal, nonspeechRejected)
     }
 
     @Test

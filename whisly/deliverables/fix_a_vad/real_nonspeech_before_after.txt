@@ -1,0 +1,22 @@
+﻿category	file	old_passed	new_passed	new_voiced_ms	new_ratio
+music	music_508322_acoustic_guitar_8_wav_16k_mono.wav	True	True	1940	1.0
+music	music_97776_acoustic_guitar_with_non_standard_tuning_phrase__16k_mono.wav	True	True	4140	0.984
+music	music_211963_acoustic_guitar_rythm_with_maracas_16k_mono.wav	True	True	4420	1.0
+music	music_690185_acoustic_guitar_chords_cgamem_mp3_16k_mono.wav	True	True	4620	0.976
+music	music_19460_tg_xylophone_4_wav_16k_mono.wav	True	False	3220	0.0
+music	music_501300_toy_xylophone_16k_mono.wav	True	True	1020	0.667
+music	music_701063_harmonica_east_top_easy_tune_16k_mono.wav	True	True	4620	1.0
+music	music_792630_harmonica_c_random_stuff_multi_take_16k_mono.wav	True	True	2780	1.0
+music	music_711243_simple_bit_of_beethoven_on_the_piano_16k_mono.wav	True	True	4240	1.0
+music	music_735624_sierra_serenade_16k_mono.wav	True	True	3660	1.0
+noise	noise_236292_rain_on_window_wav_16k_mono.wav	True	True	5820	0.97
+noise	noise_276294_leaves_in_wind_wav_16k_mono.wav	True	False	200	0.061
+noise	noise_509035_birds_singing_mp3_16k_mono.wav	True	True	3060	0.935
+noise	noise_534909_ocean_waves_04_wav_16k_mono.wav	True	True	5960	0.993
+noise	noise_409403_storm_from_indoors_wav_16k_mono.wav	True	True	2320	0.98
+noise	noise_510233_river_stream_stereo_from_lake_of_glacier_closewa_16k_mono.wav	True	True	5700	0.95
+noise	noise_637559_forest_ambience_constant_breeze_flac_16k_mono.wav	True	True	6000	1.0
+noise	noise_482264_zikaden_grillen_summer_atmo_wav_16k_mono.wav	True	True	3580	1.0
+noise	noise_532696_city_street_ambience_with_construction_wav_16k_mono.wav	True	True	5980	1.0
+noise	noise_726522_rushing_stream_river_water_16k_mono.wav	True	False	960	0.222
+TOTAL old_false_accepts=20/20 new_false_accepts=17/20
