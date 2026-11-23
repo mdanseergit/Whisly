@@ -4,6 +4,37 @@ Date: 2026-11-22. Status: Step 0 deliverable. This document is an evidence map o
 
 Evidence method: local source files were read/grepped; package and artifact hashes were computed with `Get-FileHash`; library/model licence pages were fetched from primary sources; previous build/test output from `.\gradlew.bat assembleDebug testDebugUnitTest` is recorded in `TEST_REPORT.md` and is being refreshed after this document. Device/network/logcat evidence is **UNMEASURED**.
 
+> ## Step 7 update (2026-11-23) — current state supersedes the baseline below
+>
+> The map below is preserved as the Step 0 baseline. The reset changed these facts:
+>
+> - The bundled OpenAI Whisper Tiny INT8 assets (`assets/whisper/tiny/`, MIT weights / Apache-2.0
+>   export tooling) are the only STT model. All user ZIP import, custom speech-pack download and
+>   user model-import flows are gone. `assets/whisper/tiny/` was never deleted or replaced.
+> - One `TranscriptFirewall` (`ai/stt/TranscriptFirewall.kt`) is the only STT gate for both the main
+>   and conversation microphone paths: measured annotation stripping, ≥95% registry script gate,
+>   `PASS` / `LOW_CONFIDENCE` (`Not sure: check and edit`) / `FAIL` (`Couldn't understand. Try again.`).
+>   No fabricated confidence exists; every current result is `LOW_CONFIDENCE` and needs an explicit
+>   Translate tap.
+> - One immutable `PipelineOrchestrator` owns all stage transitions; one
+>   `CapabilityRegistry.StageProfile` is the single language registry. Legacy `canListen` rows no
+>   longer grant speech; only measured tiers do. English STT = BETA; all 12 Indic languages =
+>   UNAVAILABLE. Speech auto-detect is UNAVAILABLE; typed-text LID stays only in `TextTranslationScreen`.
+> - TTS is temporary Android system TTS behind a fail-closed gate: exact `Locale`, country/variant
+>   availability, installed non-network voice, exact active voice locale, ≥95% target-script text;
+>   missing voice → `Voice not available for <language>` + official voice-data install intent.
+> - Later-stage failure keeps earlier results: MT failure keeps the editable transcript; TTS failure
+>   keeps the translation for editing.
+> - A lint-detected API-24 crash in `ExitReportManager.readTraceSummary` was fixed with
+>   `@RequiresApi(Build.VERSION_CODES.R)`; `lintDebug` now passes with 0 errors.
+> - Version is `versionCode=7`, `versionName="1.0.7"`. Release AAB/APK, `mapping.txt`, SHA-256,
+>   `CHANGELOG.md` and `TEST_REPORT.md` are in `deliverables/final_v1.0.7/`.
+> - Evaluation-only bake-off (`docs/EVAL_RESULTS.md`, `docs/MODELS.md`) tested `base.en` and
+>   `small.en` but bundled neither, per user decision. No candidate exposes per-token confidence.
+>
+> Phone measurements, instrumented tests, per-device TTS voices, clean-install airplane-mode proof
+> and Play Console size remain `UNMEASURED` / blocked (no device attached).
+
 ---
 
 ## 1. Plain-language explanation

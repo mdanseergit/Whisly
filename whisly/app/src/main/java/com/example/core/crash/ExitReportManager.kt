@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import android.app.ApplicationExitInfo
 import android.content.Context
 import android.os.Build
+import androidx.annotation.RequiresApi
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -64,6 +65,7 @@ object ExitReportManager {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     private fun readTraceSummary(exitInfo: ApplicationExitInfo): String {
         return runCatching {
             val inputStream = exitInfo.traceInputStream ?: return@runCatching ""
