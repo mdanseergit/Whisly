@@ -732,7 +732,7 @@ class ExampleUnitTest {
                 speechAccepted++
             } else {
                 speechFailures.add(
-                    "${file.parentFile.name}-${file.name}:" +
+                    "${file.parentFile?.name ?: "."}-${file.name}:" +
                         "base=${vad.diagnostics.vadSpectralRejectReason}," +
                         "global=${vad.diagnostics.vadGlobalRejectReason}," +
                         "b2=${vad.diagnostics.vadGlobalBand2Fraction}," +

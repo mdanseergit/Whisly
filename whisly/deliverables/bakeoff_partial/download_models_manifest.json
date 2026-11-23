@@ -1,0 +1,151 @@
+[
+  {
+    "kind": "whisper",
+    "name": "tiny",
+    "bytes": 103609903,
+    "sha256": [
+      "d24fb083ae3b1041fc24e97971d60e280c9342201fbb67b0ab428a8b4a51a434",
+      "d2fece8dd42771f1df975c6c0445770d0c292bf7547c2cae04a6c0cc57540925",
+      "b34b360dbb493e781e479794586d661700670d65564001f23024971d1f2fa126"
+    ],
+    "source": "hf://csukuangfj/sherpa-onnx-whisper-tiny",
+    "pin": "bundled-baseline-control"
+  },
+  {
+    "kind": "whisper",
+    "name": "tiny.en",
+    "bytes": 103627191,
+    "sha256": [
+      "0ce578b827c94a961aacb8fa14b02f096504b337e5c94be37c36238cbe3e8bc6",
+      "06c0e6ff6348d427e51839219d1c886c18cfdf411e629e33f5e1679bff9c1527",
+      "306cd27f03c1a714eca7108e03d66b7dc042abe8c258b44c199a7ed9838dd930"
+    ],
+    "source": "hf://csukuangfj/sherpa-onnx-whisper-tiny.en",
+    "pin": "d026532c022fa99fd789d6b32446a1df7b6bfc43"
+  },
+  {
+    "kind": "whisper",
+    "name": "base",
+    "bytes": 160609290,
+    "sha256": [
+      "0b8fb1304b6109976038efff5ace81720e00386f3ff6b54ee8c75291ca0a1e11",
+      "9759d217388a01b3a4c7c15533201067b48ae819c4daafc8624e64b9409dc02d",
+      "b34b360dbb493e781e479794586d661700670d65564001f23024971d1f2fa126"
+    ],
+    "source": "hf://csukuangfj/sherpa-onnx-whisper-base",
+    "pin": "bb53ee204431c90d314c1cc08d28d23e5b7927cc"
+  },
+  {
+    "kind": "whisper",
+    "name": "base.en",
+    "bytes": 160626066,
+    "sha256": [
+      "ef6b936f4c9b1d90a3b68634b60c4ed8576b26172b33c2535ec0e933c9edb823",
+      "f7162ad6db2dbef16cfaeaa7f945b9d7dd9c1b8d472f6aca82f2273d185e4d41",
+      "306cd27f03c1a714eca7108e03d66b7dc042abe8c258b44c199a7ed9838dd930"
+    ],
+    "source": "hf://csukuangfj/sherpa-onnx-whisper-base.en",
+    "pin": "59eea950fc76df2453efb57e6c0fd334548e8ffe"
+  },
+  {
+    "kind": "whisper",
+    "name": "small",
+    "bytes": 375485327,
+    "sha256": [
+      "4cbe7b22fa9026b843b60a68640c747de05bafb1a11b57edc0e66c232d9f33a9",
+      "acad50b5c782696e91b55914cc5ab4f756f1532f76e22aa6fc615f39fb69a8ee",
+      "b34b360dbb493e781e479794586d661700670d65564001f23024971d1f2fa126"
+    ],
+    "source": "hf://csukuangfj/sherpa-onnx-whisper-small",
+    "pin": "8f3c18b358db4d1f2fc1eae49d75cd20989e4309"
+  },
+  {
+    "kind": "whisper",
+    "name": "small.en",
+    "bytes": 375501079,
+    "sha256": [
+      "8bdac288f369aa94ee2194059238c465ed82ea9d47ee8fa4a8c0a891873e462f",
+      "710ccf890e10f3faa15f51ec346081a2723c9f3adb6e4da81c6573a5a6f877fb",
+      "306cd27f03c1a714eca7108e03d66b7dc042abe8c258b44c199a7ed9838dd930"
+    ],
+    "source": "hf://csukuangfj/sherpa-onnx-whisper-small.en",
+    "pin": "d9533f69affd85061aee349af7fea5cb2996dbbe"
+  },
+  {
+    "kind": "whisper",
+    "name": "medium",
+    "bytes": 946072270,
+    "sha256": [
+      "1c54582b4d829de0089f6cb63bbbdb3bf7555398bacaf855fbecf1a84dfd193e",
+      "595d00a338a365a7bfa0ca7f296cabc639583bef770ab6130df90f49a6412747",
+      "b34b360dbb493e781e479794586d661700670d65564001f23024971d1f2fa126"
+    ],
+    "source": "hf://csukuangfj/sherpa-onnx-whisper-medium",
+    "pin": "8c31d28503847560985df21f90e14f0c736e075e"
+  },
+  {
+    "kind": "whisper",
+    "name": "medium.en",
+    "bytes": 946086998,
+    "sha256": [
+      "5a8e3a36619e0b67db9320eef3152db59d4b440f5ce0212d2c162a61b750bf80",
+      "7303be339ed4e51f4ffb7ae84f3803b10cf8e67e1dcf8a98cb4d843f0dea0141",
+      "306cd27f03c1a714eca7108e03d66b7dc042abe8c258b44c199a7ed9838dd930"
+    ],
+    "source": "hf://csukuangfj/sherpa-onnx-whisper-medium.en",
+    "pin": "251ab4521f354490e8f2c206fbd0b7f3f6b0a7ec"
+  },
+  {
+    "kind": "zipformer_transducer",
+    "name": "bn_vosk_streaming",
+    "bytes": 94119939,
+    "sha256": [
+      "779f2412d6fa56f76be9fe71349cdf3edd10434ae9b1fc5e49834fb904320516",
+      "fc03e8ca154593b95748198a56de115d4e6048d97c41692f93dfefb05f3693b4",
+      "1df7319f4f9c36d7130cacaf629e1d52e904070e7a14bca9d4f209edeb162da6",
+      "6f3a4d64d7da07e7dd7f3fd679e07607be3ec149d1b807726dbb8bbcc80a9fe1"
+    ],
+    "source": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-streaming-zipformer-bn-vosk-2026-02-09.tar.bz2",
+    "pin": "release-asset; no git commit pin published; downloaded bytes SHA-256 recorded"
+  },
+  {
+    "kind": "vosk",
+    "name": "small-en-in",
+    "bytes": 37573330,
+    "sha256": [
+      "20663dcac4d5cb783a579c54d98339344a688e4ec6e1b4a4b059fd1235454cc7"
+    ],
+    "source": "https://alphacephei.com/vosk/models/vosk-model-small-en-in-0.4.zip",
+    "pin": "published-versioned-archive; SHA-256 recorded"
+  },
+  {
+    "kind": "vosk",
+    "name": "small-hi",
+    "bytes": 44458845,
+    "sha256": [
+      "7c50a10866889f0ac21d912c20537a055a597ed09fc1d3e5bcd798f9f0017e48"
+    ],
+    "source": "https://alphacephei.com/vosk/models/vosk-model-small-hi-0.22.zip",
+    "pin": "published-versioned-archive; SHA-256 recorded"
+  },
+  {
+    "kind": "vosk",
+    "name": "small-gu",
+    "bytes": 108054987,
+    "sha256": [
+      "e87b7055e52b38a493a8308cf815b6fc05b9a89ef8aee18b4cbc2867cfc5f42a"
+    ],
+    "source": "https://alphacephei.com/vosk/models/vosk-model-small-gu-0.42.zip",
+    "pin": "published-versioned-archive; SHA-256 recorded"
+  },
+  {
+    "kind": "vosk",
+    "name": "small-te",
+    "bytes": 60544249,
+    "sha256": [
+      "3e77b05becc7599a596ccebd8b22cb95eb4eca0cfca524827cdfbfd66af09497"
+    ],
+    "source": "https://alphacephei.com/vosk/models/vosk-model-small-te-0.42.zip",
+    "pin": "published-versioned-archive; SHA-256 recorded"
+  }
+]

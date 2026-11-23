@@ -98,7 +98,10 @@ private fun reportIntent(tag: String): Intent =
         .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
         .putExtra(RecognizerIntent.EXTRA_LANGUAGE, tag)
         .putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
-        .putExtra(RecognizerIntent.EXTRA_REQUEST_WORD_CONFIDENCE, true)
+        // RecognizerIntent.EXTRA_REQUEST_WORD_CONFIDENCE is API 34; the literal value is taken
+        // verbatim from SDK 36 sources/android-36/android/speech/RecognizerIntent.java:576-577.
+        // Unknown extras are ignored on older APIs, so no minSdk-incompatible symbol is referenced.
+        .putExtra("android.speech.extra.REQUEST_WORD_CONFIDENCE", true)
 
 @Composable
 fun OnDeviceRecognizerDebugRoute(onBack: () -> Unit) {

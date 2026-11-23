@@ -142,11 +142,11 @@ class MainActivity : ComponentActivity() {
 
             val animators = mutableListOf<Animator>()
             animators.add(ObjectAnimator.ofFloat(splashView, View.ALPHA, 1f, 0f))
-            if (iconView != null && iconView != splashView) {
-                animators.add(ObjectAnimator.ofFloat(iconView, View.SCALE_X, 1f, 1.05f))
-                animators.add(ObjectAnimator.ofFloat(iconView, View.SCALE_Y, 1f, 1.05f))
-                animators.add(ObjectAnimator.ofFloat(iconView, View.ALPHA, 1f, 0f))
-            }
+            // iconView is non-null per the SplashScreenViewProvider contract; the old null/identity
+            // check was always true and has been removed rather than left to hide a real change.
+            animators.add(ObjectAnimator.ofFloat(iconView, View.SCALE_X, 1f, 1.05f))
+            animators.add(ObjectAnimator.ofFloat(iconView, View.SCALE_Y, 1f, 1.05f))
+            animators.add(ObjectAnimator.ofFloat(iconView, View.ALPHA, 1f, 0f))
 
             val animSet = AnimatorSet().apply {
                 duration = 250L
