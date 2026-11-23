@@ -10,7 +10,7 @@
 
 [![Release](https://img.shields.io/github/v/release/mdanseergit/Whisly?style=for-the-badge&logo=github&color=EBAF96)](https://github.com/mdanseergit/Whisly/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/mdanseergit/Whisly/total?style=for-the-badge&color=EBAF96)](https://github.com/mdanseergit/Whisly/releases/latest)
-[![Stars](https://img.shields.io/github/stars/mdanseergit/Whisly?style=for-the-badge&color=EBAF96)](https://github.com/mdanseergit/Whisly/stargazers)
+[![Stars](https://img.shields.io/github/stars/mdanseergit/Whisly?style=for-the-badge&color=EBAF96)](https://github.com/mdanseergit/Whisly)
 [![Forks](https://img.shields.io/github/forks/mdanseergit/Whisly?style=for-the-badge&color=EBAF96)](https://github.com/mdanseergit/Whisly/network/members)
 [![License: MIT](https://img.shields.io/github/license/mdanseergit/Whisly?style=for-the-badge&color=EBAF96)](./LICENSE)
 [![Language](https://img.shields.io/github/languages/top/mdanseergit/Whisly?style=for-the-badge&color=EBAF96)](https://github.com/mdanseergit/Whisly)
