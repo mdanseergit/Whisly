@@ -118,8 +118,11 @@ class WhislyOfflineSpeechRecognizer(
             return fail(PipelineErrorType.MICROPHONE_MUTED)
         }
 
-        val cap = CapabilityRegistry.getLanguage(languageCode)
-        if (cap != null && !cap.canListen) {
+        // Registry tier and decoder vocabulary must both agree. Measured UNAVAILABLE languages
+        // never open the microphone, even if an older registry row still says canListen=true.
+        if (!CapabilityRegistry.canRunSpeechRecognition(languageCode) ||
+            !SherpaOnnxSttEngine.isLanguageSupported(languageCode)
+        ) {
             return fail(PipelineErrorType.UNSUPPORTED_SOURCE_LANGUAGE)
         }
 

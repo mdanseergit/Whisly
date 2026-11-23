@@ -73,52 +73,53 @@ object LanguageIdEngine {
         var hasMarathiLla = false
         var hasAssameseRa = false
 
+        // Script blocks come from the single capability registry, never from a local table.
         for (ch in normalized) {
             val cp = ch.code
-            when (cp) {
-                in 0x0B80..0x0BFF -> {
+            when (CapabilityRegistry.scriptBlockOf(cp)) {
+                "TAML" -> {
                     textScores["ta"] = (textScores["ta"] ?: 0f) + 1f
                     indicScriptCount++
                 }
-                in 0x0980..0x09FF -> {
+                "BENG" -> {
                     bengaliAssameseCount++
                     indicScriptCount++
                     if (cp == 0x09F0 || cp == 0x09F1) hasAssameseRa = true
                 }
-                in 0x0900..0x097F -> {
+                "DEVA" -> {
                     devanagariCount++
                     indicScriptCount++
                     if (cp == 0x0933) hasMarathiLla = true
                 }
-                in 0x0C00..0x0C7F -> {
+                "TELU" -> {
                     textScores["te"] = (textScores["te"] ?: 0f) + 1f
                     indicScriptCount++
                 }
-                in 0x0C80..0x0CFF -> {
+                "KNDA" -> {
                     textScores["kn"] = (textScores["kn"] ?: 0f) + 1f
                     indicScriptCount++
                 }
-                in 0x0D00..0x0D7F -> {
+                "MLYM" -> {
                     textScores["ml"] = (textScores["ml"] ?: 0f) + 1f
                     indicScriptCount++
                 }
-                in 0x0A80..0x0AFF -> {
+                "GUJR" -> {
                     textScores["gu"] = (textScores["gu"] ?: 0f) + 1f
                     indicScriptCount++
                 }
-                in 0x0B00..0x0B7F -> {
+                "ORYA" -> {
                     textScores["or"] = (textScores["or"] ?: 0f) + 1f
                     indicScriptCount++
                 }
-                in 0x0A00..0x0A7F -> {
+                "GURU" -> {
                     textScores["pa"] = (textScores["pa"] ?: 0f) + 1f
                     indicScriptCount++
                 }
-                in 0x1C50..0x1C7F -> {
+                "OLCK" -> {
                     textScores["sat"] = (textScores["sat"] ?: 0f) + 1f
                     indicScriptCount++
                 }
-                in 0x0041..0x005A, in 0x0061..0x007A -> {
+                "LATN" -> {
                     textScores["en"] = (textScores["en"] ?: 0f) + 1f
                     latinCount++
                 }

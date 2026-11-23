@@ -1,9 +1,9 @@
 package com.example.ai.translation
 
+import com.example.ai.registry.CapabilityRegistry
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.common.model.DownloadConditions
 import com.google.mlkit.common.model.RemoteModelManager
-import com.google.mlkit.nl.translate.TranslateLanguage
 import com.google.mlkit.nl.translate.TranslateRemoteModel
 import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.Translator
@@ -30,20 +30,9 @@ object RealOnDeviceTranslationService {
     private val translators = ConcurrentHashMap<String, Translator>()
     private val modelManager by lazy { RemoteModelManager.getInstance() }
 
-    fun mapToTranslateLanguage(langCode: String): String? {
-        return when (langCode.lowercase()) {
-            "en" -> TranslateLanguage.ENGLISH
-            "ta" -> TranslateLanguage.TAMIL
-            "hi" -> TranslateLanguage.HINDI
-            "bn" -> TranslateLanguage.BENGALI
-            "mr" -> TranslateLanguage.MARATHI
-            "te" -> TranslateLanguage.TELUGU
-            "kn" -> TranslateLanguage.KANNADA
-            "gu" -> TranslateLanguage.GUJARATI
-            "ur" -> TranslateLanguage.URDU
-            else -> null
-        }
-    }
+    /** Tag comes only from the single capability registry; this class owns no language list. */
+    fun mapToTranslateLanguage(langCode: String): String? =
+        CapabilityRegistry.mlKitTranslationTag(langCode)
 
     fun isLanguageSupported(langCode: String): Boolean {
         return mapToTranslateLanguage(langCode) != null

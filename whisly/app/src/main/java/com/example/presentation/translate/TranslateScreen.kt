@@ -284,6 +284,7 @@ fun TranslateScreen(
                 transcriptReviewNotice = uiState.transcriptReviewNotice,
                 translatedSentence = uiState.translatedSentence,
                 sttConfidence = uiState.sttConfidence,
+                sttTierLabel = uiState.sttTierLabel,
                 latencyBadgeText = "",
                 isPlayingAudio = isPlayingAudio,
                 ttsSupportedForTarget = ttsSupportedForTarget,

@@ -7,6 +7,7 @@ import android.speech.tts.UtteranceProgressListener
 import android.util.Log
 import com.example.ai.pipeline.AudioResult
 import com.example.ai.pipeline.SpeechSynthesizer
+import com.example.ai.registry.CapabilityRegistry
 import com.example.domain.models.PipelineErrorType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
@@ -200,33 +201,10 @@ class SystemTextToSpeechEngine(private val context: Context) : SpeechSynthesizer
     private fun isUnsupportedLanguage(languageCode: String): Boolean =
         languageCode.isBlank() || languageCode.equals("auto", ignoreCase = true)
 
+    /** Locale is registry-owned; no TTS-local language table remains. */
     private fun localeFor(languageCode: String): Locale? = runCatching {
-        when (languageCode.lowercase()) {
-            "en" -> Locale("en", "IN")
-            "as" -> Locale("as", "IN")
-            "bn" -> Locale("bn", "IN")
-            "brx" -> Locale("brx", "IN")
-            "doi" -> Locale("doi", "IN")
-            "gu" -> Locale("gu", "IN")
-            "hi" -> Locale("hi", "IN")
-            "kn" -> Locale("kn", "IN")
-            "ks" -> Locale("ks", "IN")
-            "kok" -> Locale("kok", "IN")
-            "mai" -> Locale("mai", "IN")
-            "ml" -> Locale("ml", "IN")
-            "mni" -> Locale("mni", "IN")
-            "mr" -> Locale("mr", "IN")
-            "ne" -> Locale("ne", "IN")
-            "or" -> Locale("or", "IN")
-            "pa" -> Locale("pa", "IN")
-            "sa" -> Locale("sa", "IN")
-            "sat" -> Locale("sat", "IN")
-            "sd" -> Locale("sd", "IN")
-            "ta" -> Locale("ta", "IN")
-            "te" -> Locale("te", "IN")
-            "ur" -> Locale("ur", "IN")
-            else -> Locale.forLanguageTag(languageCode)
-        }
+        CapabilityRegistry.ttsLocale(languageCode)?.let { Locale.forLanguageTag(it) }
+            ?: Locale.forLanguageTag(languageCode)
     }.getOrNull()
 
     private fun audioFailure(

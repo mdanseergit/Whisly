@@ -55,6 +55,7 @@ data class TranslateUiState(
     val translatedSentence: String = "",
     val tokenizedPreview: String = "",
     val sttConfidence: Float? = null,
+    val sttTierLabel: String? = null,
     val lastSttLatencyMs: Long = 0L,
     val lastMtLatencyMs: Long = 0L,
     val lastTtsLatencyMs: Long = 0L,
@@ -456,11 +457,16 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
         return capitalized.replace(Regex("\\s+"), " ")
     }
 
+    /** Visible Beta badge required by the STT acceptance gate for BETA-tier results. */
+    private fun sttTierLabel(code: String): String? =
+        if (CapabilityRegistry.sttTier(code) == CapabilityRegistry.StageTier.BETA) "Beta" else null
+
     /** Returns null when the requested language cannot own a microphone decode. */
     private fun speechSourceOrNull(code: String): String? {
         return code.takeIf {
             it != CapabilityRegistry.AUTO_DETECT_CODE &&
-                CapabilityRegistry.getLanguage(it)?.canListen == true
+                CapabilityRegistry.canRunSpeechRecognition(it) &&
+                com.example.ai.stt.SherpaOnnxSttEngine.isLanguageSupported(it)
         }
     }
 
@@ -523,6 +529,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                 pendingConversationSpeakerIsA = null,
                 translatedSentence = "",
                 sttConfidence = null,
+                sttTierLabel = null,
                 activeError = null,
                 statusBannerMessage = null
             )
@@ -607,6 +614,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                                     recognizedTranscript = transcript,
                                     initialSttTranscript = transcript,
                                     sttConfidence = outcome.confidence,
+                                    sttTierLabel = sttTierLabel(selectedSource),
                                     transcriptReviewNotice = reviewNotice,
                                     detectedSourceLangCode = selectedSource,
                                     ambiguousLanguageCandidates = emptyList(),
@@ -813,6 +821,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                                 recognizedTranscript = transcript,
                                 initialSttTranscript = transcript,
                                 sttConfidence = outcome.confidence,
+                                sttTierLabel = sttTierLabel(speakerSource),
                                 transcriptReviewNotice = reviewNotice,
                                 detectedSourceLangCode = speakerSource,
                                 pendingConversationSpeakerIsA = state.activeConversationSpeakerIsA,
@@ -873,6 +882,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                     pendingConversationSpeakerIsA = null,
                     translatedSentence = "",
                     sttConfidence = null,
+                    sttTierLabel = null,
                     activeError = null
                 )
             }

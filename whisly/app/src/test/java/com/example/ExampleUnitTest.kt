@@ -6,6 +6,7 @@ import com.example.ai.lid.LanguageIdEngine
 import com.example.ai.pipeline.OrchestratorState
 import com.example.ai.pipeline.PipelineOrchestrator
 import com.example.ai.registry.CapabilityRegistry
+import com.example.ai.registry.CapabilityRegistry.StageTier
 import com.example.ai.stt.TranscriptFirewall
 import com.example.ai.translation.IndicLanguageCatalog
 import com.example.ai.translation.IndicTrans2Engine
@@ -19,6 +20,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.math.PI
@@ -493,6 +495,28 @@ class ExampleUnitTest {
             "No STT result may auto-call translation",
             Regex("(?m)^\\s+confirmTranscriptAndTranslate\\(\\)\\s*$").containsMatchIn(viewModel)
         )
+    }
+
+    @Test
+    fun `single registry carries measured tiers and delegates language tags`() {
+        assertEquals(StageTier.BETA, CapabilityRegistry.sttTier("en"))
+        for (code in listOf("hi", "bn", "ta", "te", "kn", "ml", "mr", "gu", "pa", "ur", "or", "as", "sat")) {
+            assertEquals("STT tier for $code", StageTier.UNAVAILABLE, CapabilityRegistry.sttTier(code))
+            assertFalse("No Indic language may own speech for $code", CapabilityRegistry.canRunSpeechRecognition(code))
+        }
+        assertTrue(CapabilityRegistry.canRunSpeechRecognition("en"))
+
+        assertEquals("hi", CapabilityRegistry.mlKitTranslationTag("hi"))
+        assertNull(CapabilityRegistry.mlKitTranslationTag("ml"))
+        assertNull(CapabilityRegistry.mlKitTranslationTag("or"))
+        assertEquals("ml", CapabilityRegistry.mlKitLidTag("ml"))
+        assertNull(CapabilityRegistry.mlKitLidTag("or"))
+        assertNull(CapabilityRegistry.whisperCode("or"))
+        assertNull(CapabilityRegistry.whisperCode("sat"))
+        assertEquals("en-IN", CapabilityRegistry.ttsLocale("en"))
+        assertEquals("DEVA", CapabilityRegistry.scriptBlockOf(0x0915))
+        assertEquals("TAML", CapabilityRegistry.scriptBlockOf(0x0BA4))
+        assertNull(CapabilityRegistry.scriptBlockOf(0x0031))
     }
 
     @Test

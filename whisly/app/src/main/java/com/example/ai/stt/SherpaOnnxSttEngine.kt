@@ -3,6 +3,7 @@ package com.example.ai.stt
 import android.content.Context
 import android.util.Log
 import com.example.ai.audio.AudioProcessor
+import com.example.ai.registry.CapabilityRegistry
 import com.example.domain.models.PipelineErrorType
 import com.k2fsa.sherpa.onnx.FeatureConfig
 import com.k2fsa.sherpa.onnx.OfflineModelConfig
@@ -158,15 +159,16 @@ class SherpaOnnxSttEngine(private val context: Context) : SttDecoder {
      */
     private fun normalizeLanguage(languageCode: String): String? {
         val normalized = languageCode.lowercase(Locale.US).substringBefore('-')
-        return normalized.takeIf { it in WHISPER_LANGUAGE_CODES }
+        return CapabilityRegistry.whisperCode(normalized)
     }
 
     companion object {
         const val TAG = "SherpaStt"
 
+        /** Decoder vocabulary support only; speech readiness also requires a measured tier. */
         @JvmStatic
         fun isLanguageSupported(languageCode: String): Boolean =
-            languageCode.lowercase(Locale.US).substringBefore('-') in WHISPER_LANGUAGE_CODES
+            CapabilityRegistry.whisperCode(languageCode) != null
 
         const val ENGINE_NAME = "sherpa-onnx Whisper Tiny INT8 multilingual"
         const val ASSET_DIR = "whisper/tiny"
@@ -177,10 +179,6 @@ class SherpaOnnxSttEngine(private val context: Context) : SttDecoder {
             "tiny-encoder.int8.onnx",
             "tiny-decoder.int8.onnx",
             "tiny-tokens.txt"
-        )
-        val WHISPER_LANGUAGE_CODES = setOf(
-            "as", "bn", "en", "gu", "hi", "kn", "ml", "mr", "ne", "pa", "sa", "sd", "ta", "te",
-            "ur"
         )
     }
 }

@@ -660,6 +660,167 @@ object CapabilityRegistry {
         map
     }
 
+    /** Evaluation tier measured against the acceptance gates in `docs/DIAGNOSIS9.md`. */
+    enum class StageTier { VERIFIED, BETA, UNAVAILABLE }
+
+    const val NO_ML_KIT_TAG = "NONE"
+    const val BUNDLED_STT_MODEL_ID = "sherpa_onnx_whisper_tiny_int8"
+    const val TEMPORARY_TTS_VOICE_ID = "system_tts"
+
+    /**
+     * Per-language, per-stage evidence profile. This is the only place where STT model/code,
+     * ML Kit translation/LID tags, TTS locale, script blocks, and measured tiers live.
+     *
+     * Measured facts (2026-11-23):
+     * - English CER ~0.1021 but garbage 10% > 1% gate, so STT is BETA, never VERIFIED.
+     * - Every Indic language decoded unusably or with wrong-script garbage, so STT is UNAVAILABLE.
+     * - `or` and `sat` have no Whisper tokenizer token, so they cannot be forced at all.
+     * - No device TTS voice, MT chrF/WER, or acoustic LID measurement exists, so those tiers
+     *   are UNAVAILABLE until real evidence is supplied. Typed ML Kit text translation remains
+     *   available as an unmeasured convenience; it is not certified by a tier claim.
+     */
+    data class StageProfile(
+        val code: String,
+        val sttModelId: String?,
+        val sttCode: String?,
+        val mlKitTranslationTag: String,
+        val mlKitLidTag: String,
+        val ttsLocale: String?,
+        val ttsVoiceId: String?,
+        val scriptBlocks: Set<String>,
+        val scriptRanges: List<IntRange>,
+        val sttTier: StageTier,
+        val mtTier: StageTier,
+        val lidTier: StageTier,
+        val ttsTier: StageTier
+    ) {
+        val sttAvailable: Boolean get() = sttModelId != null && sttCode != null && sttTier != StageTier.UNAVAILABLE
+        val textTranslationAvailable: Boolean get() = mlKitTranslationTag != NO_ML_KIT_TAG
+        val lidAvailable: Boolean get() = mlKitLidTag != NO_ML_KIT_TAG && lidTier != StageTier.UNAVAILABLE
+        val ttsAvailable: Boolean get() = ttsLocale != null && ttsTier != StageTier.UNAVAILABLE
+    }
+
+    private val LATN = "LATN" to listOf(0x0041..0x007A)
+    private val DEVA = "DEVA" to listOf(0x0900..0x097F)
+    private val BENG = "BENG" to listOf(0x0980..0x09FF)
+    private val GURU = "GURU" to listOf(0x0A00..0x0A7F)
+    private val GUJR = "GUJR" to listOf(0x0A80..0x0AFF)
+    private val ORYA = "ORYA" to listOf(0x0B00..0x0B7F)
+    private val TAML = "TAML" to listOf(0x0B80..0x0BFF)
+    private val TELU = "TELU" to listOf(0x0C00..0x0C7F)
+    private val KNDA = "KNDA" to listOf(0x0C80..0x0CFF)
+    private val MLYM = "MLYM" to listOf(0x0D00..0x0D7F)
+    private val ARAB = "ARAB" to listOf(0x0600..0x06FF)
+    private val OLCK = "OLCK" to listOf(0x1C50..0x1C7F)
+    private val MTEI = "MTEI" to listOf(0xABE0..0xABFF)
+    private val TAKR = "TAKR" to listOf(0x116C0..0x116FF)
+
+    private val allScriptPairs = listOf(
+        LATN, DEVA, BENG, GURU, GUJR, ORYA, TAML, TELU, KNDA, MLYM, ARAB, OLCK, MTEI, TAKR
+    )
+
+    /** Canonical script block for a code point, from registry data only. */
+    fun scriptBlockOf(codePoint: Int): String? =
+        allScriptPairs.firstOrNull { (_, ranges) -> ranges.any { codePoint in it } }?.first
+
+    private val stageRows: List<StageProfile> = listOf(
+        stageRow("en", "en", TranslateTag.ENGLISH, LidTag.EN, LATN),
+        stageRow("hi", "hi", TranslateTag.HINDI, LidTag.HI, DEVA),
+        stageRow("bn", "bn", TranslateTag.BENGALI, LidTag.BN, BENG),
+        stageRow("ta", "ta", TranslateTag.TAMIL, LidTag.TA, TAML),
+        stageRow("te", "te", TranslateTag.TELUGU, LidTag.TE, TELU),
+        stageRow("kn", "kn", TranslateTag.KANNADA, LidTag.KN, KNDA),
+        stageRow("ml", "ml", null, LidTag.ML, MLYM),
+        stageRow("mr", "mr", TranslateTag.MARATHI, LidTag.MR, DEVA),
+        stageRow("gu", "gu", TranslateTag.GUJARATI, LidTag.GU, GUJR),
+        stageRow("pa", "pa", null, LidTag.PA, GURU),
+        stageRow("ur", "ur", TranslateTag.URDU, LidTag.UR, ARAB),
+        stageRow("or", null, null, null, ORYA),
+        stageRow("as", "as", null, null, BENG),
+        stageRow("sat", null, null, null, OLCK),
+        stageRow("ne", "ne", null, null, DEVA),
+        stageRow("sa", "sa", null, null, DEVA),
+        stageRow("brx", null, null, null, DEVA, BENG),
+        stageRow("doi", null, null, null, DEVA, TAKR),
+        stageRow("ks", null, null, null, ARAB, DEVA),
+        stageRow("kok", null, null, null, DEVA, KNDA),
+        stageRow("mai", null, null, null, DEVA),
+        stageRow("mni", null, null, null, BENG, MTEI),
+        stageRow("sd", "sd", null, null, ARAB)
+    )
+
+    /** String tag constants are duplicated here only as registry-owned names, never as maps elsewhere. */
+    private object TranslateTag {
+        const val ENGLISH = "en"
+        const val HINDI = "hi"
+        const val BENGALI = "bn"
+        const val TAMIL = "ta"
+        const val TELUGU = "te"
+        const val KANNADA = "kn"
+        const val MARATHI = "mr"
+        const val GUJARATI = "gu"
+        const val URDU = "ur"
+    }
+
+    private object LidTag {
+        const val EN = "en"
+        const val HI = "hi"
+        const val BN = "bn"
+        const val TA = "ta"
+        const val TE = "te"
+        const val KN = "kn"
+        const val ML = "ml"
+        const val MR = "mr"
+        const val GU = "gu"
+        const val PA = "pa"
+        const val UR = "ur"
+    }
+
+    private fun stageRow(
+        code: String,
+        whisperCode: String?,
+        translateTag: String?,
+        lidTag: String?,
+        vararg scripts: Pair<String, List<IntRange>>
+    ): StageProfile {
+        val sttMeasured = code == "en"
+        return StageProfile(
+            code = code,
+            sttModelId = if (sttMeasured) BUNDLED_STT_MODEL_ID else null,
+            sttCode = whisperCode,
+            mlKitTranslationTag = translateTag ?: NO_ML_KIT_TAG,
+            mlKitLidTag = lidTag ?: NO_ML_KIT_TAG,
+            ttsLocale = getLanguage(code)?.voiceLocale,
+            ttsVoiceId = TEMPORARY_TTS_VOICE_ID,
+            scriptBlocks = scripts.map { it.first }.toSet(),
+            scriptRanges = scripts.flatMap { it.second },
+            sttTier = if (sttMeasured) StageTier.BETA else StageTier.UNAVAILABLE,
+            mtTier = StageTier.UNAVAILABLE,
+            lidTier = StageTier.UNAVAILABLE,
+            ttsTier = StageTier.UNAVAILABLE
+        )
+    }
+
+    val stageProfiles: Map<String, StageProfile> = stageRows.associateBy { it.code }
+
+    fun stageProfile(code: String): StageProfile? =
+        stageProfiles[code.lowercase().substringBefore('-')]
+
+    fun whisperCode(code: String): String? = stageProfile(code)?.sttCode
+
+    fun mlKitTranslationTag(code: String): String? =
+        stageProfile(code)?.mlKitTranslationTag?.takeIf { it != NO_ML_KIT_TAG }
+
+    fun mlKitLidTag(code: String): String? =
+        stageProfile(code)?.mlKitLidTag?.takeIf { it != NO_ML_KIT_TAG }
+
+    fun ttsLocale(code: String): String? = stageProfile(code)?.ttsLocale
+
+    fun sttTier(code: String): StageTier = stageProfile(code)?.sttTier ?: StageTier.UNAVAILABLE
+
+    /** Only a measured, non-UNAVAILABLE STT tier may own the microphone. */
+    fun canRunSpeechRecognition(code: String): Boolean = stageProfile(code)?.sttAvailable == true
+
     fun getLanguage(code: String): LanguageCapabilityEntry? {
         return allLanguages.find { it.code.equals(code, ignoreCase = true) }
     }

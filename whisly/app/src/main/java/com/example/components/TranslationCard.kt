@@ -55,6 +55,7 @@ fun TranslationWorkspaceCard(
     transcriptReviewNotice: String?,
     translatedSentence: String,
     sttConfidence: Float?,
+    sttTierLabel: String? = null,
     latencyBadgeText: String,
     isPlayingAudio: Boolean,
     ttsSupportedForTarget: Boolean,
@@ -106,6 +107,17 @@ fun TranslationWorkspaceCard(
                             fontWeight = FontWeight.SemiBold
                         )
                     )
+                    if (sttTierLabel != null) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = sttTierLabel,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = WhislyTokens.WarningText,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            modifier = Modifier.testTag("stt_beta_badge")
+                        )
+                    }
                 }
             }
 
