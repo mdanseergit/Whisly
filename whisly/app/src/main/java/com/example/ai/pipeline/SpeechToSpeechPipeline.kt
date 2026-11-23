@@ -89,13 +89,27 @@ class SpeechToSpeechPipeline(
                 }
             }
 
+            val ttsError = if (ttsResult.success) null
+                else (ttsResult.error ?: PipelineErrorType.TTS_FAILURE)
+            if (ttsError != null) {
+                // The translation is kept for editing; only the voice stage fails closed.
+                orchestrator.transition(OrchestratorState.Error(ttsError))
+                return@withLock EndToEndTurnOutcome(
+                    state = OrchestratorState.Error(ttsError),
+                    speechResult = null,
+                    translationResult = mtResult,
+                    audioResult = ttsResult,
+                    error = ttsError
+                )
+            }
+
             orchestrator.transition(OrchestratorState.Idle)
             EndToEndTurnOutcome(
                 state = OrchestratorState.Idle,
                 speechResult = null,
                 translationResult = mtResult,
                 audioResult = ttsResult,
-                error = if (ttsResult.success) null else (ttsResult.error ?: PipelineErrorType.TTS_FAILURE)
+                error = null
             )
         }
     }

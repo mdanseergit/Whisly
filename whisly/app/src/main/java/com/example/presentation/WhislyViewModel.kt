@@ -3,6 +3,7 @@ package com.example.presentation
 import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ai.audio.AudioProcessor
@@ -30,9 +31,12 @@ import com.example.data.repositories.WhislyRepository
 import com.example.domain.models.ConversationTurn
 import com.example.domain.models.PipelineErrorType
 import com.example.domain.models.PipelineStage
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -205,6 +209,14 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
     val waveformAmplitudes: StateFlow<List<Float>> = audioProcessor.waveformAmplitudes
     val isPlayingAudio: StateFlow<Boolean> = audioProcessor.isPlaying
     val audioDiagnostics: StateFlow<AudioDiagnostics> = audioProcessor.lastDiagnostics
+
+    private val _voiceDataInstallRequests = MutableSharedFlow<Intent>(extraBufferCapacity = 1)
+    /** Official system voice-data intent, emitted only after a failed TTS voice gate. */
+    val voiceDataInstallRequests: SharedFlow<Intent> = _voiceDataInstallRequests.asSharedFlow()
+
+    fun requestVoiceDataInstall() {
+        _voiceDataInstallRequests.tryEmit(ttsEngine.voiceDataInstallIntent())
+    }
     val downloadStates: StateFlow<Map<String, com.example.domain.models.DownloadState>> = modelManager.downloadStates
 
     private val _isColdStartReady = MutableStateFlow(false)
@@ -484,6 +496,8 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
         return when (error) {
             PipelineErrorType.UNSUPPORTED_SOURCE_LANGUAGE ->
                 "Speech isn't available for $name yet"
+            PipelineErrorType.UNSUPPORTED_TARGET_VOICE, PipelineErrorType.TTS_FAILURE ->
+                "Voice not available for $name"
             else -> null
         }
     }
@@ -699,6 +713,9 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
             val ttsRes = outcome.audioResult
             if (mtRes != null && mtRes.success) {
                 val totalLatency = state.lastSttLatencyMs + mtRes.latencyMs + (ttsRes?.latencyMs ?: 0L)
+                val voiceError = outcome.error?.takeIf {
+                    it == PipelineErrorType.UNSUPPORTED_TARGET_VOICE || it == PipelineErrorType.TTS_FAILURE
+                }
                 _uiState.update {
                     it.copy(
                         translatedSentence = mtRes.translatedText,
@@ -707,9 +724,11 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                         lastTtsLatencyMs = ttsRes?.latencyMs ?: 0L,
                         lastSynthesizedPcm = ttsRes?.pcm16Audio ?: ShortArray(0),
                         lastSynthesizedSampleRateHz = ttsRes?.sampleRateHz ?: 0,
-                        activeError = outcome.error
+                        activeError = outcome.error,
+                        statusBannerMessage = voiceError?.let { errorBannerFor(it, state.targetLangCode) }
                     )
                 }
+                if (voiceError != null) requestVoiceDataInstall()
 
                 repository.recordEncryptedHistory(
                     sourceLang = effectiveSource,
@@ -758,9 +777,20 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                 speechSpeed = speed
             )
             if (!played) {
-                _uiState.update { it.copy(activeError = PipelineErrorType.UNSUPPORTED_TARGET_VOICE) }
+                setVoiceUnavailable(PipelineErrorType.UNSUPPORTED_TARGET_VOICE, state.targetLangCode)
+                requestVoiceDataInstall()
             }
         }
+    }
+
+    private fun setVoiceUnavailable(error: PipelineErrorType, languageCode: String) {
+        _uiState.update {
+            it.copy(
+                activeError = error,
+                statusBannerMessage = errorBannerFor(error, languageCode)
+            )
+        }
+        emitStage(PipelineStage.ERROR)
     }
 
     fun speakArbitraryText(text: String, langCode: String) {
@@ -773,7 +803,8 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                 speechSpeed = speed
             )
             if (!played) {
-                _uiState.update { it.copy(activeError = PipelineErrorType.UNSUPPORTED_TARGET_VOICE) }
+                setVoiceUnavailable(PipelineErrorType.UNSUPPORTED_TARGET_VOICE, langCode)
+                requestVoiceDataInstall()
             }
         }
     }

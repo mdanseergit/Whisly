@@ -1,6 +1,7 @@
 package com.example.ai.tts
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
@@ -62,15 +63,21 @@ class SystemTextToSpeechEngine(private val context: Context) : SpeechSynthesizer
         val tts = ensureInitialized()
             ?: return audioFailure(language, voiceId, PipelineErrorType.TTS_FAILURE, "engine init failed")
 
-        val locale = localeFor(language)
-            ?: return audioFailure(language, voiceId, PipelineErrorType.UNSUPPORTED_TARGET_VOICE, "invalid locale")
-        val availability = runCatching { tts.isLanguageAvailable(locale) }.getOrDefault(TextToSpeech.LANG_NOT_SUPPORTED)
-        if (availability == TextToSpeech.LANG_MISSING_DATA || availability == TextToSpeech.LANG_NOT_SUPPORTED) {
+        val voiceCheck = checkVoice(language, tts)
+        if (!voiceCheck.usable) {
             return audioFailure(
                 language,
                 voiceId,
                 PipelineErrorType.UNSUPPORTED_TARGET_VOICE,
-                "device voice not available"
+                voiceCheck.reason
+            )
+        }
+        if (!CapabilityRegistry.textMatchesLanguageScript(text, language)) {
+            return audioFailure(
+                language,
+                voiceId,
+                PipelineErrorType.UNSUPPORTED_TARGET_VOICE,
+                "text script does not match target language"
             )
         }
 
@@ -80,7 +87,7 @@ class SystemTextToSpeechEngine(private val context: Context) : SpeechSynthesizer
             sampleRateHz = NO_PCM_SAMPLE_RATE_HZ,
             durationMs = 0L,
             language = language,
-            voiceId = "system_tts",
+            voiceId = CapabilityRegistry.TEMPORARY_TTS_VOICE_ID,
             latencyMs = System.currentTimeMillis() - startedAt,
             engineUsed = "Android TextToSpeech (temporary)",
             usedSystemFallback = true,
@@ -102,13 +109,10 @@ class SystemTextToSpeechEngine(private val context: Context) : SpeechSynthesizer
         if (text.isBlank() || isUnsupportedLanguage(languageCode)) return false
 
         val tts = ensureInitialized() ?: return false
-        val locale = localeFor(languageCode) ?: return false
-        val availability = runCatching { tts.isLanguageAvailable(locale) }.getOrDefault(TextToSpeech.LANG_NOT_SUPPORTED)
-        if (availability == TextToSpeech.LANG_MISSING_DATA || availability == TextToSpeech.LANG_NOT_SUPPORTED) {
-            return false
-        }
+        if (!checkVoice(languageCode, tts).usable) return false
+        // Never hand wrong-script text to a voice, even when the locale itself is installed.
+        if (!CapabilityRegistry.textMatchesLanguageScript(text, languageCode)) return false
 
-        runCatching { tts.setLanguage(locale) }
         runCatching { tts.setSpeechRate(speechSpeed.coerceIn(0.25f, 3.0f)) }
 
         val utteranceId = "whisly_${utteranceIds.getAndIncrement()}"
@@ -206,6 +210,57 @@ class SystemTextToSpeechEngine(private val context: Context) : SpeechSynthesizer
         CapabilityRegistry.ttsLocale(languageCode)?.let { Locale.forLanguageTag(it) }
             ?: Locale.forLanguageTag(languageCode)
     }.getOrNull()
+
+    /** Official `ACTION_INSTALL_TTS_DATA` intent; system voice data, not an app model download. */
+    fun voiceDataInstallIntent(): Intent =
+        Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+    data class VoiceCheck(val usable: Boolean, val reason: String)
+
+    /**
+     * Gate from `docs/TTS_OFFICIAL_API_EVIDENCE.md`: exact registry Locale, only a confirmed
+     * country/variant availability result, an installed non-network voice with a matching locale,
+     * and no engine substitution to a different voice. Fails closed on every unknown.
+     */
+    private fun checkVoice(languageCode: String, tts: TextToSpeech): VoiceCheck {
+        val locale = localeFor(languageCode)
+            ?: return VoiceCheck(false, "invalid locale")
+        val tag = locale.toLanguageTag()
+
+        val availability = runCatching { tts.isLanguageAvailable(locale) }
+            .getOrDefault(TextToSpeech.LANG_NOT_SUPPORTED)
+        if (availability != TextToSpeech.LANG_COUNTRY_AVAILABLE &&
+            availability != TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE
+        ) {
+            // LANG_AVAILABLE (0) is not accepted: the exact country voice is unconfirmed.
+            return VoiceCheck(false, "isLanguageAvailable=$availability for $tag")
+        }
+
+        val voices = runCatching { tts.getVoices() }.getOrNull().orEmpty()
+        val candidates = voices.filter { voice ->
+            voice.locale.language.equals(locale.language, ignoreCase = true) &&
+                (locale.country.isBlank() || voice.locale.country.equals(locale.country, ignoreCase = true))
+        }
+        if (candidates.isEmpty()) return VoiceCheck(false, "no installed voice for $tag")
+
+        val voice = candidates.firstOrNull { candidate ->
+            !candidate.features.contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED) &&
+                !candidate.isNetworkConnectionRequired
+        } ?: return VoiceCheck(false, "voice data missing or network-required for $tag")
+
+        val setResult = runCatching { tts.setVoice(voice) }.getOrDefault(TextToSpeech.ERROR)
+        if (setResult != TextToSpeech.SUCCESS) return VoiceCheck(false, "setVoice failed for $tag")
+
+        val active = runCatching { tts.voice }.getOrNull()
+        if (active == null ||
+            !active.locale.language.equals(voice.locale.language, ignoreCase = true) ||
+            (voice.locale.country.isNotBlank() &&
+                !active.locale.country.equals(voice.locale.country, ignoreCase = true))
+        ) {
+            return VoiceCheck(false, "engine substituted a different voice for $tag")
+        }
+        return VoiceCheck(true, "ok")
+    }
 
     private fun audioFailure(
         language: String,

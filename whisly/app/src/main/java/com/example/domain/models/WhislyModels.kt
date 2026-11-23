@@ -76,8 +76,8 @@ enum class PipelineErrorType(
         "This language pair isn't available offline yet."
     ),
     UNSUPPORTED_TARGET_VOICE(
-        "Voice Not Available",
-        "Voice not available for this language."
+        "Voice not available for this language",
+        "Voice not available for this language"
     ),
     MODEL_MISSING(
         "Speech isn't ready for this language yet",
@@ -140,7 +140,7 @@ enum class PipelineErrorType(
         "Could not translate this text. Check offline packs and try again."
     ),
     TTS_FAILURE(
-        "Voice Not Available",
+        "Voice not available for this language",
         "Voice not available for this language"
     ),
     AUDIO_PLAYBACK_INTERRUPTED(

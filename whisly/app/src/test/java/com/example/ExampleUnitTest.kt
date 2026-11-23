@@ -498,6 +498,16 @@ class ExampleUnitTest {
     }
 
     @Test
+    fun `tts script gate fails closed for wrong-script text and ignores digits`() {
+        assertTrue(CapabilityRegistry.textMatchesLanguageScript("Hello 123!", "en"))
+        assertTrue(CapabilityRegistry.textMatchesLanguageScript("नमस्ते 123।", "hi"))
+        assertFalse(CapabilityRegistry.textMatchesLanguageScript("Namaste 123", "hi"))
+        assertFalse(CapabilityRegistry.textMatchesLanguageScript("नमस्ते hello", "hi"))
+        assertTrue(CapabilityRegistry.textMatchesLanguageScript("1234", "en"))
+        assertFalse(CapabilityRegistry.textMatchesLanguageScript("Hello", "or"))
+    }
+
+    @Test
     fun `single registry carries measured tiers and delegates language tags`() {
         assertEquals(StageTier.BETA, CapabilityRegistry.sttTier("en"))
         for (code in listOf("hi", "bn", "ta", "te", "kn", "ml", "mr", "gu", "pa", "ur", "or", "as", "sat")) {

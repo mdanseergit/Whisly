@@ -19,8 +19,10 @@ import androidx.compose.material.icons.outlined.MicNone
 import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -106,6 +108,12 @@ fun WhislyAppRoot(
     viewModel: WhislyViewModel,
     startInTranslateDirectly: Boolean = false
 ) {
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        viewModel.voiceDataInstallRequests.collect { intent ->
+            runCatching { context.startActivity(intent) }
+        }
+    }
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: WhislyRoutes.TRANSLATE
@@ -232,6 +240,7 @@ fun WhislyAppRoot(
                     settings = settings,
                     pipelineStage = pipelineStage,
                     orchestratorState = orchestratorState,
+                    onInstallVoiceData = { viewModel.requestVoiceDataInstall() },
                     amplitudes = amplitudes,
                     isPlayingAudio = isPlayingAudio,
                     hasMicPermission = viewModel.audioProcessor.hasRecordPermission(),

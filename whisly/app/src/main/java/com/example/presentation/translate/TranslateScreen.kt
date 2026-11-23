@@ -46,6 +46,7 @@ import com.example.core.theme.WhislyDesign
 import com.example.core.theme.WhislyTokens
 import com.example.data.local.AppSettingsEntity
 import com.example.data.local.LanguageEntity
+import com.example.domain.models.PipelineErrorType
 import com.example.domain.models.PipelineStage
 import com.example.presentation.TranslateUiState
 
@@ -81,6 +82,7 @@ fun TranslateScreen(
     onStopAudio: () -> Unit,
     onSavePhrase: () -> Unit,
     onDismissError: () -> Unit,
+    onInstallVoiceData: () -> Unit = {},
     onNavigateToLanguages: () -> Unit,
     onNavigateToTextMode: () -> Unit,
     onNavigateToHistory: () -> Unit,
@@ -230,6 +232,16 @@ fun TranslateScreen(
                                 modifier = Modifier.testTag("banner_install_pack_button")
                             ) {
                                 Text("Download", color = WhislyTokens.PrimaryOrange, fontWeight = FontWeight.Bold)
+                            }
+                        } else if (uiState.activeError == PipelineErrorType.UNSUPPORTED_TARGET_VOICE ||
+                            uiState.activeError == PipelineErrorType.TTS_FAILURE
+                        ) {
+                            // Official system voice-data install action, not an app model download.
+                            TextButton(
+                                onClick = onInstallVoiceData,
+                                modifier = Modifier.testTag("banner_install_voice_data_button")
+                            ) {
+                                Text("Install voice data", color = WhislyTokens.PrimaryOrange, fontWeight = FontWeight.Bold)
                             }
                         } else if (bannerErrorMessage != null) {
                             IconButton(onClick = onDismissError) {

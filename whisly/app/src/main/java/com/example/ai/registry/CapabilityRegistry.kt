@@ -723,6 +723,20 @@ object CapabilityRegistry {
     fun scriptBlockOf(codePoint: Int): String? =
         allScriptPairs.firstOrNull { (_, ranges) -> ranges.any { codePoint in it } }?.first
 
+    /**
+     * Fail-closed script gate for spoken output. Digits and punctuation are neutral; at least 95%
+     * of letter code points must fall inside the target language's registry script blocks.
+     * English requires the LATN block. No transliteration or wrong-script voice is permitted.
+     */
+    fun textMatchesLanguageScript(text: String, code: String): Boolean {
+        val expected = stageProfile(code)?.scriptBlocks ?: return false
+        if (expected.isEmpty()) return false
+        val letters = text.codePoints().filter { Character.isLetter(it) }.toArray()
+        if (letters.isEmpty()) return true
+        val matching = letters.count { cp -> scriptBlockOf(cp) in expected }
+        return matching.toDouble() / letters.size >= 0.95
+    }
+
     private val stageRows: List<StageProfile> = listOf(
         stageRow("en", "en", TranslateTag.ENGLISH, LidTag.EN, LATN),
         stageRow("hi", "hi", TranslateTag.HINDI, LidTag.HI, DEVA),
