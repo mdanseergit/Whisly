@@ -138,15 +138,23 @@ the scope was narrowed; that command is in the incident evidence and was not del
   build shell); a local regex scan of build inputs found 0 hits, and the APK scan found 0.
 - All C: folder sizes (permissions/reparse points), and the unresolved purpose of
   `whisly-whisper-tiny-stt.zip`.
-- The user's OneDrive pause request was not answered; OneDrive sync state was not changed.
+- OneDrive pause was offered again with the exact click path; the user chose **Leave it on**.
+  OneDrive sync state was not changed.
 
-## Proposals — NOT executed, need your decision
+## Proposals and decisions (2026-11-23)
+
+None of the following were executed; all were declined by the user:
 
 1. `git filter-repo` to drop the two tracked release binaries from history: pack 232.2 MB →
-   roughly 40–50 MB (estimate; requires full backup and a forced refetch by any collaborator).
+   roughly 40–50 MB (estimate; would require full backup and a forced refetch by any collaborator).
+   **Decision: do nothing now.**
 2. `git rm --cached whisly/deliverables/final_v1.0.7/app-release.{apk,aab}` plus `.gitignore`
-   strengthening (files remain on disk and in the lean backup).
-3. Delete `whisly/deliverables/final_v1.0.7` (245.4 MB) after the new final APK is confirmed.
+   strengthening (files would remain on disk and in the lean backup). **Decision: do nothing now.**
+3. Delete `whisly/deliverables/final_v1.0.7` (245.4 MB). **Decision: keep it.**
 4. Delete the old 844 MB `C:\dev\Whisly-backups\Whisly_phase0_20261123_140456.zip` by name.
+   **Decision: keep it.**
 5. Pause OneDrive sync: tray icon → OneDrive → Help & settings → Settings → Sync and backup →
-   **Pause syncing** → choose 2/8/24 hours. (Not done automatically.)
+   **Pause syncing** → 2/8/24 hours. **Decision: leave sync on.**
+
+The user also confirmed the measured free-space figure (70.19 GB after the final backup)
+is the one to use, rather than the earlier "~20 GB full" estimate.
