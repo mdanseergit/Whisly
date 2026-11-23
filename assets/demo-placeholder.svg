@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="360" viewBox="0 0 720 360" role="img" aria-label="Demo placeholder">
+  <rect width="720" height="360" rx="20" fill="#29211E"/>
+  <rect x="1" y="1" width="718" height="358" rx="19" fill="none" stroke="#EBAF96" stroke-width="2"/>
+  <circle cx="360" cy="150" r="58" fill="none" stroke="#EBAF96" stroke-width="5">
+    <animate attributeName="r" values="44;64;44" dur="3.2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.35;1;0.35" dur="3.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="360" cy="150" r="30" fill="#DFA58D"/>
+  <text x="360" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#F8F2EC">Demo coming soon</text>
+  <text x="360" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#EBAF96">replace with assets/demo.gif</text>
+</svg>
