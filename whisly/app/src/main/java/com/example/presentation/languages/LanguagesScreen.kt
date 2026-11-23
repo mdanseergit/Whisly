@@ -337,7 +337,7 @@ private fun LanguagesScreenDarkPreview() {
             languages = IndicLanguageCatalog.buildInitialLanguageEntities().take(4),
             installedModels = emptyList(),
             availableStorageBytes = 12L * 1024 * 1024 * 1024,
-            statusBanner = "Pack ready",
+            statusBanner = null,
             onInstallLanguage = {},
             onRemoveLanguage = {}
         )

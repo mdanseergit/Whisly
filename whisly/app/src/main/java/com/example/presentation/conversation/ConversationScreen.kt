@@ -507,8 +507,8 @@ private fun ConversationScreenLightPreview() {
                         isPersonA = true,
                         sourceLangCode = "ta",
                         targetLangCode = "bn",
-                        originalText = "Sample text",
-                        translatedText = "Sample text",
+                        originalText = "",
+                        translatedText = "",
                         timestamp = 1730000000000L,
                         confidence = null,
                         ttsAvailable = true

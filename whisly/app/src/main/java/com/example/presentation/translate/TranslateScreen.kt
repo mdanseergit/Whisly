@@ -320,8 +320,8 @@ private fun TranslateScreenLightPreview() {
     com.example.core.theme.WhislyTheme(darkTheme = false) {
         TranslateScreen(
             uiState = TranslateUiState(
-                recognizedTranscript = "Sample text",
-                translatedSentence = "Sample text"
+                recognizedTranscript = "",
+                translatedSentence = ""
             ),
             languages = com.example.ai.translation.IndicLanguageCatalog.buildInitialLanguageEntities().take(4),
             settings = AppSettingsEntity(),
@@ -355,8 +355,8 @@ private fun TranslateScreenDarkPreview() {
         TranslateScreen(
             uiState = TranslateUiState(
                 isDarkTheme = true,
-                recognizedTranscript = "Sample text",
-                translatedSentence = "Sample text"
+                recognizedTranscript = "",
+                translatedSentence = ""
             ),
             languages = com.example.ai.translation.IndicLanguageCatalog.buildInitialLanguageEntities().take(4),
             settings = AppSettingsEntity(),

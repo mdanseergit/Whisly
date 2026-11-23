@@ -130,35 +130,35 @@ fun OnDeviceRecognizerDebugRoute(onBack: () -> Unit) {
                 return@post
             }
             val probe = SpeechRecognizer.createOnDeviceSpeechRecognizer(context)
-            try {
-                probe.checkRecognitionSupport(
-                    reportIntent("en-US"), context.mainExecutor,
-                    object : RecognitionSupportCallback {
-                        override fun onSupportResult(support: RecognitionSupport) {
-                            val installed = support.installedOnDeviceLanguages.toSet()
-                            val pending = support.pendingOnDeviceLanguages.toSet()
-                            val supported = support.supportedOnDeviceLanguages.toSet()
-                            val online = support.onlineLanguages.toSet()
-                            langRows = DEBUG_LANGUAGES.map { (code, tag) ->
-                                DebugLangRow(
-                                    code = code, tag = tag,
-                                    installed = if (installed.any { it.startsWith(code, true) }) "YES" else "NO",
-                                    pending = if (pending.any { it.startsWith(code, true) }) "YES" else "NO",
-                                    supported = if (supported.any { it.startsWith(code, true) }) "YES" else "NO",
-                                    online = if (online.any { it.startsWith(code, true) }) "YES" else "NO",
-                                )
-                            }
-                            status = "Support report measured on this device"
+            // Keep the recognizer alive until the async callback arrives; destroy() only then.
+            probe.checkRecognitionSupport(
+                reportIntent("en-US"), context.mainExecutor,
+                object : RecognitionSupportCallback {
+                    private fun finish() = probe.destroy()
+                    override fun onSupportResult(support: RecognitionSupport) {
+                        val installed = support.installedOnDeviceLanguages.toSet()
+                        val pending = support.pendingOnDeviceLanguages.toSet()
+                        val supported = support.supportedOnDeviceLanguages.toSet()
+                        val online = support.onlineLanguages.toSet()
+                        langRows = DEBUG_LANGUAGES.map { (code, tag) ->
+                            DebugLangRow(
+                                code = code, tag = tag,
+                                installed = if (installed.any { it.startsWith(code, true) }) "YES" else "NO",
+                                pending = if (pending.any { it.startsWith(code, true) }) "YES" else "NO",
+                                supported = if (supported.any { it.startsWith(code, true) }) "YES" else "NO",
+                                online = if (online.any { it.startsWith(code, true) }) "YES" else "NO",
+                            )
                         }
-                        override fun onError(error: Int) {
-                            supportError = "checkRecognitionSupport error=$error"
-                            status = supportError
-                        }
+                        status = "Support report measured on this device"
+                        finish()
                     }
-                )
-            } finally {
-                probe.destroy()
-            }
+                    override fun onError(error: Int) {
+                        supportError = "checkRecognitionSupport error=$error"
+                        status = supportError
+                        finish()
+                    }
+                }
+            )
         }
     }
 
@@ -169,30 +169,30 @@ fun OnDeviceRecognizerDebugRoute(onBack: () -> Unit) {
         }
         mainHandler.post {
             val rec = SpeechRecognizer.createOnDeviceSpeechRecognizer(context)
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    rec.triggerModelDownload(reportIntent(row.tag), context.mainExecutor,
-                        object : android.speech.ModelDownloadListener {
-                            override fun onProgress(progress: Int) {
-                                status = "${row.code} download progress=$progress%"
-                            }
-                            override fun onSuccess() {
-                                status = "${row.code} download SUCCESS — re-run Refresh"
-                            }
-                            override fun onScheduled() {
-                                status = "${row.code} download SCHEDULED (no further updates)"
-                            }
-                            override fun onError(error: Int) {
-                                status = "${row.code} download ERROR=$error"
-                            }
-                        })
-                } else {
-                    @Suppress("DEPRECATION")
-                    rec.triggerModelDownload(reportIntent(row.tag))
-                    status = "${row.code} download requested (API 33, no progress listener)"
-                }
-            } finally {
-                // The download is system-owned; the probe recognizer has no active session.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                rec.triggerModelDownload(reportIntent(row.tag), context.mainExecutor,
+                    object : android.speech.ModelDownloadListener {
+                        private fun finish() = rec.destroy()
+                        override fun onProgress(progress: Int) {
+                            status = "${row.code} download progress=$progress%"
+                        }
+                        override fun onSuccess() {
+                            status = "${row.code} download SUCCESS — re-run Refresh"
+                            finish()
+                        }
+                        override fun onScheduled() {
+                            status = "${row.code} download SCHEDULED (no further updates)"
+                            finish()
+                        }
+                        override fun onError(error: Int) {
+                            status = "${row.code} download ERROR=$error"
+                            finish()
+                        }
+                    })
+            } else {
+                @Suppress("DEPRECATION")
+                rec.triggerModelDownload(reportIntent(row.tag))
+                status = "${row.code} download requested (API 33, no progress listener)"
                 rec.destroy()
             }
         }

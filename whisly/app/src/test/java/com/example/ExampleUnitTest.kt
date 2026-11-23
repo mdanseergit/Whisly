@@ -423,6 +423,23 @@ class ExampleUnitTest {
     }
 
     @Test
+    fun `grep check enforces no canned preview transcript text remains in main source`() {
+        val mainSrcDir = java.io.File("src/main/java")
+        if (!mainSrcDir.exists()) return
+        val forbidden = listOf("Sample text", "Pack ready")
+        val ktFiles = mainSrcDir.walkTopDown().filter { it.extension == "kt" }.toList()
+        for (file in ktFiles) {
+            val content = file.readText()
+            for (term in forbidden) {
+                assertFalse(
+                    "Canned preview term '$term' returned in ${file.name}",
+                    content.contains(term, ignoreCase = true)
+                )
+            }
+        }
+    }
+
+    @Test
     fun `grep check enforces that speech screens never offer auto detect`() {
         val presentationDir = java.io.File("src/main/java/com/example/presentation")
         if (!presentationDir.exists()) return

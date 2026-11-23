@@ -301,8 +301,8 @@ private fun TextTranslationScreenLightPreview() {
     WhislyTheme(darkTheme = false) {
         TextTranslationScreen(
             uiState = TranslateUiState(
-                textModeInput = "Sample text",
-                textModeOutput = "Sample text"
+                textModeInput = "",
+                textModeOutput = ""
             ),
             languages = IndicLanguageCatalog.buildInitialLanguageEntities().take(4),
             onSelectSource = {},
@@ -325,8 +325,8 @@ private fun TextTranslationScreenDarkPreview() {
         TextTranslationScreen(
             uiState = TranslateUiState(
                 isDarkTheme = true,
-                textModeInput = "Sample text",
-                textModeOutput = "Sample text"
+                textModeInput = "",
+                textModeOutput = ""
             ),
             languages = IndicLanguageCatalog.buildInitialLanguageEntities().take(4),
             onSelectSource = {},

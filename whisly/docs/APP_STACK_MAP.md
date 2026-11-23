@@ -4,6 +4,33 @@ Date: 2026-11-22. Status: Step 0 deliverable. This document is an evidence map o
 
 Evidence method: local source files were read/grepped; package and artifact hashes were computed with `Get-FileHash`; library/model licence pages were fetched from primary sources; previous build/test output from `.\gradlew.bat assembleDebug testDebugUnitTest` is recorded in `TEST_REPORT.md` and is being refreshed after this document. Device/network/logcat evidence is **UNMEASURED**.
 
+> ## Phase 0 verification (2026-11-23) — read this before the older sections
+>
+> The baseline narrative in §§1–11 below predates the voice reset and contains statements that are
+> no longer true. The Step 7 note and this Phase 0 note supersede them. Verified corrections:
+>
+> - Git: branch `voice-reset`, baseline tag `pre-voice-reset` at `033b53f`, 18 reachable commits.
+>   Backup outside OneDrive: `C:\dev\Whisly-backups\Whisly_pre-voice-reset_20261122_113141.zip`,
+>   254,493,504 bytes, SHA-256 `2ED041F15DF8EC92ACE7A77FD26E4A367DCC36D2AC030A001096F86E9BF8793B`.
+>   OneDrive is not a safe git/Gradle location; move the project to `C:\dev\Whisly` (user decision pending).
+> - The local `androidx/core/splashscreen/SplashScreen.kt` shim is **gone** (no file found); `MainActivity`
+>   imports `androidx.core.splashscreen.SplashScreen` from official `core-splashscreen:1.2.0`.
+> - No `PortalVoiceOrb` or `MyApplicationTheme` wrapper remains; `AuraVoiceOrb` is the single active orb.
+> - jitpack.io is retained only because the pinned `com.github.k2-fsa.sherpa-onnx:sherpa-onnx:1.13.5`
+>   AAR resolves from it; its POM declares Apache-2.0 and the supply-chain risk is recorded in `MODELS.md`.
+> - Canned preview strings (`"Sample text"`, `"Pack ready"`) were removed from `src/main/java`; a JUnit
+>   source-scan guard now fails if they return. No production transcript/translation is preset.
+> - Full-history secret scan over all 18 commits: `TOTAL_HITS=0`. `gitleaks` was not installed; the local
+>   scan was a regex/blob grep and does not replace entropy-based detection. No `.env`, keystore or
+>   private key is tracked. Tracked binaries at HEAD are the two bundled Whisper INT8 ONNX assets and
+>   the two release artifacts in `deliverables/final_v1.0.7/` (the latter are intentional deliverables,
+>   not build-cache leakage).
+> - Real sizes are no longer UNMEASURED: see `docs/BUILD_EVIDENCE.md` and
+>   `deliverables/final_v1.0.7/apkanalyzer/` for the measured APK/AAB, per-component and SHA-256 values.
+> - Everything in §§1–11 describing ZIP model import, custom speech-pack downloads, `canListen=true` for
+>   Indic languages, `whisly_manifest.json` as truth, or a non-bundled STT model is historical only.
+>   The current truth is in the Step 7 note above and in `CapabilityRegistry.StageProfile`.
+
 > ## Step 7 update (2026-11-23) — current state supersedes the baseline below
 >
 > The map below is preserved as the Step 0 baseline. The reset changed these facts:

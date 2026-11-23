@@ -95,3 +95,60 @@ Removed tests and why:
   <testcase name="regression lock 20 sentences assert non-echo, target script, zero transliteration, and chrF floor" .../>
 </testsuite>
 ```
+
+## Phase 0 re-run after canned-preview cleanup (2026-11-23)
+
+Command (from `whisly/`), exact tail of output:
+```
+$env:JAVA_HOME="C:\Users\danse\.gradle\jdks\eclipse_adoptium-17-amd64-windows.2"; .\gradlew.bat clean assembleDebug testDebugUnitTest
+...
+> Task :app:testDebugUnitTest
+
+BUILD SUCCESSFUL in 2m 55s
+51 actionable tasks: 29 executed, 22 from cache
+Configuration cache entry reused.
+```
+Kotlin compiler warnings in this run: `MainActivity.kt:101` deprecated `TRIM_MEMORY_RUNNING_LOW`;
+`MainActivity.kt:145` condition always true; `CrashProtectionManager.kt:67` deprecated `val id: Long`;
+`ExampleUnitTest.kt:735` unsafe call on nullable `File?`. No errors.
+
+JUnit XML totals after the new guard test:
+```
+com.example.ExampleRobolectricTest tests=5 failures=0 errors=0
+com.example.ExampleUnitTest tests=29 failures=0 errors=0
+com.example.LaunchAndRecoveryPreventionTest tests=5 failures=0 errors=0
+com.example.NavigationTapTest tests=1 failures=0 errors=0
+com.example.OfflineZeroNetworkGuardTest tests=5 failures=0 errors=0
+com.example.TranslationRegressionLockTest tests=2 failures=0 errors=0
+TOTAL_TESTS=47
+```
+New test confirmed in raw XML:
+```
+<testcase name="grep check enforces no canned preview transcript text remains in main source" classname="com.example.ExampleUnitTest" time="0.051"/>
+```
+
+Lint command and exact tail:
+```
+$env:JAVA_HOME="C:\Users\danse\.gradle\jdks\eclipse_adoptium-17-amd64-windows.2"; .\gradlew.bat lintDebug
+> Task :app:lintReportDebug
+Wrote HTML report to file:///C:/Users/danse/AppData/Local/Temp/whisly_build/app/reports/lint-results-debug.html
+> Task :app:lintDebug
+
+BUILD SUCCESSFUL in 2m 39s
+31 actionable tasks: 9 executed, 22 up-to-date
+Configuration cache entry stored.
+```
+`lint-results-debug.txt` final line: `0 errors, 107 warnings`.
+
+Full-history secrets scan (gitleaks not installed; local regex over all reachable commits):
+```
+commits_scanned=18
+--- HITS (commit path:line:match) ---
+TOTAL_HITS=0
+--- TRACKED SENSITIVE/BINARY EXTENSIONS AT HEAD ---
+whisly/app/src/main/assets/whisper/tiny/tiny-decoder.int8.onnx
+whisly/app/src/main/assets/whisper/tiny/tiny-encoder.int8.onnx
+whisly/deliverables/final_v1.0.7/app-release.aab
+whisly/deliverables/final_v1.0.7/app-release.apk
+TRACKED_BINARY_COUNT=4
+```
