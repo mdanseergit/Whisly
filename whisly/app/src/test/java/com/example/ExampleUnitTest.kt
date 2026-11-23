@@ -3,6 +3,8 @@ package com.example
 import com.example.ai.audio.AudioProcessor
 import com.example.ai.evaluation.AiEvaluationSuite
 import com.example.ai.lid.LanguageIdEngine
+import com.example.ai.pipeline.OrchestratorState
+import com.example.ai.pipeline.PipelineOrchestrator
 import com.example.ai.registry.CapabilityRegistry
 import com.example.ai.stt.TranscriptFirewall
 import com.example.ai.translation.IndicLanguageCatalog
@@ -491,6 +493,32 @@ class ExampleUnitTest {
             "No STT result may auto-call translation",
             Regex("(?m)^\\s+confirmTranscriptAndTranslate\\(\\)\\s*$").containsMatchIn(viewModel)
         )
+    }
+
+    @Test
+    fun `orchestrator enforces the immutable single state machine`() {
+        val orchestrator = PipelineOrchestrator()
+        assertEquals(OrchestratorState.Idle, orchestrator.current())
+
+        // Jumping straight to translation without listening/confirmation is rejected.
+        assertFalse(orchestrator.transition(OrchestratorState.Speaking))
+        assertEquals(OrchestratorState.Idle, orchestrator.current())
+
+        assertTrue(orchestrator.transition(OrchestratorState.Listening))
+        assertTrue(orchestrator.transition(OrchestratorState.Transcribing))
+        assertTrue(orchestrator.transition(OrchestratorState.ConfirmTranscript))
+        assertTrue(orchestrator.transition(OrchestratorState.Translating))
+        assertTrue(orchestrator.transition(OrchestratorState.Speaking))
+
+        // A second pipeline run cannot begin from Speaking until the machine is Idle.
+        assertFalse(orchestrator.transition(OrchestratorState.Listening))
+        assertTrue(orchestrator.transition(OrchestratorState.Idle))
+        assertTrue(orchestrator.transition(OrchestratorState.Listening))
+        val error = OrchestratorState.Error(PipelineErrorType.STT_FAILURE)
+        assertTrue(orchestrator.transition(error))
+        assertEquals(error, orchestrator.current())
+        orchestrator.cancel()
+        assertEquals(OrchestratorState.Idle, orchestrator.current())
     }
 
     @Test

@@ -118,6 +118,7 @@ fun WhislyAppRoot(
     val historyItems by viewModel.historyState.collectAsStateWithLifecycle()
     val settings by viewModel.settingsState.collectAsStateWithLifecycle()
     val pipelineStage by viewModel.pipelineStage.collectAsStateWithLifecycle()
+    val orchestratorState by viewModel.orchestratorState.collectAsStateWithLifecycle()
     val amplitudes by viewModel.waveformAmplitudes.collectAsStateWithLifecycle()
     val isPlayingAudio by viewModel.isPlayingAudio.collectAsStateWithLifecycle()
     val audioDiagnostics by viewModel.audioDiagnostics.collectAsStateWithLifecycle()
@@ -230,6 +231,7 @@ fun WhislyAppRoot(
                     languages = languages,
                     settings = settings,
                     pipelineStage = pipelineStage,
+                    orchestratorState = orchestratorState,
                     amplitudes = amplitudes,
                     isPlayingAudio = isPlayingAudio,
                     hasMicPermission = viewModel.audioProcessor.hasRecordPermission(),

@@ -10,6 +10,8 @@ import com.example.ai.evaluation.AiEvaluationSuite
 import com.example.ai.lid.LanguageIdEngine
 import com.example.ai.modelmanager.WhislyModelManager
 import com.example.ai.pipeline.AudioDiagnostics
+import com.example.ai.pipeline.OrchestratorState
+import com.example.ai.pipeline.PipelineOrchestrator
 import com.example.ai.pipeline.SpeechToSpeechPipeline
 import com.example.ai.registry.CapabilityRegistry
 import com.example.ai.stt.TranscriptFirewall
@@ -32,6 +34,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -71,6 +74,17 @@ data class TranslateUiState(
     val isDarkTheme: Boolean = false,
     val lowEndPerformanceMode: Boolean = false
 )
+
+/** Compatibility projection only; never a second state owner. */
+private fun OrchestratorState.toPipelineStage(): PipelineStage = when (this) {
+    OrchestratorState.Idle -> PipelineStage.IDLE
+    OrchestratorState.Listening -> PipelineStage.RECORDING
+    OrchestratorState.Transcribing -> PipelineStage.PREPROCESSING
+    OrchestratorState.ConfirmTranscript -> PipelineStage.AWAITING_CONFIRMATION
+    OrchestratorState.Translating -> PipelineStage.MT_INFERENCE
+    OrchestratorState.Speaking -> PipelineStage.PLAYING_AUDIO
+    is OrchestratorState.Error -> PipelineStage.ERROR
+}
 
 class WhislyViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -135,9 +149,30 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
         ttsEngineInitialized = true
         SystemTextToSpeechEngine(context = application)
     }
+    /** The only mutable pipeline state machine. All screens observe it; none of them set it. */
+    private val orchestrator = PipelineOrchestrator()
+    val orchestratorState: StateFlow<OrchestratorState> = orchestrator.state
+
+    /** Single writer adapter used by legacy call sites; error state always carries its real type. */
+    private fun emitStage(stage: PipelineStage) {
+        val next = when (stage) {
+            PipelineStage.IDLE -> OrchestratorState.Idle
+            PipelineStage.RECORDING -> OrchestratorState.Listening
+            PipelineStage.PREPROCESSING, PipelineStage.STT_INFERENCE -> OrchestratorState.Transcribing
+            PipelineStage.AWAITING_CONFIRMATION -> OrchestratorState.ConfirmTranscript
+            PipelineStage.NORMALIZING, PipelineStage.MT_INFERENCE -> OrchestratorState.Translating
+            PipelineStage.TTS_INFERENCE, PipelineStage.PLAYING_AUDIO -> OrchestratorState.Speaking
+            PipelineStage.COMPLETED -> OrchestratorState.Idle
+            PipelineStage.ERROR -> OrchestratorState.Error(
+                _uiState.value.activeError ?: PipelineErrorType.STT_FAILURE
+            )
+        }
+        orchestrator.transition(next)
+    }
+
     val pipeline by lazy {
         pipelineInitialized = true
-        SpeechToSpeechPipeline(mtEngine, ttsEngine)
+        SpeechToSpeechPipeline(mtEngine, ttsEngine, orchestrator)
     }
 
     val languagesState: StateFlow<List<LanguageEntity>> = repository.languagesFlow
@@ -158,8 +193,13 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
     val settingsState: StateFlow<AppSettingsEntity?> = repository.settingsFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    private val _pipelineStage = MutableStateFlow(PipelineStage.IDLE)
-    val pipelineStage: StateFlow<PipelineStage> = _pipelineStage.asStateFlow()
+    /**
+     * Read-only compatibility view for existing Compose code. The orchestrator is the only
+     * writer; this mapping never owns state and never accepts a write.
+     */
+    val pipelineStage: StateFlow<PipelineStage> = orchestrator.state
+        .map { it.toPipelineStage() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, PipelineStage.IDLE)
 
     val waveformAmplitudes: StateFlow<List<Float>> = audioProcessor.waveformAmplitudes
     val isPlayingAudio: StateFlow<Boolean> = audioProcessor.isPlaying
@@ -181,7 +221,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
 
     val unifiedTranslationState: StateFlow<com.example.domain.models.UnifiedTranslationState> = kotlinx.coroutines.flow.combine(
         _uiState,
-        _pipelineStage,
+        pipelineStage,
         audioProcessor.waveformAmplitudes,
         audioProcessor.isPlaying
     ) { state, stage, amps, isPlaying ->
@@ -259,6 +299,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
     fun onAppBackgrounded() {
         if (_uiState.value.isRecording) {
             speechRecognizer.cancel()
+            orchestrator.cancel()
             _uiState.update { it.copy(isRecording = false) }
         }
         if (ttsEngineInitialized) {
@@ -390,7 +431,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                 activeError = PipelineErrorType.MIC_PERMISSION_DENIED
             )
         }
-        _pipelineStage.value = PipelineStage.ERROR
+        emitStage(PipelineStage.ERROR)
     }
 
     fun toggleMainRecording() {
@@ -445,17 +486,17 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
         if (_uiState.value.isRecording || sttJob?.isActive == true) return
         if (!audioProcessor.hasMicrophoneHardware()) {
             _uiState.update { it.copy(activeError = PipelineErrorType.NO_MICROPHONE_AVAILABLE) }
-            _pipelineStage.value = PipelineStage.ERROR
+            emitStage(PipelineStage.ERROR)
             return
         }
         if (!audioProcessor.hasRecordPermission()) {
             _uiState.update { it.copy(activeError = PipelineErrorType.MIC_PERMISSION_DENIED) }
-            _pipelineStage.value = PipelineStage.ERROR
+            emitStage(PipelineStage.ERROR)
             return
         }
         if (audioProcessor.isMicrophoneMuted()) {
             _uiState.update { it.copy(activeError = PipelineErrorType.MICROPHONE_MUTED) }
-            _pipelineStage.value = PipelineStage.ERROR
+            emitStage(PipelineStage.ERROR)
             return
         }
         val sourceLang = _uiState.value.sourceLangCode
@@ -464,14 +505,14 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
             _uiState.update {
                 it.copy(activeError = error, statusBannerMessage = errorBannerFor(error, sourceLang))
             }
-            _pipelineStage.value = PipelineStage.ERROR
+            emitStage(PipelineStage.ERROR)
             return
         }
         if (ttsEngineInitialized) {
             ttsEngine.stopSpeaking()
         }
         audioProcessor.resetWaveform()
-        _pipelineStage.value = PipelineStage.RECORDING
+        emitStage(PipelineStage.RECORDING)
         _uiState.update {
             it.copy(
                 isRecording = true,
@@ -503,7 +544,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                     statusBannerMessage = errorBannerFor(startError, sourceLang)
                 )
             }
-            _pipelineStage.value = PipelineStage.ERROR
+            emitStage(PipelineStage.ERROR)
             return
         }
 
@@ -528,7 +569,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
         recordingTimerJob?.cancel()
         recordingTimerJob = null
         _uiState.update { it.copy(isRecording = false) }
-        _pipelineStage.value = PipelineStage.PREPROCESSING
+        emitStage(PipelineStage.PREPROCESSING)
 
         sttJob = viewModelScope.launch {
             val outcome = speechRecognizer.stopAndRecognize()
@@ -541,7 +582,6 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                     val firewall = TranscriptFirewall.evaluate(transcript, outcome.confidence)
                     when (firewall) {
                         TranscriptFirewall.Outcome.FAIL -> {
-                            _pipelineStage.value = PipelineStage.ERROR
                             _uiState.update {
                                 it.copy(
                                     recognizedTranscript = "",
@@ -552,6 +592,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                                     statusBannerMessage = TranscriptFirewall.FAILURE_MESSAGE
                                 )
                             }
+                            emitStage(PipelineStage.ERROR)
                             return@launch
                         }
                         TranscriptFirewall.Outcome.LOW_CONFIDENCE,
@@ -575,21 +616,21 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                             }
                             // No automatic translation. The user must edit if needed and tap
                             // Translate, including for PASS results.
-                            _pipelineStage.value = PipelineStage.AWAITING_CONFIRMATION
+                            emitStage(PipelineStage.AWAITING_CONFIRMATION)
                         }
                     }
                 }
                 is com.example.ai.stt.SttOutcome.Failure -> {
-                    _pipelineStage.value = PipelineStage.ERROR
                     _uiState.update {
                         it.copy(
                             activeError = outcome.error,
                             statusBannerMessage = errorBannerFor(outcome.error, _uiState.value.sourceLangCode)
                         )
                     }
+                    emitStage(PipelineStage.ERROR)
                 }
                 com.example.ai.stt.SttOutcome.Cancelled -> {
-                    _pipelineStage.value = PipelineStage.IDLE
+                    emitStage(PipelineStage.IDLE)
                 }
             }
         }
@@ -610,7 +651,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
         val targetName = CapabilityRegistry.getLanguage(state.targetLangCode)?.name ?: state.targetLangCode
 
         if (effectiveSource.equals(state.targetLangCode, ignoreCase = true)) {
-            _pipelineStage.value = PipelineStage.IDLE
+            emitStage(PipelineStage.IDLE)
             _uiState.update {
                 it.copy(
                     translatedSentence = "",
@@ -624,7 +665,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             val isPairReady = isPairReadyOffline(effectiveSource, state.targetLangCode)
             if (!isPairReady) {
-                _pipelineStage.value = PipelineStage.IDLE
+                emitStage(PipelineStage.IDLE)
                 _uiState.update {
                     it.copy(
                         translatedSentence = "",
@@ -636,7 +677,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
             }
 
             val settings = settingsState.value ?: AppSettingsEntity()
-            _pipelineStage.value = PipelineStage.MT_INFERENCE
+            emitStage(PipelineStage.MT_INFERENCE)
             val outcome = pipeline.translateAndSynthesize(
                 confirmedText = transcript,
                 sourceLang = effectiveSource,
@@ -644,7 +685,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                 autoPlay = settings.autoPlayTranslatedSpeech,
                 speechSpeed = settings.speechSpeed
             )
-            _pipelineStage.value = pipeline.currentStage.value
+            // The pipeline already advanced the single orchestrator to its final state.
 
             val mtRes = outcome.translationResult
             val ttsRes = outcome.audioResult
@@ -742,7 +783,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
             val speakerSource = if (state.activeConversationSpeakerIsA) effectiveSrc else state.targetLangCode
             val speakerTarget = if (state.activeConversationSpeakerIsA) state.targetLangCode else effectiveSrc
             _uiState.update { it.copy(isRecording = false) }
-            _pipelineStage.value = PipelineStage.PREPROCESSING
+            emitStage(PipelineStage.PREPROCESSING)
 
             viewModelScope.launch {
                 when (val outcome = speechRecognizer.stopAndRecognize()) {
@@ -750,7 +791,6 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                         val transcript = sanitizeTranscript(outcome.text)
                         val firewall = TranscriptFirewall.evaluate(transcript, outcome.confidence)
                         if (firewall == TranscriptFirewall.Outcome.FAIL) {
-                            _pipelineStage.value = PipelineStage.ERROR
                             _uiState.update {
                                 it.copy(
                                     recognizedTranscript = "",
@@ -760,6 +800,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                                     statusBannerMessage = TranscriptFirewall.FAILURE_MESSAGE
                                 )
                             }
+                            emitStage(PipelineStage.ERROR)
                             return@launch
                         }
                         val reviewNotice = if (firewall == TranscriptFirewall.Outcome.LOW_CONFIDENCE) {
@@ -780,19 +821,19 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                             )
                         }
                         // No conversation turn is emitted until the user confirms the transcript.
-                        _pipelineStage.value = PipelineStage.AWAITING_CONFIRMATION
+                        emitStage(PipelineStage.AWAITING_CONFIRMATION)
                     }
                     is com.example.ai.stt.SttOutcome.Failure -> {
-                        _pipelineStage.value = PipelineStage.ERROR
                         _uiState.update {
                             it.copy(
                                 activeError = outcome.error,
                                 statusBannerMessage = errorBannerFor(outcome.error, state.sourceLangCode)
                             )
                         }
+                        emitStage(PipelineStage.ERROR)
                     }
                     com.example.ai.stt.SttOutcome.Cancelled -> {
-                        _pipelineStage.value = PipelineStage.IDLE
+                        emitStage(PipelineStage.IDLE)
                     }
                 }
             }
@@ -813,14 +854,14 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                 _uiState.update {
                     it.copy(activeError = error, statusBannerMessage = errorBannerFor(error, speakerSource))
                 }
-                _pipelineStage.value = PipelineStage.ERROR
+                emitStage(PipelineStage.ERROR)
                 return
             }
             if (ttsEngineInitialized) {
                 ttsEngine.stopSpeaking()
             }
 
-            _pipelineStage.value = PipelineStage.RECORDING
+            emitStage(PipelineStage.RECORDING)
             _uiState.update {
                 it.copy(
                     isRecording = true,
@@ -845,7 +886,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
             )
             if (startError != null) {
                 _uiState.update { it.copy(isRecording = false, activeError = startError) }
-                _pipelineStage.value = PipelineStage.ERROR
+                emitStage(PipelineStage.ERROR)
             }
         }
     }
@@ -910,7 +951,6 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
             autoPlay = settings.autoPlayTranslatedSpeech,
             speechSpeed = settings.speechSpeed
         )
-        _pipelineStage.value = pipeline.currentStage.value
         val mtRes = outcome.translationResult
         if (mtRes != null && mtRes.success) {
             val tgtInfo = IndicLanguageCatalog.getLanguageInfo(targetLang)
@@ -968,7 +1008,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
         val targetName = CapabilityRegistry.getLanguage(state.targetLangCode)?.name ?: state.targetLangCode
 
         if (effectiveSource.equals(state.targetLangCode, ignoreCase = true)) {
-            _pipelineStage.value = PipelineStage.IDLE
+            emitStage(PipelineStage.IDLE)
             _uiState.update {
                 it.copy(
                     textModeOutput = "",
@@ -983,7 +1023,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             val isPairReady = isPairReadyOffline(effectiveSource, state.targetLangCode)
             if (!isPairReady) {
-                _pipelineStage.value = PipelineStage.IDLE
+                emitStage(PipelineStage.IDLE)
                 _uiState.update {
                     it.copy(
                         textModeOutput = "",
@@ -1003,7 +1043,6 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                 autoPlay = false,
                 speechSpeed = settings.speechSpeed
             )
-            _pipelineStage.value = pipeline.currentStage.value
             val mtRes = outcome.translationResult
             if (mtRes != null && mtRes.success) {
                 _uiState.update {

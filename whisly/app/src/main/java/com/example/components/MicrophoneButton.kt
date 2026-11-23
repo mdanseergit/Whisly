@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.example.ai.pipeline.OrchestratorState
 import com.example.core.theme.WhislyDesign
 import com.example.core.theme.WhislyTokens
 import java.util.Locale
@@ -50,6 +51,8 @@ fun HeroMicrophoneControl(
     recordingElapsedMs: Long,
     amplitudes: List<Float>,
     statusHint: String,
+    orchestratorState: OrchestratorState = OrchestratorState.Idle,
+    hasTranslationResult: Boolean = false,
     sourceLanguageName: String,
     targetLanguageName: String,
     onToggleRecording: () -> Unit,
@@ -81,13 +84,14 @@ fun HeroMicrophoneControl(
         }
     }
 
-    val orbState = when {
-        isRecording -> AuraOrbState.LISTENING
-        statusHint.contains("Transcribing", ignoreCase = true) || statusHint.contains("Translating", ignoreCase = true) -> AuraOrbState.PROCESSING
-        statusHint.contains("ready", ignoreCase = true) -> AuraOrbState.SUCCESS
-        statusHint.contains("pack", ignoreCase = true) || statusHint.contains("download", ignoreCase = true) -> AuraOrbState.DISABLED
-        statusHint.contains("Error", ignoreCase = true) || statusHint.contains("Try again", ignoreCase = true) -> AuraOrbState.ERROR
-        else -> AuraOrbState.IDLE
+    // Derived from the single orchestrator state, never from status-message text sniffing.
+    val orbState = when (orchestratorState) {
+        OrchestratorState.Listening -> AuraOrbState.LISTENING
+        OrchestratorState.Transcribing, OrchestratorState.Translating -> AuraOrbState.PROCESSING
+        is OrchestratorState.Error -> AuraOrbState.ERROR
+        OrchestratorState.Idle ->
+            if (hasTranslationResult) AuraOrbState.SUCCESS else AuraOrbState.IDLE
+        OrchestratorState.ConfirmTranscript, OrchestratorState.Speaking -> AuraOrbState.IDLE
     }
 
     Column(

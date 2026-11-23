@@ -3,20 +3,16 @@ package com.example.ai.pipeline
 import com.example.ai.translation.IndicTrans2Engine
 import com.example.ai.tts.SystemTextToSpeechEngine
 import com.example.domain.models.PipelineErrorType
-import com.example.domain.models.PipelineStage
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.coroutineContext
 
 data class EndToEndTurnOutcome(
-    val stage: PipelineStage,
+    val state: OrchestratorState,
     val speechResult: SpeechResult?,
     val translationResult: TranslationResult?,
     val audioResult: AudioResult?,
@@ -24,26 +20,21 @@ data class EndToEndTurnOutcome(
 )
 
 /**
- * Clean post-reset translation/output coordinator.
+ * Typed translation and temporary platform TTS playback only.
  *
- * Speech capture and bundled Whisper STT are owned by [com.example.ai.stt.WhislyOfflineSpeechRecognizer]
- * before this pipeline is called. This coordinator only performs typed ML Kit translation and
- * temporary platform TTS playback.
+ * Speech capture and bundled Whisper STT are owned by
+ * [com.example.ai.stt.WhislyOfflineSpeechRecognizer] before this pipeline is called. This class
+ * owns no stage of its own: every transition goes to the single [PipelineOrchestrator]. A failed
+ * MT/TTS stage returns the successful translation result so the caller keeps it.
  */
 class SpeechToSpeechPipeline(
     val mtEngine: IndicTrans2Engine,
     val ttsEngine: SystemTextToSpeechEngine,
+    private val orchestrator: PipelineOrchestrator,
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     private val inferenceDispatcher: CoroutineDispatcher = Dispatchers.Default.limitedParallelism(1)
 ) {
     private val inferenceMutex = Mutex()
-
-    private val _currentStage = MutableStateFlow(PipelineStage.IDLE)
-    val currentStage: StateFlow<PipelineStage> = _currentStage.asStateFlow()
-
-    fun updateStage(stage: PipelineStage) {
-        _currentStage.value = stage
-    }
 
     fun unloadModelsOnMemoryPressure() {
         mtEngine.unloadResidentModel()
@@ -60,37 +51,36 @@ class SpeechToSpeechPipeline(
     ): EndToEndTurnOutcome = withContext(inferenceDispatcher) {
         inferenceMutex.withLock {
             coroutineContext.ensureActive()
-            _currentStage.value = PipelineStage.NORMALIZING
-            _currentStage.value = PipelineStage.MT_INFERENCE
+            orchestrator.transition(OrchestratorState.Translating)
 
             val mtResult = mtEngine.translate(confirmedText, sourceLang, targetLang)
             if (!mtResult.success) {
-                _currentStage.value = PipelineStage.ERROR
+                val error = mtResult.error ?: PipelineErrorType.TRANSLATION_FAILURE
+                orchestrator.transition(OrchestratorState.Error(error))
                 return@withLock EndToEndTurnOutcome(
-                    stage = PipelineStage.ERROR,
+                    state = OrchestratorState.Error(error),
                     speechResult = null,
                     translationResult = mtResult,
                     audioResult = null,
-                    error = mtResult.error ?: PipelineErrorType.TRANSLATION_FAILURE
+                    error = error
                 )
             }
 
             coroutineContext.ensureActive()
-            _currentStage.value = PipelineStage.TTS_INFERENCE
+            orchestrator.transition(OrchestratorState.Speaking)
             val ttsResult = ttsEngine.synthesize(mtResult.translatedText, targetLang, voiceId)
 
             if (ttsResult.success && autoPlay) {
                 coroutineContext.ensureActive()
-                _currentStage.value = PipelineStage.PLAYING_AUDIO
                 val played = ttsEngine.speakOutLoud(
                     text = mtResult.translatedText,
                     languageCode = targetLang,
                     speechSpeed = speechSpeed
                 )
                 if (!played) {
-                    _currentStage.value = PipelineStage.ERROR
+                    orchestrator.transition(OrchestratorState.Error(PipelineErrorType.TTS_FAILURE))
                     return@withLock EndToEndTurnOutcome(
-                        stage = PipelineStage.ERROR,
+                        state = OrchestratorState.Error(PipelineErrorType.TTS_FAILURE),
                         speechResult = null,
                         translationResult = mtResult,
                         audioResult = ttsResult,
@@ -99,9 +89,9 @@ class SpeechToSpeechPipeline(
                 }
             }
 
-            _currentStage.value = PipelineStage.COMPLETED
+            orchestrator.transition(OrchestratorState.Idle)
             EndToEndTurnOutcome(
-                stage = PipelineStage.COMPLETED,
+                state = OrchestratorState.Idle,
                 speechResult = null,
                 translationResult = mtResult,
                 audioResult = ttsResult,

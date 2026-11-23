@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.ai.pipeline.OrchestratorState
 import com.example.components.HeroMicrophoneControl
 import com.example.components.LanguageSelectorBar
 import com.example.components.TranslationWorkspaceCard
@@ -63,6 +64,7 @@ fun TranslateScreen(
     languages: List<LanguageEntity>,
     settings: AppSettingsEntity?,
     pipelineStage: PipelineStage,
+    orchestratorState: OrchestratorState = OrchestratorState.Idle,
     amplitudes: List<Float>,
     isPlayingAudio: Boolean,
     hasMicPermission: Boolean,
@@ -255,6 +257,8 @@ fun TranslateScreen(
                 recordingElapsedMs = uiState.recordingElapsedMs,
                 amplitudes = amplitudes,
                 statusHint = statusHintText,
+                orchestratorState = orchestratorState,
+                hasTranslationResult = uiState.translatedSentence.isNotBlank(),
                 sourceLanguageName = sourceLang?.englishName ?: "Tamil",
                 targetLanguageName = targetLang?.englishName ?: "Bengali",
                 onToggleRecording = {
