@@ -31,7 +31,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.components.GooeyNavItem
 import com.example.components.WhislyGooeyNavBar
+import com.example.BuildConfig
 import com.example.core.theme.WhislyDesign
+import com.example.debug.OnDeviceRecognizerDebugRoute
 import com.example.presentation.WhislyViewModel
 import com.example.presentation.about.AboutWhislyScreen
 import com.example.presentation.conversation.ConversationScreen
@@ -63,6 +65,7 @@ object WhislyRoutes {
     const val SETTINGS = "settings"
     const val ABOUT = "about"
     const val EXIT_REPORT = "exit_report"
+    const val ON_DEVICE_RECOGNIZER_DEBUG = "on_device_recognizer_debug"
 }
 
 /**
@@ -404,6 +407,11 @@ fun WhislyAppRoot(
                     onClearHistory = viewModel::clearAllHistory,
                     onOpenAboutWhisly = { navController.navigate(WhislyRoutes.ABOUT) },
                     onOpenExitReport = { navController.navigate(WhislyRoutes.EXIT_REPORT) },
+                    onOpenOnDeviceRecognizerDebug = if (BuildConfig.DEBUG) {
+                        { navController.navigate(WhislyRoutes.ON_DEVICE_RECOGNIZER_DEBUG) }
+                    } else {
+                        {}
+                    },
                     onBack = exitToHome
                 )
             }
@@ -420,6 +428,16 @@ fun WhislyAppRoot(
 
             composable(WhislyRoutes.EXIT_REPORT) {
                 ExitReportScreen(
+                    onBack = {
+                        if (!navController.popBackStack()) {
+                            exitToHome()
+                        }
+                    }
+                )
+            }
+
+            composable(WhislyRoutes.ON_DEVICE_RECOGNIZER_DEBUG) {
+                OnDeviceRecognizerDebugRoute(
                     onBack = {
                         if (!navController.popBackStack()) {
                             exitToHome()

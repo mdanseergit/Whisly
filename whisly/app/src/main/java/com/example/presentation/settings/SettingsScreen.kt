@@ -49,6 +49,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.BuildConfig
 import com.example.ai.evaluation.AiEvaluationSuite
 import com.example.ai.pipeline.AudioDiagnostics
 import com.example.core.theme.WhislyDesign
@@ -78,6 +79,7 @@ fun SettingsScreen(
     onClearHistory: () -> Unit,
     onOpenAboutWhisly: () -> Unit = {},
     onOpenExitReport: () -> Unit = {},
+    onOpenOnDeviceRecognizerDebug: () -> Unit = {},
     onRunTranslationAudit: () -> Unit = {},
     onBack: () -> Unit,
     modifier: Modifier = Modifier
@@ -312,6 +314,41 @@ fun SettingsScreen(
                         contentDescription = null,
                         tint = colors.mutedText
                     )
+                }
+
+                if (BuildConfig.DEBUG) {
+                    HorizontalDivider(color = colors.border)
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .minimumInteractiveComponentSize()
+                            .clickable(onClick = onOpenOnDeviceRecognizerDebug)
+                            .padding(vertical = 12.dp)
+                            .testTag("settings_on_device_recognizer_debug_button")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.BugReport,
+                            contentDescription = null,
+                            tint = WhislyTokens.PrimaryOrange,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "On-device recognizer probe (DEBUG)",
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                color = colors.primaryCocoa,
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            modifier = Modifier.weight(1f)
+                        )
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = colors.mutedText
+                        )
+                    }
                 }
             }
         }
