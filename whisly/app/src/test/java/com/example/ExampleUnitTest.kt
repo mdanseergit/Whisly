@@ -416,6 +416,39 @@ class ExampleUnitTest {
     }
 
     @Test
+    fun `grep check enforces that speech screens never offer auto detect`() {
+        val presentationDir = java.io.File("src/main/java/com/example/presentation")
+        if (!presentationDir.exists()) return
+        val voiceScreens = listOf(
+            "home/HomeScreen.kt",
+            "conversation/ConversationScreen.kt",
+            "translate/TranslateScreen.kt"
+        )
+        voiceScreens.forEach { relative ->
+            val file = java.io.File(presentationDir, relative)
+            assertTrue("Missing voice screen $relative", file.exists())
+            assertTrue(
+                "$relative must disable the auto-detect picker option",
+                file.readText().contains("allowAutoDetect = false")
+            )
+        }
+        val viewModel = java.io.File(presentationDir, "WhislyViewModel.kt").readText()
+        assertTrue(
+            "Speech recording must validate the selected spoken language",
+            viewModel.contains("speechSourceOrNull(sourceLang) == null")
+        )
+        assertFalse(
+            "Conversation STT must not override the selected language with an engine guess",
+            viewModel.contains("outcome.languageCode.ifBlank")
+        )
+        assertTrue(
+            "Typed text fallback must remain available in the text-only screen",
+            java.io.File(presentationDir, "text_translation/TextTranslationScreen.kt")
+                .readText().contains("allowAutoDetect = true")
+        )
+    }
+
+    @Test
     fun `speech constancy test proves silence and click noise are rejected before decoding`() {
         val silentAudio = AudioProcessor.preprocessAndRunVad(ShortArray(16000) { 0 }, 16000, 1000L)
         assertFalse(silentAudio.vadSpeechDetected)

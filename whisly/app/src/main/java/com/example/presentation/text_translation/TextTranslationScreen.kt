@@ -113,7 +113,8 @@ fun TextTranslationScreen(
             allLanguages = languages,
             onSelectSource = onSelectSource,
             onSelectTarget = onSelectTarget,
-            onSwapLanguages = onSwapLanguages
+            onSwapLanguages = onSwapLanguages,
+            allowAutoDetect = true
         )
 
         Spacer(modifier = Modifier.height(WhislyTokens.Space16))

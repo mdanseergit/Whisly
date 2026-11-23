@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.ExampleUnitTest" tests="20" skipped="0" failures="0" errors="0" timestamp="2026-11-23T05:25:35.856Z" hostname="MOHAMMEDDANSEER" time="13.612">
+  <properties/>
+  <testcase name="voiced segment trims leading and trailing silence before decoding" classname="com.example.ExampleUnitTest" time="0.156"/>
+  <testcase name="grep check enforces that removed voice import and fake decoder paths do not return" classname="com.example.ExampleUnitTest" time="0.559"/>
+  <testcase name="pure evaluation suite computes WER, CER, chrF++, BLEU, and LID accuracy without bundled benchmark data" classname="com.example.ExampleUnitTest" time="0.02"/>
+  <testcase name="regression test for I need water asserts Tamil script only, presence of thanneer, and zero letter-by-letter transliteration" classname="com.example.ExampleUnitTest" time="0.0"/>
+  <testcase name="grep check enforces that no word list or transliteration table exists in main source" classname="com.example.ExampleUnitTest" time="0.113"/>
+  <testcase name="indicTrans2 routes DIRECT and PIVOT_EN pairs, preserves numbers and entities, and rejects abnormal output" classname="com.example.ExampleUnitTest" time="0.321"/>
+  <testcase name="audio processor normalizes PCM16 to float, resamples to 16kHz, and detects clipping" classname="com.example.ExampleUnitTest" time="0.004"/>
+  <testcase name="capability registry defines 13 Wave 1 languages, 12 Indian languages, directed translation pairs, and Wave 3 below-threshold gates" classname="com.example.ExampleUnitTest" time="0.009"/>
+  <testcase name="echo guard rejects identical hypothesis and fails closed" classname="com.example.ExampleUnitTest" time="0.015"/>
+  <testcase name="adaptive hysteresis VAD rejects silence and transient clicks while detecting quiet and short speech" classname="com.example.ExampleUnitTest" time="0.028"/>
+  <testcase name="Whisper language gate accepts published token codes and rejects registry gaps" classname="com.example.ExampleUnitTest" time="0.006"/>
+  <testcase name="grep check enforces that speech screens never offer auto detect" classname="com.example.ExampleUnitTest" time="0.013"/>
+  <testcase name="speech constancy test proves silence and click noise are rejected before decoding" classname="com.example.ExampleUnitTest" time="0.02"/>
+  <testcase name="missing pack gives no output and fails closed with MODEL_MISSING" classname="com.example.ExampleUnitTest" time="0.015"/>
+  <testcase name="language ID engine identifies scripts, distinguishes Hindi vs Marathi and Bengali vs Assamese, and flags ambiguity" classname="com.example.ExampleUnitTest" time="0.011"/>
+  <testcase name="production VAD matches measured real speech and CC0 nonspeech fixtures" classname="com.example.ExampleUnitTest" time="11.351"/>
+  <testcase name="keystore crypto manager validates SHA-256 manifest signatures and connectivity state resolves accurately" classname="com.example.ExampleUnitTest" time="0.035"/>
+  <testcase name="bundled Whisper Tiny assets match pinned sizes and sha256" classname="com.example.ExampleUnitTest" time="0.91"/>
+  <testcase name="spectral validity rejects pure tones and broadband noise after normalization" classname="com.example.ExampleUnitTest" time="0.022"/>
+  <testcase name="audio gate rejects silence and low confidence before any bundled decoder runs" classname="com.example.ExampleUnitTest" time="0.0"/>
+  <system-out><![CDATA[PRODUCTION_VAD_REAL_SPEECH accepted=130/130
+PRODUCTION_VAD_REAL_NONSPEECH rejected=20/20
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -64,6 +64,7 @@ fun LanguageSelectorBar(
     onSwapLanguages: () -> Unit,
     isSourceAutoDetect: Boolean = false,
     detectedLanguageName: String = "",
+    allowAutoDetect: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val colors = WhislyDesign.colors
@@ -152,7 +153,7 @@ fun LanguageSelectorBar(
             title = "Select Source Language",
             languages = allLanguages,
             selectedCode = if (isSourceAutoDetect) "auto" else (sourceLanguage?.code ?: "ta"),
-            allowAutoDetect = true,
+            allowAutoDetect = allowAutoDetect,
             onSelect = { code ->
                 pickingSource = false
                 onSelectSource(code)
@@ -332,14 +333,14 @@ private fun LanguagePickerSheet(
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Column {
                                     Text(
-                                        text = "Auto-detect",
+                                        text = "Auto (typed text fallback)",
                                         style = MaterialTheme.typography.titleMedium.copy(
                                             color = colors.primaryCocoa,
                                             fontWeight = FontWeight.Bold
                                         )
                                     )
                                     Text(
-                                        text = "Detect spoken or typed language automatically",
+                                        text = "Typed text only. Speech uses the language you select.",
                                         style = MaterialTheme.typography.bodySmall.copy(
                                             color = colors.mutedText
                                         )

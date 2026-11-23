@@ -53,7 +53,7 @@ import com.example.presentation.TranslateUiState
  *
  * Strictly structured into 4 clean sections:
  * 1. Header (Whisly logo, single readiness status indicator, Theme toggle)
- * 2. Language row (Source Language / Auto-detect + Swap + Target Language)
+ * 2. Language row (selected spoken source + Swap + Target Language)
  * 3. Central microphone button + real audio waveform
  * 4. Translation result card (Original speech & Translation)
  */
@@ -89,13 +89,9 @@ fun TranslateScreen(
     val context = LocalContext.current
     val clipboard = LocalClipboardManager.current
     val colors = WhislyDesign.colors
-    val isSourceAuto = uiState.sourceLangCode == "auto"
     val sourceLang = languages.find { it.code == uiState.sourceLangCode }
     val targetLang = languages.find { it.code == uiState.targetLangCode }
-    val detectedLanguageLabel = uiState.detectedSourceLangCode?.let { detectedCode ->
-        languages.find { it.code == detectedCode }?.englishName ?: detectedCode
-    } ?: ""
-    val isPairVerifiedOffline = (isSourceAuto || sourceLang?.code == "en" || sourceLang?.isInstalled == true) &&
+    val isPairVerifiedOffline = (sourceLang?.code == "en" || sourceLang?.isInstalled == true) &&
         (targetLang?.code == "en" || targetLang?.isInstalled == true)
     val ttsSupportedForTarget = targetLang?.canSpeak == true || targetLang?.ttsCapability == "SYSTEM_FALLBACK_ONLY"
 
@@ -133,7 +129,7 @@ fun TranslateScreen(
         ) {
             Spacer(modifier = Modifier.height(14.dp))
 
-            // 2. Language Row: Source Language / Auto-detect + Swap + Target Language
+            // 2. Language Row: user-selected spoken source + Swap + Target Language
             LanguageSelectorBar(
                 sourceLanguage = sourceLang,
                 targetLanguage = targetLang,
@@ -141,8 +137,8 @@ fun TranslateScreen(
                 onSelectSource = onSelectSource,
                 onSelectTarget = onSelectTarget,
                 onSwapLanguages = onSwapLanguages,
-                isSourceAutoDetect = isSourceAuto,
-                detectedLanguageName = detectedLanguageLabel
+                isSourceAutoDetect = false,
+                allowAutoDetect = false
             )
 
             // Ambiguous Language Confirmation Banner (e.g., Hindi vs Marathi or Bengali vs Assamese)
@@ -259,7 +255,7 @@ fun TranslateScreen(
                 recordingElapsedMs = uiState.recordingElapsedMs,
                 amplitudes = amplitudes,
                 statusHint = statusHintText,
-                sourceLanguageName = if (isSourceAuto) "Auto-detect" else (sourceLang?.englishName ?: "Tamil"),
+                sourceLanguageName = sourceLang?.englishName ?: "Tamil",
                 targetLanguageName = targetLang?.englishName ?: "Bengali",
                 onToggleRecording = {
                     if (uiState.isRecording || hasMicPermission) {
@@ -275,12 +271,7 @@ fun TranslateScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             // 4. Translation Result Card (Original speech + Translation)
-            val sourceDisplay = when {
-                isSourceAuto && detectedLanguageLabel.isNotBlank() ->
-                    "Auto ($detectedLanguageLabel)"
-                isSourceAuto -> "Auto-detect"
-                else -> "${sourceLang?.nativeName ?: ""} (${sourceLang?.englishName ?: "Tamil"})"
-            }
+            val sourceDisplay = "${sourceLang?.nativeName ?: ""} (${sourceLang?.englishName ?: "Tamil"})"
             TranslationWorkspaceCard(
                 stage = pipelineStage,
                 sourceLanguageName = sourceDisplay,

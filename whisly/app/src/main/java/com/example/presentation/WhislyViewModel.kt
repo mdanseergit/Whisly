@@ -206,9 +206,16 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                 repository.ensureSeeded()
                 val settings = dao.getSettingsSnapshot()
                 if (settings != null) {
+                    // Speech auto-detect is UNAVAILABLE. Older installs may have persisted "auto";
+                    // never restore it as the spoken source. Typed text can still select the LID
+                    // fallback for this session without persisting it.
+                    val restoredSource = settings.defaultSourceLang.takeIf {
+                        it != CapabilityRegistry.AUTO_DETECT_CODE &&
+                            CapabilityRegistry.getLanguage(it)?.canListen == true
+                    } ?: "ta"
                     _uiState.update {
                         it.copy(
-                            sourceLangCode = settings.defaultSourceLang,
+                            sourceLangCode = restoredSource,
                             targetLangCode = settings.defaultTargetLang
                         )
                     }
@@ -265,17 +272,18 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun completeOnboarding(preferredSource: String = "ta", preferredTarget: String = "bn") {
+        val safeSource = speechSourceOrNull(preferredSource) ?: "ta"
         viewModelScope.launch {
             repository.updateSettings {
                 it.copy(
                     onboardingCompleted = true,
-                    defaultSourceLang = preferredSource,
+                    defaultSourceLang = safeSource,
                     defaultTargetLang = preferredTarget
                 )
             }
             _uiState.update {
                 it.copy(
-                    sourceLangCode = preferredSource,
+                    sourceLangCode = safeSource,
                     targetLangCode = preferredTarget
                 )
             }
@@ -341,8 +349,9 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
 
     fun swapLanguages() {
         val current = _uiState.value
+        // "auto" is a typed-text fallback only. It must never become the spoken source or target.
         val effectiveSource = if (current.sourceLangCode == CapabilityRegistry.AUTO_DETECT_CODE) {
-            current.detectedSourceLangCode ?: "ta"
+            current.detectedSourceLangCode?.takeIf { it != current.targetLangCode } ?: "ta"
         } else {
             current.sourceLangCode
         }
@@ -403,16 +412,28 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
         return capitalized.replace(Regex("\\s+"), " ")
     }
 
+    /** Returns null when the requested language cannot own a microphone decode. */
+    private fun speechSourceOrNull(code: String): String? {
+        return code.takeIf {
+            it != CapabilityRegistry.AUTO_DETECT_CODE &&
+                CapabilityRegistry.getLanguage(it)?.canListen == true
+        }
+    }
+
     /**
      * One accurate line for errors whose message must name a language. Everything else keeps the
      * fixed message from [PipelineErrorType], so no failure is ever reported twice or reworded.
      */
     private fun errorBannerFor(error: PipelineErrorType?, languageCode: String): String? {
         if (error == null) return null
-        val name = CapabilityRegistry.getLanguage(languageCode)?.name ?: languageCode
+        val name = if (languageCode == CapabilityRegistry.AUTO_DETECT_CODE) {
+            "Auto-detect"
+        } else {
+            CapabilityRegistry.getLanguage(languageCode)?.name ?: languageCode
+        }
         return when (error) {
             PipelineErrorType.UNSUPPORTED_SOURCE_LANGUAGE ->
-                "Speech isn't available for $name yet. Type to translate instead."
+                "Speech isn't available for $name yet"
             else -> null
         }
     }
@@ -434,12 +455,20 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
             _pipelineStage.value = PipelineStage.ERROR
             return
         }
+        val sourceLang = _uiState.value.sourceLangCode
+        if (speechSourceOrNull(sourceLang) == null) {
+            val error = PipelineErrorType.UNSUPPORTED_SOURCE_LANGUAGE
+            _uiState.update {
+                it.copy(activeError = error, statusBannerMessage = errorBannerFor(error, sourceLang))
+            }
+            _pipelineStage.value = PipelineStage.ERROR
+            return
+        }
         if (ttsEngineInitialized) {
             ttsEngine.stopSpeaking()
         }
         audioProcessor.resetWaveform()
         _pipelineStage.value = PipelineStage.RECORDING
-        val sourceLang = _uiState.value.sourceLangCode
         _uiState.update {
             it.copy(
                 isRecording = true,
@@ -506,29 +535,22 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                         _uiState.update { it.copy(activeError = PipelineErrorType.STT_FAILURE) }
                         return@launch
                     }
-                    val isAuto = _uiState.value.sourceLangCode == CapabilityRegistry.AUTO_DETECT_CODE
-                    val lid = if (isAuto) LanguageIdEngine.identifyLanguage(transcript) else null
-                    val ambiguous = isAuto && (lid?.isAmbiguous == true)
-                    val detected = if (isAuto) {
-                        (lid?.detectedLanguageCode ?: _uiState.value.detectedSourceLangCode ?: "en")
-                    } else {
-                        _uiState.value.sourceLangCode
-                    }
+                    // Speech auto-detect is UNAVAILABLE. The decoder was forced with the
+                    // user-selected source language; never override it with a text LID guess.
+                    val selectedSource = _uiState.value.sourceLangCode
                     _uiState.update {
                         it.copy(
                             recognizedTranscript = transcript,
                             initialSttTranscript = transcript,
                             sttConfidence = outcome.confidence,
-                            detectedSourceLangCode = if (isAuto) detected else it.detectedSourceLangCode,
-                            ambiguousLanguageCandidates = if (ambiguous) (lid?.ambiguousCandidates ?: emptyList()) else emptyList(),
+                            detectedSourceLangCode = selectedSource,
+                            ambiguousLanguageCandidates = emptyList(),
                             activeError = null,
                             statusBannerMessage = null
                         )
                     }
                     _pipelineStage.value = PipelineStage.AWAITING_CONFIRMATION
-                    if (!ambiguous) {
-                        confirmTranscriptAndTranslate()
-                    }
+                    confirmTranscriptAndTranslate()
                 }
                 is com.example.ai.stt.SttOutcome.Failure -> {
                     _pipelineStage.value = PipelineStage.ERROR
@@ -555,11 +577,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
         val transcript = state.recognizedTranscript.trim()
         if (transcript.isEmpty()) return
 
-        val effectiveSource = if (state.sourceLangCode == CapabilityRegistry.AUTO_DETECT_CODE) {
-            state.detectedSourceLangCode ?: LanguageIdEngine.identifyLanguage(transcript).detectedLanguageCode ?: "en"
-        } else {
-            state.sourceLangCode
-        }
+        val effectiveSource = state.sourceLangCode
 
         val targetName = CapabilityRegistry.getLanguage(state.targetLangCode)?.name ?: state.targetLangCode
 
@@ -692,11 +710,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
     fun toggleConversationTurnRecording(isPersonA: Boolean) {
         val state = _uiState.value
         if (state.isRecording) {
-            val effectiveSrc = if (state.sourceLangCode == CapabilityRegistry.AUTO_DETECT_CODE) {
-                state.detectedSourceLangCode ?: "ta"
-            } else {
-                state.sourceLangCode
-            }
+            val effectiveSrc = state.sourceLangCode
             val speakerSource = if (state.activeConversationSpeakerIsA) effectiveSrc else state.targetLangCode
             val speakerTarget = if (state.activeConversationSpeakerIsA) state.targetLangCode else effectiveSrc
             _uiState.update { it.copy(isRecording = false) }
@@ -708,7 +722,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                         _pipelineStage.value = PipelineStage.AWAITING_CONFIRMATION
                         executeConversationTranslationTurn(
                             isPersonA = state.activeConversationSpeakerIsA,
-                            sourceLang = outcome.languageCode.ifBlank { speakerSource },
+                            sourceLang = speakerSource,
                             targetLang = speakerTarget,
                             transcript = outcome.text,
                             confidence = outcome.confidence ?: 1.0f
@@ -719,12 +733,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                         _uiState.update {
                             it.copy(
                                 activeError = outcome.error,
-                                statusBannerMessage = errorBannerFor(
-                                    outcome.error,
-                                    if (state.sourceLangCode == CapabilityRegistry.AUTO_DETECT_CODE) {
-                                        state.detectedSourceLangCode ?: "ta"
-                                    } else state.sourceLangCode
-                                )
+                                statusBannerMessage = errorBannerFor(outcome.error, state.sourceLangCode)
                             )
                         }
                     }
@@ -743,15 +752,19 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
                 _uiState.update { it.copy(activeError = PipelineErrorType.MIC_PERMISSION_DENIED) }
                 return
             }
+            val effectiveSrc = state.sourceLangCode
+            val speakerSource = if (isPersonA) effectiveSrc else state.targetLangCode
+            if (speechSourceOrNull(speakerSource) == null) {
+                val error = PipelineErrorType.UNSUPPORTED_SOURCE_LANGUAGE
+                _uiState.update {
+                    it.copy(activeError = error, statusBannerMessage = errorBannerFor(error, speakerSource))
+                }
+                _pipelineStage.value = PipelineStage.ERROR
+                return
+            }
             if (ttsEngineInitialized) {
                 ttsEngine.stopSpeaking()
             }
-            val effectiveSrc = if (state.sourceLangCode == CapabilityRegistry.AUTO_DETECT_CODE) {
-                state.detectedSourceLangCode ?: "ta"
-            } else {
-                state.sourceLangCode
-            }
-            val speakerSource = if (isPersonA) effectiveSrc else state.targetLangCode
 
             _pipelineStage.value = PipelineStage.RECORDING
             _uiState.update {
@@ -782,11 +795,7 @@ class WhislyViewModel(application: Application) : AndroidViewModel(application) 
         val trimmed = text.trim()
         if (trimmed.isEmpty()) return
         val state = _uiState.value
-        val effectiveSrc = if (state.sourceLangCode == CapabilityRegistry.AUTO_DETECT_CODE) {
-            state.detectedSourceLangCode ?: "ta"
-        } else {
-            state.sourceLangCode
-        }
+        val effectiveSrc = state.sourceLangCode
         val speakerSource = if (isPersonA) effectiveSrc else state.targetLangCode
         val speakerTarget = if (isPersonA) state.targetLangCode else effectiveSrc
         viewModelScope.launch {

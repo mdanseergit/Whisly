@@ -145,7 +145,8 @@ fun ConversationScreen(
             allLanguages = languages,
             onSelectSource = onSelectSource,
             onSelectTarget = onSelectTarget,
-            onSwapLanguages = onSwapLanguages
+            onSwapLanguages = onSwapLanguages,
+            allowAutoDetect = false
         )
 
         Spacer(modifier = Modifier.height(WhislyTokens.Space12))
